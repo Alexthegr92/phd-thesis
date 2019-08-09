@@ -900,7 +900,7 @@ From these observations it may be declared that this system is scalable in corne
 	\label{fig_PerCor}
 \end{figure}
 
-\section{Correctness Experiments}
+\section{Collision Correctness Experiments}
 In the following section we explore the correctness of collisions between objects, i.e. do objects have the same collision behaviour in a AP as they do in a centralised system. We are concerned with objects that are migrating and/or interacting with an object that has recently migrated.
 We will now explain how a naive system can lead to erroneous collision behaviour and AP can lead to erroneous collision behaviour if speed, frame-time or latency go above the user-defined tolerances.
 
@@ -936,12 +936,15 @@ A control experiment on a centralised system was performed, in which the scenari
 	\label{fig_ErrorCentral}
 \end{figure}
 
-AP can only lead to late or missed collisions when at least one object involved in the collision has just migrated (received since the last physics time-step). In order to test this case, the same scenario as the control was used with two servers. The two spheres were given starting positions so the two would collide at a point on the boundary between servers, thus creating the most likely situation for objects collide with each other in their first time-step after being migrated. The purpose of this experiment is to demonstrate that collisions in AP are always correct if the respective values remain within their tolerances.
+AP can only lead to late or missed collisions when at least one object involved in the collision has just migrated (received since the last physics time-step). This is because non-migrating objects behave the same as objects in a centralised solution. In order to test this case, the same scenario as the control was used with two servers. The two spheres were given starting positions so the two would collide at a point on the boundary between servers, thus creating the most likely situation for objects collide with each other in their first time-step after being migrated. The purpose of this experiment is to demonstrate that collisions in AP are always correct if the respective values remain within their tolerances.
 Only objects that have just migrated are considered in the experiment results. The two servers use the same tolerances used in the performance experiments, including a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$.
 
 %TODO: Graph for 2-server collisions. Will need set values with tolerances to max and vary them one at a time.
 
 %TODO: Missed collisions (and number of, mean and max error)
+
+\section{Communication Correctness Experiments}
+%Will look for missing/duplicate objects auras. Dangling auras
 
 \section{Case Study: Suspension Bridge}
 
