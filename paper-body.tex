@@ -604,6 +604,49 @@ $BNU$ is called once per network connection between servers. It is responsible f
 	\end{algorithmic}
 \end{algorithm}
 
+\begin{figure}[hbt]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2.5cm]
+		\node[initial,state,accepting,align=center] (R) {$Receive$};
+		\node[initial,state,accepting] (S) [below of=R] {$Inject$};
+		\node[state]         (q2) [below of=S, node distance=3cm, text width=2cm, align=center] {$Intersecting$ $Boundary$};
+		\node[state]         (q1) [left of=q2, node distance=4cm]  {$Host$ $Region$};
+		\node[state]         (q3) [right of=q2, node distance=4cm, text width=2cm, align=center] {$Boundary$ $Traversed$};
+		\node[state]         (q4) [below of=q2, node distance=4cm] {$Sent$};
+		\node[state]         (q5) [right of=q4] {$Destroyed$};
+		
+		
+		\path[->] 
+		(R) edge node {} (S)
+		(S) edge [bend right] node [left, text width=2cm, align=center] {No Collision} (q1)
+		(S) edge node [anchor=center, text width=1.5cm, align=left] {$OBC$} (q2)
+		(S) edge [bend left] node [right, text width=2cm, align=center] {Outside Owner} (q3)
+		%(q1) edge [loop above] node {} (q1)
+		%(q2) edge [loop left] node {} (q2)
+		(q3) edge [loop below] node [above] {$BT$} (q3)
+		(q1) edge node [left, text width=2cm, align=center] {$AC$} (q4)
+		(q2) edge node [anchor=center, text width=2cm, align=center] {$AC$} (q4)
+		(q3) edge node [anchor=center, text width=2cm, align=center] {$BT$/$AC$} (q4)
+		
+		(q1) edge [bend left] node [anchor=center, text width=1.5cm, align=center, above] {$OBC$} (q2)
+		(q2) edge [bend left] node [anchor=center, text width=2cm, align=center, above] {$OBE$} (q1)
+		(q3) edge [bend left] node [anchor=center, text width=2cm, align=center] {Owner Collision} (q2)
+		(q2) edge [bend left] node [anchor=center, above, text width=2cm, align=center] {Owner Exit} (q3)
+		
+		(q4) edge node {} (q5)
+		
+		%(S)  edge [loop above] node {a} (S)
+		%edge              node {a} (q1)
+		%(q1) edge [bend left]  node {a} (S)
+		%edge              node {b} (q2)
+		%(q2) edge [loop above] node {b} (q2)
+		%edge [bend left]  node {b} (q1)
+		;
+		\end{tikzpicture}
+	}
+\end{figure}
+
 \chapter{Experiments and Results}
 \section{Scalability Experiments}
 This study aims to demonstrate scalability. When more servers are added, the timeliness of the simulation improves and more objects may be supported. The performance measure of interest is the maximum frame time of a server as this indicates if the simulation can be maintained when object numbers increase (keeping a low frame-time is the goal). Therefore, an injection rate is used, that spawns moving objects into the simulation as time passes.
