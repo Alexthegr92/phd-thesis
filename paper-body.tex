@@ -318,9 +318,31 @@ $R_{a}$ is the radius of the aura in $m$, $R_{o}$ is the bounding sphere of the 
 \end{figure}
 
 \section{Thrashing}\label{Thrashing}
-An object may be overlapping two auras from different servers. Given appropriate velocity, this could result in object migration, followed by aura collision, followed by migration and then repeating the process again. For example, Objects K, L and M in Fig. \ref{AuraProj}. Object K lies inside the auras of both Object L and M. The common term `thrashing' will be used to describe such a scenario.
+The common term `thrashing' will be used to describe the following two scenarios that must be considered.
 
-In order to prevent thrashing, when an object is migrated, it is also migrated with any objects found that lie within the aura of the object or have an existing aura which overlaps the migrating object's aura. This is carried out recursively to ensure all objects that are overlapping are migrated at the same time.
+1. An object may be overlapping two auras from different servers. Given appropriate velocity, this could result in object migration, followed by aura collision, followed by migration and then repeating the process again. For example, Objects K, L and M in Fig. \ref{AuraProj}. Object K lies inside the auras of both Object L and M. 
+
+In order to prevent this thrashing, when an object is migrated, it is also migrated with any objects found that lie within the aura of the object or have an existing aura which overlaps the migrating object's aura. This is carried out recursively to ensure all objects that are overlapping are migrated at the same time.
+
+2. Two objects on different servers may both trigger the migration of the other. For example, Objects C and D in Fig. \ref{AuraProj}. Suppose the two objects are moving towards each other. Object C collides with the aura of object D and begins migrating to Server 1. Before Object C is received (and the message processed), object D collides with the aura of Object C and begins migrating to Server 0. The two objects remain on different servers and the process can repeat again, indefinitely.
+
+When Object C is received, the object is created in Server 0's physics simulation and the aura for that object is removed from Server 0's physics simulation. 
+The next physics time-step on Server 0, the object is within the aura distance of the boundary with Server 1, a message for the aura of object C will added to the send buffer for Server 1. The next network update, the message will be sent to Server 1.
+If Object C intersects an aura from Server 1, in this case Object D's aura, it will be added to the object send buffer for Server 1. The next network update, the message will be sent to Server 1. %And the aura no longer sent?
+The message for Object C's aura is received by Server 1 and processed on the next network update, when processed, a trigger volume for Object C's aura will be created in the physics engine of Server 1. The next physics time-step on Server 1, any objects within that aura will call a trigger callback, in this case Object D, indicating that object D has collided with an aura and so should be migrated to Server 0. Object D is added to the object send buffer for Server 0 and the next network update, Object D is migrated.
+
+%TODO: Check if aura sent in addition to the object migration? Yes, but it is also sent with an aura remove message
+%TODO: Check if aura removed immediately when object is received? Will be received at the same time as the aura remove message, which will remove the aura immediately
+%TODO: WIll the immediately remove aura still trigger a callback? It shouldn't do, as it checks for removed shapes
+
+
+In order for this process to repeat, both objects must have their migrations triggered (during a physics update) before the message of the other object migration has been received and processed and a physics time step has occurred to remove the aura trigger volume from the physics simulation.
+
+In order for this to occur, each object must have its aura created (first physics time step after arrival) before the aura of the other object or the other object itself has been received (if the aura is received, it will trigger the migration immediately, so an aura will not be sent, if the other object is received, the aura will be removed). Each object has its aura received by the other server, triggering the migration of the other object. The cycle is broken once an object is received and its aura removed before the other object has its migration triggered when a physics time step occurs.
+
+%Proposed solution 1: If an object collides with an aura that has just been created (was created in the most recent physics time step), only migrate the object if the colliding object id is greater (or lower than) the object projecting the aura's id. This will allow a physics time step to occur and the aura removed, if the object projecting the aura is being migrated. Should work so long as the migration message is received and processed on the waiting server before its next physics time step, i.e. round-trip time is less than two physics time steps. Aura is sent on step 0, remote aura is received, it gets created in step 1 and ignored for the first step of existense, the migrate message is received and the aura is removed in step 2
+
+%Proposed solution 2: If an object collides with another object's aura and is also projecting an aura they will both be colliding with each other's aura (if the two objects have identical rotations or are spheres). If an object knows the other object is colliding/will collide with its aura, only migrate if object id is higher or lower or rank of server is higher or lower. Would rely on knowing the exact shape of the collider of the other object
 
 \section{Islands}
 When an object traverses a region boundary, the object is migrated only if it does not overlap an aura projected by an object from the same server. In the context of migrations, an island is defined as two or more objects located outside of their host server's region (i.e. have traversed a region boundary) but are each within the aura projected from objects owned by the same host. For example, Objects H, I, and J illustrated in Fig. \ref{AuraProj}. No objects in the island are migrated as each object is within the aura of another object in the island. This should be prevented as it causes processing and networking overhead and is unnecessary as all objects lie within the region of Server 2 and are not interacting with any other objects from Server 0. 
