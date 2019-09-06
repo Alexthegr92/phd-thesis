@@ -11,12 +11,59 @@ Recent developments have demonstrated the importance of software defined network
 
 In the context of current research, we can place ourselves at the juncture of balancing physics calculations across servers in the cloud for game streaming services. This should provide improved economic use of resources, as current game streaming services simply mimic the machine requirements of the player without distributing any of the component parts of the gaming engine. In addition, streamed games may benefit from increased numbers of artefacts (way beyond what is currently possible in a player's machine) as other servers may be utilised to solve the physics problems.
 
-To achieve our research goal while remaining relevant to current state-of-the-art physics simulations, this study uses PhysX (from Nvidia) as the physics engine \cite{PhysX}. This ensures a simulation equal in detail to commercial video game titles. The challenge is to deploy instances of PhysX into a cloud infrastructure (on multiple servers) and allow objects within a simulation to be seamlessly passed across PhysX instances. We construct messaging services to enable PhysX instances on different servers to communicate and divide the simulation geographically across such servers. The challenge of this research is ensuring real-time fidelity can be satisfied when objects migrate across PhysX instances (from server to server). This problem of object migration is complicated by the possibility of object interaction occurring during such migration. Considering the assumption of commercial level fidelities of fast paced objects and frame rates of 60 frames per-second, any anomalous behaviour of objects during migration would be easily discernible to a player.  
+To achieve our research goal while remaining relevant to current state-of-the-art physics simulations, this study uses PhysX (from Nvidia) as the physics engine \cite{PhysX}. This ensures a simulation equal in detail to commercial video game titles. The challenge is to deploy instances of PhysX into a cloud infrastructure (on multiple servers) and allow objects within a simulation to be seamlessly passed across PhysX instances. We construct messaging services to enable PhysX instances on different servers to communicate and divide the simulation geographically across such servers. The challenge of this research is ensuring real-time fidelity can be satisfied when objects migrate across PhysX instances (from server to server). This problem of object migration is complicated by the possibility of object interaction occurring during such migration. Considering the assumption of commercial level fidelities of fast paced objects and frame rates of 60 frames per-second, any anomalous behaviour of objects during migration would be easily discernible to a player. 
+
+\section{Summary}
+Scaling and more complex games is a selling point.
+
+Traditionally real-time simulations are confined to a single machine, including real-time physics. 
+Recent cloud technology has made available, lower cost, low-latency, high-performance, including GPU-enabled machines. This means, real-time simulations can now run in the cloud as well as being economically viable. It is possible to rapidly provision resources on demand, allowing for fast scaling up and down of resources as needed.
+
+The potential uses of scaling real-time physics simulations are vast. (Large world, physics based games, game relying on physics queries (AI)). Scaling real-time physics is useful not only for games, but large-scale simulations where querying or simulating the physical state of the world is heavily used, e.g. large-scale multi-agent AI, such as city simulations, military simulations. 
+
+Server authoritative physics would also allow over the network multiplayer games to rely heavily on physical elements. In games, only a limited part of the game is simulated on the server side and not physics, with focus on player-player interaction and not player-environment (physics) interaction, as this is a limit of existing technology. 
+Synchronising physics states between players and servers is not possible due to latency, two players will have different views of the physical state of the world, based on their latency, interactions from those player's with the physical state will cause divergence, which may not be possible to converge. This is normally worked around by not having physics affect gameplay and using kinematic sequences, ensuring determinism. A single physics simulation, resolves these problems of multiple physics states, which have to be synchronised and lead to divergent physics states. 
+
+Simulating the physical state of the world entirely in the cloud frees up resources on the user's machine allowing for more processing time to be spent on other systems, such as graphics, AI etc. Alternatively, simulating physics in the cloud could be combined with streamed gaming.
+
+Streamed gaming is an active area of research, where the game is run entirely in the cloud, with the graphical output streamed to the player. Reducing the computing power requirements on player hardware even allowing gaming on mobiles with graphical quality beyond what would be possible if the game were running entirely on a mobile device.  If the physics simulation is co-located with the graphics streaming servers (with very low-latency), the problem of latency between player's view of the physics simulation and actual state is resolved, allowing for a better shared view of the physics state.
+
+It therefore is the next logical step to start breaking apart the different systems of the game into their own 'containers', allowing for independent scaling and resource provision management.  
+Using the recent developments in cloud technology, we explore the possibility of using this on demand scaling, to scale up real-time physics simulations.
+
 
 \section{Purpose of Study}
 \section{Outline}
 
 \chapter{Background and Related Work}
+\section{Real-time Physics Engines}
+%We must first understand how real-time physics engines work
+%"World" is called a scene, "Bodies" are things being simulated
+%Descrete simulation steps, each step simulates a period of time
+
+%Main physics loop (what goes on within a simulation step)
+%Explanation of rigid bodies, actors, shapes, constraints
+%Explanation of simulation and query shapes
+%Explanation of trigger volumes
+%Explanation of kinetic vs kinematic
+%Explanation of sleeping
+
+%Each simulation step must take less time to execute than the time it is simulating, otherwise the simulation is unable to run in real-time.
+%It is possible for the main application to update more often than the simulation frequency
+%It is also possible that the main application update is unable to be executed at the same frequency as the physics simulation frequency. Options are running the simulation at a bigger time-step or simulate multiple, smaller sub-steps. Trade-off between keeping consistent behaviour and performance.
+%Diagrams for above
+%Well of despair example and diagram
+%Solutions to well of despair: 
+%Decouple physics from application update with use of sync and async scene, can make player interaction more difficult
+%allow time dropping
+%variable time-stepping
+%simplifying the physics scene
+
+%PhysX runs on a separate thread by default
+%It is not possible to read/write directly to the scene during simulation, scene is buffered so changes can be made and will only affect the next simulation step. 
+%Image of time-slots
+%Event callbacks for collisions/triggers
+
 \section{Online Gaming}
 Although there has been research utilising multiple servers to distribute the task of solving physics based problems (e.g., \cite{mashayekhi2018automatically}), to the best of our knowledge there is no literature describing real-time interactive physics exploiting the addition of servers to gain scalability. The closest work to our research is that carried out to seek scalability in terms of player numbers in online gaming in the field of Distributed Virtual Environments (DVEs). 
 
@@ -48,7 +95,10 @@ A drawback to streamed gaming is the requirement for a significantly more powerf
 In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines.
 
 \section{Cloud Computing}
+Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
+
 \section{Scalable Non-Real Time Physics}
+Includes fluid simulations, meteorological simulations. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps.
 
 \section{Background Summary}
 In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
@@ -64,7 +114,7 @@ Our approach allows servers to assume responsibility for objects within a real-t
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \begin{figure}
 	\centering
-	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm, scale=1.2]
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm, scale=2.4]
 	%	\clip(-3.8316065591348587,-1.5915496679322039) rectangle (4.0193993686026035,3.119053888710274);
 	\draw [line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (0.11306222137602934,0.5749956216017253) circle (0.2191629059122392cm);
 	\fill[line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-0.19130495931412153,2.497904290969918) -- (0.09727089010996666,2.49668178609732) -- (0.09849339498256493,2.785257635521408) -- (-0.19008245444152327,2.7864801403940063) -- cycle;
@@ -200,10 +250,21 @@ Accomplishing a transfer with a simple message from one server to another is cha
 
 For additional clarity consider objects A and B in Fig. \ref{AuraProj}. Each server is aware of the objects they host but not other objects. As such, objects A and B would not interact and not collide with each other, creating a time-space inconsistency. A time-space inconsistency is defined as two objects occupying the same space at the same time. If Object B has a velocity directed towards the boundary, it would continue at its initial velocity until it traversed the boundary, at which point it would migrate to server 0. Upon completion of the migration, objects A and B would overlap far more than would be expected in a typical simulation, resulting in inappropriate collision response.
 
+\section{Considered Solutions}
+Simulate objects overlapping the boundary on both servers, however, results would diverge as objects interact with objects not overlapping the boundary and there is the overhead of objects have to be simulated twice.
+
+Simulate objects overlapping the boundary and objects interacting with those on both servers, e.g. by using an overlapping region. Results would still diverge due to non-determinism of physics engines and there is the overhead of objects have to be simulated twice.
+
+Objects in the overlapping region interact over the network. This could be done synchronously, which would be slow (could divide collision responses between servers and then exchange results). Would have to simulate objects twice, would require multiple round-trips per physics time-step, but collision response would be identical.
+
+Treat objects being simulated on another server as static. However, this would not lead to correct collision response, energy would end up being added to the system causing jitter etc.
+
+Simulate all objects that are interacting with each other on the same server. Auras could be used to determine which objects are potentially interacting. Auras of objects would need to be exchanged. Solution would need to manage number of auras exchanged to reduce this overhead.
+
 \section{Proposed Solution}
 We term our approach Aura Projection (AP). AP tackles the problem of maintaining consistency across regions while ensuring timeliness of a simulation. In particular, AP provides the building blocks of a scalable solution to server-side physics simulations by handling all configurations of boundary cases in migratory approaches. 
 
-In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. Objects with colliding auras are highlighted as candidates to be co-hosted on the same server in the near future. The presence of an aura allows: (1) the prediction of future hosting requirements allowing time to transfer objects; (2) a narrowing of interest in only considering a subset of objects promoting a scalable solution; (3) an unhindered physics simulation for existing objects; (4) limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability). In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
+In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. In other words, auras act as a request for objects to be migrated. Any object colliding with the aura is migrated to the server the aura came from. The presence of an aura allows: (1) the prediction of future hosting requirements allowing time to transfer objects; (2) a narrowing of interest in only considering a subset of objects promoting a scalable solution; (3) an unhindered physics simulation for existing objects; (4) limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability). In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
 
 Messages are sent between servers where aura overlap occurs across a geographic boundary. We term this phase of the algorithm as an object projecting its aura onto another server. %The receiving server can then predict and prepare for the possibility of interaction if an object was migrated to it. 
 
@@ -215,6 +276,8 @@ When an aura is no longer being projected for an object (boundary not overlapped
 Calculating an aura size is key to creating a scalable solution balanced against consistency: (1) Auras that are too small will result in a faster simulation but with more missed interactions; (2) Auras that are too large will include more calculations that are simply not required, increasing server load and decreasing scalability. Therefore, how auras are calculated will be carefully described and justified. 
 
 Spheres are used to represent auras. This bounding volume is computationally efficient as rotational calculations are not required in determining its correct alignment. Auras accommodate the displacement of objects using an estimated network latency based on historic monitoring, in addition to the distance a remote object may be predicted to penetrate an aura (considering velocities).
+
+Rather than every object maintaining an aura, which would add overhead to the physics simulation, when an aura is exchanged it accounts for a potential remote object's aura. When an object comes into the aura distance of the region boundary, an aura is created for the object and the aura starts being broadcast to neighbouring servers.
 
 Fig. \ref{sequence_diagram} demonstrates the sequence of events involved when an aura is sent, received, and collided with, resulting in an object migration.
 
@@ -254,7 +317,7 @@ $R_{a}$ is the radius of the aura in $m$, $R_{o}$ is the bounding sphere of the 
 
 \begin{figure}[!t]	
 	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,every node/.style={font=\scriptsize,
-		minimum height=0.25cm,minimum width=0.5cm},,scale=0.4]
+		minimum height=0.25cm,minimum width=0.5cm},,scale=1.0]
 
 \draw [line width=1pt,dash pattern=on 5pt off 5pt] (-2.0,6)-- (-2.0,-7.25);
 \draw [line width=1pt,dash pattern=on 5pt off 5pt] (2.0,6)-- (2.0,-7.25);
@@ -317,6 +380,11 @@ $R_{a}$ is the radius of the aura in $m$, $R_{o}$ is the bounding sphere of the 
 	\label{sequence_diagram}
 \end{figure}
 
+\section{Sub-optimal object hosting}
+As objects within each others auras need to be simulated on the same server, this can lead to objects being deep within another server's region (objects that are far from the region boundary).
+
+Clusters of objects can therefore end up being simulated with all but one of their objects in their host server's region. This is sub-optimal, as the more auras that are being maintained/exchanged, the higher the computational cost.
+
 \section{Thrashing}\label{Thrashing}
 The common term `thrashing' will be used to describe the following two scenarios that must be considered.
 
@@ -371,7 +439,7 @@ Clients may connect to any server and are provided with a streamed visualisation
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=2.5in]{ArchitectureDiagramVertical}
+	\includegraphics[width=\textwidth]{ArchitectureDiagramVertical}
 	\caption{Server Architecture}
 	\label{fig_stack}
 \end{figure}
@@ -655,7 +723,7 @@ Experiments were performed on two layouts of servers: column layout and corner l
 
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \definecolor{sim}{rgb}{0,0.2,0.5}
-\begin{figure}[!t]	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.8]
+\begin{figure}[!t]	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.5]
 		\clip(-2.25,0) rectangle (8.4,3.75);
 	\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (-0.02,2.5) -- (-0.02,0.5) -- (-0.22,0.5) -- (-0.22,2.5) -- cycle;
 	\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (0.22,2.5) -- (0.22,0.5) -- (0.02,0.5) -- (0.02,2.5) -- cycle;
@@ -743,7 +811,7 @@ From these observations it may be declared that this system is scalable in colum
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=.475\textwidth]{ColPerformance}
+	\includegraphics[width=\textwidth]{ColPerformance}
 	\caption{Performance of increasing numbers of servers with an accumulating number of objects (in column layout)}
 	\label{fig_PerCol}
 \end{figure}
@@ -753,8 +821,8 @@ Experiments were also carried out using servers in a corner layout. The layouts 
 From these observations it may be declared that this system is scalable in corner configuration as the addition of servers results in increased performance.
 
 \begin{figure}[!t]
-	\begin{subfigure}{.25\textwidth}
-		\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.6]
+	\begin{subfigure}{.5\textwidth}
+		\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.2]
 		%	\clip(-3,-1.5) rectangle (3,3);
 		\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (-1,-0.02) -- (1,-0.02) -- (1,-0.22) -- (-1,-0.22) -- cycle;
 		\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (-0.02,2.5) -- (-0.02,0.5) -- (-0.22,0.5) -- (-0.22,2.5) -- cycle;
@@ -816,8 +884,8 @@ From these observations it may be declared that this system is scalable in corne
 		\caption{3 Server Corner Layout}
 		\label{3ServerCorner}
 	\end{subfigure}%
-	\begin{subfigure}{.25\textwidth}
-		\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.6]
+	\begin{subfigure}{.5\textwidth}
+		\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.2]
 		%	\clip(-3,-3) rectangle (3,3);
 		\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (0.5,-0.02) -- (2.5,-0.02) -- (2.5,-0.22) -- (0.5,-0.22) -- cycle;
 		\fill[line width=0.8pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.10000000149011612] (-0.02,2.5) -- (-0.02,0.5) -- (-0.22,0.5) -- (-0.22,2.5) -- cycle;
@@ -895,7 +963,7 @@ From these observations it may be declared that this system is scalable in corne
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=.475\textwidth]{CorPerformance}
+	\includegraphics[width=\textwidth]{CorPerformance}
 	\caption{Performance of increasing numbers of servers with an accumulating number of objects (in corner layout)}
 	\label{fig_PerCor}
 \end{figure}
