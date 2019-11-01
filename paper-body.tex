@@ -251,17 +251,32 @@ Accomplishing a transfer with a simple message from one server to another is cha
 For additional clarity consider objects A and B in Fig. \ref{AuraProj}. Each server is aware of the objects they host but not other objects. As such, objects A and B would not interact and not collide with each other, creating a time-space inconsistency. A time-space inconsistency is defined as two objects occupying the same space at the same time. If Object B has a velocity directed towards the boundary, it would continue at its initial velocity until it traversed the boundary, at which point it would migrate to server 0. Upon completion of the migration, objects A and B would overlap far more than would be expected in a typical simulation, resulting in inappropriate collision response.
 
 \section{Considered Solutions}
-Simulate objects overlapping the boundary on both servers, however, results would diverge as objects interact with objects not overlapping the boundary and there is the overhead of objects have to be simulated twice.
+There are several solutions that should be considered to distribute a real-time physics simulation across multiple machines over a network:
 
-Simulate objects overlapping the boundary and objects interacting with those on both servers, e.g. by using an overlapping region. Results would still diverge due to non-determinism of physics engines and there is the overhead of objects have to be simulated twice.
+\subsection{Both servers simulate objects on boundary}
+Simulate objects overlapping the boundary on both servers, however, results would diverge significantly as objects interact with objects not overlapping the boundary and there is the extra computational overhead of needing to be simulate objects twice.
 
-Objects in the overlapping region interact over the network. This could be done synchronously, which would be slow (could divide collision responses between servers and then exchange results). Would have to simulate objects twice, would require multiple round-trips per physics time-step, but collision response would be identical.
+\subsection{Both servers simulate objects in an overlapping region}
+Simulate objects overlapping the boundary and objects interacting with those on both servers, e.g. by using an overlapping region. Object may interact with objects not in the overlapping region, so the results would diverge or the overlapping region would have to dynamically change in order to keep all interacting objects within the overlapping region. Even if all objects interacting were in the overlapping region, results would still diverge due to non-determinism of physics engines. The divergence of results due to non-determinism could be corrected by periodically syncing the objects (ensuring the objects have the same state on both servers), however, this would appear as jitter and would require additional computational and network overhead. In addition to this there is the extra computational overhead of needing to be simulate objects twice.
 
-Treat objects being simulated on another server as static. However, this would not lead to correct collision response, energy would end up being added to the system causing jitter etc.
+\subsection{Over network object collisions}
+Objects in the overlapping region interact over the network. This could be done synchronously, which would be slow (could divide collision responses between servers and then exchange results). This solution would have to simulate objects twice and would require multiple round-trips of messages over the network per physics time-step, but the collision response for objects would be identical on both servers.
 
+% All these solutions require fast and reliable network connections, except AP
+
+\subsection{Remote objects as static}
+Treat objects being simulated on another server as static. However, this would not lead to correct collision response, if compared to a single simulation. Momentum is conserved in collisions and no momentum is transferred to static objects, therefore the resulting momentum on the colliding object would not be the same as if the two objects were dynamic (not static) on a single simulation.
+Half of all collisions would be missed, as collisions would be resolved for the object not being treated as static, but on the remote server, the collision never appears to happen, as the collision has already been resolved when receiving the updated state of the interacting object.
+This could also lead to jitter, if two objects are in contact (i.e. colliding over multiple frames, such as a box stacked on top of another box), the server in which the collision is resolved on could be different every physics step, the outcome of which may be different and cause jitter.
+% It is probably more complicated than this, as physics engines do a lot to deal with objects in contact, constantly moving a static object is probably going to interfere with this.
+
+% Collisions may not be missed if there is deep penetration as PhysX won't move objects all the way out of a collision if the collision is deep enough.
+
+\subsection{All object interactions on same server}
 Simulate all objects that are interacting with each other on the same server. Auras could be used to determine which objects are potentially interacting. Auras of objects would need to be exchanged. Solution would need to manage number of auras exchanged to reduce this overhead.
 
 \section{Proposed Solution}
+% Introduce this in context of above section
 We term our approach Aura Projection (AP). AP tackles the problem of maintaining consistency across regions while ensuring timeliness of a simulation. In particular, AP provides the building blocks of a scalable solution to server-side physics simulations by handling all configurations of boundary cases in migratory approaches. 
 
 In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. In other words, auras act as a request for objects to be migrated. Any object colliding with the aura is migrated to the server the aura came from. The presence of an aura allows: (1) the prediction of future hosting requirements allowing time to transfer objects; (2) a narrowing of interest in only considering a subset of objects promoting a scalable solution; (3) an unhindered physics simulation for existing objects; (4) limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability). In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
