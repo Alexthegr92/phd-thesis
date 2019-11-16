@@ -1062,21 +1062,21 @@ For each experiment the following graphs are shown:
 
 In this experiment the relative speed of the two objects being varied from $2m\mathord{\cdot}s^{-1}$ to double tolerance, $128m\mathord{\cdot}s^{-1}$ in increments of $2m\mathord{\cdot}s^{-1}$ and repeated $10$ times.
 
-\begin{figure}[!t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{CollisionsPenVsSpeed}
 	\caption{Penetration time of objects with varying relative speed. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as relative speed increases beyond the tolerance.}
 	\label{fig_CollisionsPenVsSpeed}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{MeanMaxErrorVsSpeed}
 \caption{The mean and max of collision errors with varying relative speed}
 \label{fig_MeanMaxErrorVsSpeed}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{RatiosVsSpeed}
 \caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying relative speed}
@@ -1087,21 +1087,21 @@ In this experiment the relative speed of the two objects being varied from $2m\m
 
 In this experiment the latency between the two servers was varied from $0ms$ to $40ms$ ($20*latency tolerance$) in increments of $1ms$. A high maximum factor of 20 was chosen as error increases slowly relative to the tolerance value. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{CollisionsPenVsLatency}
 \caption{Penetration time of objects with varying latency. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The latency tolerance is marked in a dashed green line. The number and magnitude of errors increases as latency increases beyond the tolerance.}
 \label{fig_CollisionsPenVsLatency}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{MeanMaxErrorVsLatency}
 \caption{The mean and max of collision errors with varying latency}
 \label{fig_MeanMaxErrorVsLatency}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{RatiosVsLatency}
 \caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying latency}
@@ -1113,21 +1113,21 @@ In this experiment the latency between the two servers was varied from $0ms$ to 
 In this experiment the frame-time was varied from $0ms$ to $30ms$ (double the frame-time tolerance) in increments of $1ms$.
 The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{CollisionsPenVsFrameTime}
 \caption{Penetration time of objects with varying frame-time. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as target frame-time increases beyond the tolerance.}
 \label{fig_CollisionsPenVsFrameTime}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{MeanMaxErrorVsFrameTime}
 \caption{The mean and max of collision errors with varying frame-time}
 \label{fig_MeanMaxErrorVsFrameTime}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{RatiosVsFrameTime}
 \caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying frame-time}
@@ -1150,21 +1150,21 @@ RakNet, the library used for network communication in this project, includes a r
 %TODO: Check if aura updates are ordered, mention that here.
 %RakNet's reliability layer uses best effort, meaning messages are not guaranteed to be received, which means some messages may never be received resulting in 
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{CollisionsPenVsLoss}
 \caption{Penetration time of objects with varying packet-loss. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The number and magnitude of errors increases as packet-loss increases beyond $10\%$.}
 \label{fig_CollisionsPenVsLoss}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{MeanMaxErrorVsLoss}
 \caption{The mean and max of collision errors with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the magnitude of errors sharply increases until above $60\%$ where all collisions are missed so there is no error.}
 \label{fig_MeanMaxErrorVsLoss}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{RatiosVsLoss}
 \caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the ratio of erroneous collisions to correct collisions sharply increases as does misses to total collisions. Above $60\%$ packet-loss, all collisions are missed.}
