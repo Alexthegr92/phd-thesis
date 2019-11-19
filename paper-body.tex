@@ -39,7 +39,7 @@ Using the recent developments in cloud technology, we explore the possibility of
 \section{Real-time Physics Engines}
 %We must first understand how real-time physics engines work
 %"World" is called a scene, "Bodies" are things being simulated
-%Descrete simulation steps, each step simulates a period of time
+%discrete simulation steps, each step simulates a period of time
 
 %Main physics loop (what goes on within a simulation step)
 %Explanation of rigid bodies, actors, shapes, constraints
@@ -1005,7 +1005,7 @@ Erroneous collisions fall into two categories:
 
 %TODO: Expand on late collisions producing different results?
 
-To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in descrete steps, as a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
+To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in discrete steps, as a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
 
 It is possible to detect late collisions between objects. Given the relative speed of the two objects and the physics time-step, it possible to calculate the maximum expected penetration distance. If a collision is detected and it is above this value, it means it is a late collision.
 
@@ -1032,7 +1032,7 @@ A control experiment on a centralised system was performed, in which the scenari
 \end{figure}
 
 As relative speed increases, expected penetration increases and the erroneous penetration distance for the same aura error (aura too small or aura receive message delayed) also increases. Using Penetration time gives us a uniform error regardless of relative speed.
-Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and relative speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in descrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous.
+Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and relative speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous.
 
 \subsection{Varying Factors}
 
