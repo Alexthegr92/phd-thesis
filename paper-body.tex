@@ -547,7 +547,7 @@ $BT$ is called when an object traverses a boundary. In order to prevent `islands
 		\State $\textit{isIsland := true}$
 		\ForAll{{$\textit{object} \in \textit{overlaps}$}} :
 		\If {$\textit{object} \not \in \textit{visited}$}:
-		\State $\textit{isIsland \&= }\Call{IslandQuery}{\textit{object,visited}$}
+		\State $\textit{isIsland \&= }$ \Call{IslandQuery}{$\textit{object,visited}$}
 		\EndIf
 		\EndFor
 		\State return $\textit{isIsland}$
