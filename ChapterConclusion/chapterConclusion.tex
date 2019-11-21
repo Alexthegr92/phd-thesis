@@ -1,0 +1,10 @@
+\chapter{Conclusions and Future Work}
+An approach to networked real-time physics simulations that is scalable and alleviates the processing limitation of a single server has been presented. Only open-source software has been used in our approach and our algorithm has been developed in a way that is agnostic to any specific application technology.
+
+Our experiments establish that the approach is scalable, as demonstrated by the addition of servers improving the performance of the system when simulating an increasingly large number of objects. This study has demonstrated that a standard real-time physics engine (in this case, PhysX) may be incorporated into our scalable real-time physics system and achieve performance that is acceptable for real-time distributed simulations such as networked games.
+
+Our continuing work will be to carry out experiments to determine the effects that increasing latency and packet loss, and varying user defined latency and speed tolerances, have on the scalability and stability of our approach. This will provide data, which may inform a dynamically adapting messaging layer that may manage cloud resources more efficiently depending on the distribution of object interaction within a simulated world. 
+
+We are currently seeking to extend our approach to support large jointed objects that could span multiple servers. For example, a suspension bridge could be modelled in fine detail using multiple servers. This requires our approach to be extended to ensure some jointed elements may span section boundaries to connect independent objects on different servers. 
+
+Future work will enable boundaries between regions to evolve dynamically allowing load-balancing to occur, further lowering the maximum frame time across servers. In addition to load-balancing, dynamic boundaries can routinely repartition the regions between servers to avoid or reduce the number of objects interacting over region boundaries. This will reduce both network and processing overhead by avoiding the need for auras and migrations to be exchanged between servers, further improving the performance and scalability of our approach.

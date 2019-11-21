@@ -1,0 +1,70 @@
+\chapter{Background and Related Work}
+\section{Real-time Physics Engines}
+%We must first understand how real-time physics engines work
+%"World" is called a scene, "Bodies" are things being simulated
+%discrete simulation steps, each step simulates a period of time
+
+%Main physics loop (what goes on within a simulation step)
+%Explanation of rigid bodies, actors, shapes, constraints
+%Explanation of simulation and query shapes
+%Explanation of trigger volumes
+%Explanation of kinetic vs kinematic
+%Explanation of sleeping
+
+%Each simulation step must take less time to execute than the time it is simulating, otherwise the simulation is unable to run in real-time.
+%It is possible for the main application to update more often than the simulation frequency
+%It is also possible that the main application update is unable to be executed at the same frequency as the physics simulation frequency. Options are running the simulation at a bigger time-step or simulate multiple, smaller sub-steps. Trade-off between keeping consistent behaviour and performance.
+%Diagrams for above
+%Well of despair example and diagram
+%Solutions to well of despair: 
+%Decouple physics from application update with use of sync and async scene, can make player interaction more difficult
+%allow time dropping
+%variable time-stepping
+%simplifying the physics scene
+
+%PhysX runs on a separate thread by default
+%It is not possible to read/write directly to the scene during simulation, scene is buffered so changes can be made and will only affect the next simulation step. 
+%Image of time-slots
+%Event callbacks for collisions/triggers
+
+\section{Online Gaming}
+Although there has been research utilising multiple servers to distribute the task of solving physics based problems (e.g., \cite{mashayekhi2018automatically}), to the best of our knowledge there is no literature describing real-time interactive physics exploiting the addition of servers to gain scalability. The closest work to our research is that carried out to seek scalability in terms of player numbers in online gaming in the field of Distributed Virtual Environments (DVEs). 
+
+There are primarily two ways in which server-side resources can provide scalability in online gaming (e.g., DVEs): (1) Migratory; (2) Non-migratory. In migratory approaches, a server will assume responsibility for handling in-simulation objects within a region. When objects traverse region boundaries into a region that is the responsibility of another server, they will be handed over to the other server. In a non-migratory approach, in-simulation objects are allocated to the responsibility of a particular server at instantiation time and stay with that server until they are deleted.
+
+The benefit of a migratory approach is that tightly coupled objects (interacting frequently) can be co-located on the same server, reducing interaction latencies. However, the act of moving such objects may be costly in terms of time required to resolve the hosting requirements of an object. The benefit of a non-migratory approach is that servers are rarely exhausted but network traffic will result in higher latencies that will inhibit the fidelity of interaction between objects.
+
+Migratory and non-migratory approaches are now described in greater detail.
+
+\section{Distributed Virtual Environments}
+ In the migratory approach, a single game world exists, but is divided into geographical regions. Each region is maintained by a separate server (e.g. \cite{AnOverlappingArchitecture, ScalabilityIssues, LoadBalancingForDistributedVR, ALoadBalancingAlgorithm, SpatialOS}). The main drawback of this approach is the complexity of handling interactions between objects in different regions/servers while maintaining consistency \cite{P2PForMMOs}. A technique to minimise these issues is to use overlapping regions between spatial partitions. Servers share state information about objects in the overlapping region (examples include 'zoning' as described in \cite{AnOverlappingArchitecture} or 'sub-regions' as described in \cite{ScalabilityIssues}). Examples of games using this technology include \cite{Vanishin30:online} and \cite{WorldsAd48:online}, which use the SpatialOS platform \cite{SpatialOS}. However, the techniques used by SpatialOS are not described in any literature. Their demonstration video exhibits unnatural object "jitter", which is possibly a result of network latency. 
+ 
+In the non-migratory approach, the game world is not divided into geographical regions and players are split between servers in one of two ways: (1) Several instances of the game world run with complete independence from one another (known as shards e.g.\cite{WOW}) and players have no interaction across shards \cite{P2PForMMOs}; (2) Players are distributed amongst servers by some other non-geographical method and interactions with players on other servers requiring servers to share messages \cite{LoadBalancingforMMOs}.
+
+Although shards allow a degree of scalability in the number of players, it is not suitable for use in scaling real-time physics simulations as all entities within a real-time physics simulation, in the same geographical region, may interact with each other.
+
+In the case of architectures not using shards, Interest Management is required to prevent message passing growing polynomially as players increase (e.g. \cite{Bezerra2008} and \cite{LoadBalancingforMMOs}).
+\cite{Bezerra2008} proposes the A3 algorithm, an interest management technique for distributed simulations aiming to significantly reduce the necessary bandwidth required between servers. A3 uses a combination of a circular area of interest and field of view combined with a relevance gradient. \cite{LoadBalancingforMMOs} proposes a Behavioural Interest Management Technique that allocates resources based on player interactions. Auras (an area of interest/influence) are used to determine player message exchanges, reducing message passing while promoting player number scalability.
+
+Despite DVE being a popular area of research, the literature is restricted to modelling player interaction across servers and balancing their support on different servers. Clearly, the interaction patterns of players are significantly less demanding in terms of timeliness than that of interacting physical objects.
+
+\section{Streamed Gaming}
+Streamed Gaming (also know as Gaming as a Service) consists of cloud servers streaming to a player's device with player input being returned to the cloud server. The player's device acts as a thin client. The main benefit is that a player does not require expensive, powerful hardware, and games can be played on any operating system (e.g. Android, Linux and Mac). However, these benefits come at the cost of bandwidth and latency requirements \cite{iCloudAccess}.
+
+Streamed Gaming services currently available include \cite{NVidiaGameStream} and \cite{PSNOW}. NVIDIA GRID technology is targeted specifically at Streamed Gaming \cite{NVIDIACloud}.
+
+A drawback to streamed gaming is the requirement for a significantly more powerful machine at the server-side than what would be required if the game was played solely at the client side. This is because the server not only has to run the game, but has to process the video and audio stream into a suitable format for streaming. In addition, real-time player interaction requires low latency and high bandwidth resulting in networking infrastructure more expensive than would be expected for regular streaming services. 
+
+In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines.
+
+\section{Cloud Computing}
+Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
+
+\section{Scalable Non-Real Time Physics}
+Includes fluid simulations, meteorological simulations. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps.
+
+\section{Background Summary}
+In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
+
+Migratory approaches are concerned with managing the network traffic for those entities that could possibly exist on two servers but can only be solved on one. Such objects need to be placed with an owning server while minimising the effect of thrashing (where an algorithm frequently transfers objects between servers). In the rest of this paper, we describe our approach to solving this algorithmically, present how a working implementation was achieved, and present results evidencing our work. This is the first presentation of literature that can demonstrate real-time scalable server-side physics modelling and is a significant contribution to reducing the cost of commercialised streamed gaming.
+

@@ -1,0 +1,343 @@
+\chapter{Problem Definition and Proposed Solution}
+Our approach allows servers to assume responsibility for objects within a real-time simulation without hindering the fidelity of such a simulation. In order to maintain scalability, the extra processing overhead must be less than that gained by distributing the simulation workload. 
+	
+\definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
+\definecolor{dtsfsf}{rgb}{0.8274509803921568,0.1843137254901961,0.1843137254901961}
+\definecolor{sexdts}{rgb}{0.1803921568627451,0.49019607843137253,0.19607843137254902}
+\definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
+\begin{figure}
+	\centering
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm, scale=2.4]
+	%	\clip(-3.8316065591348587,-1.5915496679322039) rectangle (4.0193993686026035,3.119053888710274);
+	\draw [line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (0.11306222137602934,0.5749956216017253) circle (0.2191629059122392cm);
+	\fill[line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-0.19130495931412153,2.497904290969918) -- (0.09727089010996666,2.49668178609732) -- (0.09849339498256493,2.785257635521408) -- (-0.19008245444152327,2.7864801403940063) -- cycle;
+	\draw [line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (0.2690682445566622,2.8641372386638633) circle (0.18190589696740675cm);
+	\fill[line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-0.18001743348774918,1.688638597893834) -- (0.12779907363732385,1.6894047421549492) -- (0.12703292937620878,1.997221249280022) -- (-0.1807835777488642,1.996455105018907) -- cycle;
+	\draw [line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (0.3506985149669561,2.1504628052606924) circle (0.20094089799255885cm);
+	\fill[line width=2pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.65] (-0.336221735744061,-0.21399083968233576) -- (-0.08697438199196733,-0.21915612145269675) -- (-0.08966346659279195,0.37774900628071006) -- (-0.336221735744061,0.37774900628071006) -- cycle;
+	\draw [line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-2.7581115521258512,-0.5210040634712074) circle (0.18765298545020567cm);
+	\draw [line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-2.4332540697970817,-0.7399608687412594) circle (0.1836317971285386cm);
+	\draw [line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-2.7438006498206193,-0.983246207930206) circle (0.20084779094096714cm);
+	\fill[line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-1.8,-0.3) -- (-1.5507526462479064,-0.30516528177036095) -- (-1.553441730848731,0.29173984596304586) -- (-1.8,0.29173984596304586) -- cycle;
+	\draw [line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-1.519067473250276,-0.8075899850392314) circle (0.2110032461078136cm);
+	\draw [line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (-1.3242760580159627,-0.35254200026346094) circle (0.220457331048815cm);
+	\fill[line width=2pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.6] (1.6172164649279959,-0.10848935040022167) -- (1.9441305251416572,-0.10779885294426608) -- (1.9434400276857018,0.21911520726939515) -- (1.6165259674720405,0.21842470981343975) -- cycle;
+	\draw [line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (2.1773098805776194,-0.021729373301184463) circle (0.19660778801195347cm);
+	\fill[line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (2.3730665457464766,-0.11747262438789227) -- (2.7159883030391594,-0.11287162500071371) -- (2.7113873036519816,0.23005013229196902) -- (2.3684655463592983,0.2254491329047909) -- cycle;
+	
+	% Boundary Lines
+	\draw [line width=1pt, dash pattern=on 5pt off 5pt] (-3,0)-- (0,0);
+	\draw [line width=1pt, dash pattern={on 4pt off 3pt on 1pt off 3pt}] (0,3)-- (0,0);
+	\draw [line width=1pt, dash pattern={on 2pt off 2pt}] (0,0)-- (3,0);
+	
+	% Server Labels
+	\draw (-1.5,3.5) node[anchor=center] {Server 0};
+	\draw (1.5,3.5) node[anchor=center] {Server 1};
+	\draw (0,-1.0) node[anchor=center] {Server 2};
+	
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (0.11306222137602934,0.5749956216017253) circle (0.33970250416397074cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (0,1.824163562143371) circle (0.3724807823065095cm);
+	\draw [line width=2pt,color=dtsfsf] (-0.19130495931412153,2.497904290969918)-- (0.09727089010996666,2.49668178609732);
+	\draw [line width=2pt,color=dtsfsf] (0.09727089010996666,2.49668178609732)-- (0.09849339498256493,2.785257635521408);
+	\draw [line width=2pt,color=dtsfsf] (0.09849339498256493,2.785257635521408)-- (-0.19008245444152327,2.7864801403940063);
+	\draw [line width=2pt,color=dtsfsf] (-0.19008245444152327,2.7864801403940063)-- (-0.19130495931412153,2.497904290969918);
+	\draw [line width=2pt,color=dtsfsf] (-0.18001743348774918,1.688638597893834)-- (0.12779907363732385,1.6894047421549492);
+	\draw [line width=2pt,color=dtsfsf] (0.12779907363732385,1.6894047421549492)-- (0.12703292937620878,1.997221249280022);
+	\draw [line width=2pt,color=dtsfsf] (0.12703292937620878,1.997221249280022)-- (-0.1807835777488642,1.996455105018907);
+	\draw [line width=2pt,color=dtsfsf] (-0.1807835777488642,1.996455105018907)-- (-0.18001743348774918,1.688638597893834);
+	\draw [line width=2pt,color=rvwvcq] (-0.336221735744061,-0.21399083968233576)-- (-0.08697438199196733,-0.21915612145269675);
+	\draw [line width=2pt,color=rvwvcq] (-0.08697438199196733,-0.21915612145269675)-- (-0.08966346659279195,0.37774900628071006);
+	\draw [line width=2pt,color=rvwvcq] (-0.08966346659279195,0.37774900628071006)-- (-0.336221735744061,0.37774900628071006);
+	\draw [line width=2pt,color=rvwvcq] (-0.336221735744061,0.37774900628071006)-- (-0.336221735744061,-0.21399083968233576);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-0.20008010870040147,0.05759193325942933) circle (0.4395227390987423cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-2.7581115521258512,-0.5210040634712074) circle (0.3403858079791503cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-2.4332540697970817,-0.7399608687412594) circle (0.3064438391841357cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-2.7438006498206193,-0.983246207930206) circle (0.32740392092189946cm);
+	\draw [line width=2pt,color=dtsfsf] (-1.8,-0.3)-- (-1.5507526462479064,-0.30516528177036095);
+	\draw [line width=2pt,color=dtsfsf] (-1.5507526462479064,-0.30516528177036095)-- (-1.553441730848731,0.29173984596304586);
+	\draw [line width=2pt,color=dtsfsf] (-1.553441730848731,0.29173984596304586)-- (-1.8,0.29173984596304586);
+	\draw [line width=2pt,color=dtsfsf] (-1.8,0.29173984596304586)-- (-1.8,-0.3);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-1.6811522710982656,0.015633897433233776) circle (0.4555571106906273cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-1.519067473250276,-0.8075899850392314) circle (0.40351234312900314cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (-1.3242760580159627,-0.35254200026346094) circle (0.3214616358035378cm);
+	\draw [line width=2pt,color=rvwvcq] (1.6172164649279959,-0.10848935040022167)-- (1.9441305251416572,-0.10779885294426608);
+	\draw [line width=2pt,color=rvwvcq] (1.9441305251416572,-0.10779885294426608)-- (1.9434400276857018,0.21911520726939515);
+	\draw [line width=2pt,color=rvwvcq] (1.9434400276857018,0.21911520726939515)-- (1.6165259674720405,0.21842470981343975);
+	\draw [line width=2pt,color=rvwvcq] (1.6165259674720405,0.21842470981343975)-- (1.6172164649279959,-0.10848935040022167);
+	\draw [line width=2pt,color=sexdts] (2.3730665457464766,-0.11747262438789227)-- (2.7159883030391594,-0.11287162500071371);
+	\draw [line width=2pt,color=sexdts] (2.7159883030391594,-0.11287162500071371)-- (2.7113873036519816,0.23005013229196902);
+	\draw [line width=2pt,color=sexdts] (2.7113873036519816,0.23005013229196902)-- (2.3684655463592983,0.2254491329047909);
+	\draw [line width=2pt,color=sexdts] (2.3684655463592983,0.2254491329047909)-- (2.3730665457464766,-0.11747262438789227);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (1.7707737818301332,0.042356814063601776) circle (0.3324655775151698cm);
+	\draw [line width=2pt,dash pattern=on 1pt off 1pt] (2.5485828739333973,0.0529545076040507) circle (0.31587509276975684cm);
+	
+	% Object labels
+	\draw[color=dtsfsf] (-0.5,3) node {A};
+	\draw[color=sexdts] (0.75,3) node {B};
+	\draw[color=dtsfsf] (-0.6,1.9) node {C};
+	\draw[color=sexdts] (.75,1.9) node {D};
+	\draw[color=dtsfsf] (-1.66,0.75) node {E};
+	\draw[color=dtsfsf] (-0.85,-0.35) node {F};
+	\draw[color=dtsfsf] (-1.5,-1.45) node {G};
+	\draw[color=dtsfsf] (-3.3,-0.5) node {H};
+	\draw[color=dtsfsf] (-2.2,-1.2) node {I};
+	\draw[color=dtsfsf] (-3.3,-1) node {J};
+	\draw[color=sexdts] (2.2,-0.5) node {K};
+	\draw[color=sexdts] (2.5,0.5) node {L};
+	\draw[color=rvwvcq] (1.8,-0.5) node {M};
+	\draw[color=rvwvcq] (-0.6,0.6) node {N};
+	\draw[color=sexdts] (0.5,1) node {O};
+	
+	\end{tikzpicture}
+	
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm, scale=0.75, every node/.style={font=\scriptsize,
+		minimum height=0.25cm,minimum width=0.5cm},scale=0.75]
+	\clip(-8,-0.05) rectangle (4,2.15);
+	
+	% Boundary Lines
+	\draw [line width=1pt, dash pattern={on 4pt off 3pt on 1pt off 3pt}] (-7.5,1.8)-- (-6.5,1.8);
+	\draw (-6,1.8) node[anchor=west] {0-1 Boundary};
+	\draw [line width=1pt, dash pattern=on 5pt off 5pt] (-7.5,1.3)-- (-6.5,1.3);
+	\draw (-6,1.3) node[anchor=west] {0-2 Boundary};
+	\draw [line width=1pt, dash pattern={on 2pt off 2pt}] (-7.5,0.8)-- (-6.5,0.8);
+	\draw (-6,0.8) node[anchor=west] {1-2 Boundary};
+	
+	\draw [line width=2pt] (-7.5,0.3)-- (-6.5,0.3);
+	\draw (-6,0.3) node[anchor=west] {Aura};
+	
+	% Object boxes
+	\fill[line width=2pt,color=sexdts,fill=sexdts,fill opacity=0.6] (0.2,0.8) -- (0.7,0.8) -- (0.7,1.3) -- (0.2,1.3) -- cycle;
+	\fill[line width=2pt,color=rvwvcq,fill=rvwvcq,fill opacity=0.6] (0.2,-0.0) -- (0.7,-0.0) -- (0.7,0.5) -- (0.2,0.5) -- cycle;
+	\fill[line width=2pt,color=dtsfsf,fill=dtsfsf,fill opacity=0.6] (0.2,1.6) -- (0.7,1.6) -- (0.7,2.1) -- (0.2,2.1) -- cycle;
+	
+	\draw [line width=2pt,color=sexdts] (0.2,0.8)-- (0.7,0.8);
+	\draw [line width=2pt,color=sexdts] (0.7,0.8)-- (0.7,1.3);
+	\draw [line width=2pt,color=sexdts] (0.7,1.3)-- (0.2,1.3);
+	\draw [line width=2pt,color=sexdts] (0.2,1.3)-- (0.2,0.8);
+	
+	\draw [line width=2pt,color=rvwvcq] (0.2,-0.0)-- (0.7,-0.0);
+	\draw [line width=2pt,color=rvwvcq] (0.7,-0.0)-- (0.7,0.5);
+	\draw [line width=2pt,color=rvwvcq] (0.7,0.5)-- (0.2,0.5);
+	\draw [line width=2pt,color=rvwvcq] (0.2,0.5)-- (0.2,-0.0);
+	
+	\draw [line width=2pt,color=dtsfsf] (0.2,1.6)-- (0.7,1.6);
+	\draw [line width=2pt,color=dtsfsf] (0.7,1.6)-- (0.7,2.1);
+	\draw [line width=2pt,color=dtsfsf] (0.7,2.1)-- (0.2,2.1);
+	\draw [line width=2pt,color=dtsfsf] (0.2,2.1)-- (0.2,1.6);
+	
+	\draw (1.0,2.2) node[anchor=north west] {Server 0 Object};
+	\draw (1.0,1.4) node[anchor=north west] {Server 1 Object};
+	\draw (1.0,0.6) node[anchor=north west] {Server 2 Object};
+	
+	\end{tikzpicture}
+	\caption{Aura Projection Scenarios}
+	\label{AuraProj}
+\end{figure}
+
+\section{Naive Approach}\label{CrossBoundaryInteraction}
+To provide a comparison and to demonstrate our contribution to the field, a naive approach is described first. The naive approach is used to highlight the challenges faced when solving this problem.
+
+Assuming a migratory approach in which servers are responsible for a geographic area, when one object crosses a boundary between geographic areas, such an object's hosting must be transferred to the appropriate server. It is handling this transfer that is the underlying problem.
+
+Accomplishing a transfer with a simple message from one server to another is charged with many problems: (1) the message may be lost and the object disappears; (2) the message may be delayed and the object disappears and reappears; (3) there may be more than one candidate server for hosting (if object travelling quickly) resulting in duplication of an object; (4) the server an object leaves may be unaware of when it should stop simulating the object (resulting in duplicated objects)\cite{High-performanceServerSystems}; (5) an object may be colliding with another object across the boundary which would be lost if both objects are hosted on different servers (objects may pass through each other).
+
+For additional clarity consider objects A and B in Fig. \ref{AuraProj}. Each server is aware of the objects they host but not other objects. As such, objects A and B would not interact and not collide with each other, creating a time-space inconsistency. A time-space inconsistency is defined as two objects occupying the same space at the same time. If Object B has a velocity directed towards the boundary, it would continue at its initial velocity until it traversed the boundary, at which point it would migrate to server 0. Upon completion of the migration, objects A and B would overlap far more than would be expected in a typical simulation, resulting in inappropriate collision response.
+
+\section{Considered Solutions}
+There are several solutions that should be considered to distribute a real-time physics simulation across multiple machines over a network:
+
+\subsection{Both servers simulate objects on boundary}
+Simulate objects overlapping the boundary on both servers, however, results would diverge significantly as objects interact with objects not overlapping the boundary and there is the extra computational overhead of needing to be simulate objects twice.
+
+\subsection{Both servers simulate objects in an overlapping region}
+Simulate objects overlapping the boundary and objects interacting with those on both servers, e.g. by using an overlapping region. Object may interact with objects not in the overlapping region, so the results would diverge or the overlapping region would have to dynamically change in order to keep all interacting objects within the overlapping region. Even if all objects interacting were in the overlapping region, results would still diverge due to non-determinism of physics engines. The divergence of results due to non-determinism could be corrected by periodically syncing the objects (ensuring the objects have the same state on both servers), however, this would appear as jitter as objects would be moved from one position to their corrected position instantaneously. In addition, this would require additional network overhead for the syncing of objects between servers and extra computational overhead of needing to simulate objects twice.
+
+There would be a trade-off with this approach, either:
+1) Frequent messages are sent with small corrections for objects, appearing as jitter. This would require lots of computational and network overhead. 
+2) Infrequent messages with large corrections for objects, appearing as objects moving large distances instantaneously but would require less computational and network overhead.
+
+For new objects entering the overlapping region, there will be a delay before the new object appears on both servers, network delays would affect this and could lead to the two simulations diverging significantly. For example, if there are two fast moving objects on a collision course with each other that are expected to collide in the overlapping region. Due to network delays, each server only becomes aware of the other object once the objects have already passed each other, as a result the collision is missed entirely and the result is incorrect compared to a single simulation.
+%For example, a newly entered object from one server knocked over a stack of cubes in the overlapping region, if there was a long delay in communication, the receiving server might one physics timestep be unaware of any collision, the next timestep it would update to many timesteps after the collision
+
+\subsection{Over network object collisions}
+Objects in the overlapping region interact over the network. This would be done with the two physics in lock-step, i.e. neither progresses until all computation divided between the servers has been completed for that physics step. Servers could divide the computation of collision detection and/or response between servers and then exchange results. This solution would have to simulate objects twice and would require multiple round-trips of messages over the network per physics time-step, but the collision response for objects would be identical on both servers. This approach would be affected by network delays significantly, as not only are multiple round-trips of messages required between server each physics time-step, the simulation won't advance until all messages for that physics time-step have been completed, meaning the frequency of the simulation would be negatively affected.
+
+% All these solutions require fast and reliable network connections, except AP
+
+\subsection{Remote objects as static}
+Treat objects being simulated on another server as static. However, this would not lead to correct collision response, if compared to a single simulation. Momentum is conserved in collisions and no momentum is transferred to static objects, therefore the resulting momentum on the colliding object would not be the same as if the two objects were dynamic (not static) on a single simulation.
+Half of all collisions would be missed, as collisions would be resolved for the object not being treated as static, but on the remote server, the collision never appears to happen, as the collision has already been resolved when receiving the updated state of the interacting object.
+This could also lead to jitter, if two objects are in contact (i.e. colliding over multiple frames, such as a box stacked on top of another box), the server in which the collision is resolved on could be different every physics step. An cube stacked on top of a static cube may have a different outcome to a cube with a static cube stacked on top of it.
+% It is probably more complicated than this, as physics engines do a lot to deal with objects in contact, constantly moving a static object is probably going to interfere with this.
+
+% Collisions may not be missed if there is deep penetration as PhysX won't move objects all the way out of a collision if the collision is deep enough.
+
+This approach would be affected by network delays. For example, using the stacked cubes example. Say the two cubes are free-falling. If the bottom cube was being simulated on a different server, the position of the bottom cube would only be updated whenever a message was received from the remote server to do so. If there was a long delay between messages from the remote server, for example, from a spike in latency or a sudden big loss in packets, the cube would not be updated and appear to have stopped falling. As the bottom cube has stopped on the receiving server, the top cube remains stationary, as it is in contact with the bottom cube. On the remote server, if messages are being received, the cube would be stationary and appear to be floating, as from its server's perspective, it is in contact with the bottom cube. As a result, both servers have incorrect states compared to a single simulation.
+
+
+\subsection{All object interactions on same server}
+Simulate all objects that are interacting with each other on the same server. Auras could be used to determine which objects are potentially interacting. Auras of objects would need to be exchanged. Solution would need to manage number of auras exchanged to reduce this overhead.
+
+\section{Proposed Solution}
+% Introduce this in context of above section
+We term our approach Aura Projection (AP). AP tackles the problem of maintaining consistency across regions while ensuring timeliness of a simulation. In particular, AP provides the building blocks of a scalable solution to server-side physics simulations by handling all configurations of boundary cases in migratory approaches. 
+
+In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. In other words, auras act as a request for objects to be migrated. Any object colliding with the aura is migrated to the server the aura came from. The presence of an aura allows: (1) the prediction of future hosting requirements allowing time to transfer objects; (2) a narrowing of interest in only considering a subset of objects promoting a scalable solution; (3) an unhindered physics simulation for existing objects; (4) limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability). In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
+
+Messages are sent between servers where aura overlap occurs across a geographic boundary. We term this phase of the algorithm as an object projecting its aura onto another server. %The receiving server can then predict and prepare for the possibility of interaction if an object was migrated to it. 
+
+In the context of real-time physics simulations, auras appear on the receiving server as a trigger volume (non-physically interacting volume). For each simulation step that an object is projecting an aura, the object's position and calculated aura are sent. As a network optimisation, if the boundary object is not moving, no details are sent and the aura on at a receiving server is unaltered.
+
+When an aura is no longer being projected for an object (boundary not overlapped), the server simulating that object sends a message to any servers receiving the aura to remove the aura of that object.
+
+\section{Aura Calculation}
+Calculating an aura size is key to creating a scalable solution balanced against consistency: (1) Auras that are too small will result in a faster simulation but with more missed interactions; (2) Auras that are too large will include more calculations that are simply not required, increasing server load and decreasing scalability. Therefore, how auras are calculated will be carefully described and justified. 
+
+Spheres are used to represent auras. This bounding volume is computationally efficient as rotational calculations are not required in determining its correct alignment. Auras accommodate the displacement of objects using an estimated network latency based on historic monitoring, in addition to the distance a remote object may be predicted to penetrate an aura (considering velocities).
+
+Rather than every object maintaining an aura, which would add overhead to the physics simulation, when an aura is exchanged it accounts for a potential remote object's aura. When an object comes into the aura distance of the region boundary, an aura is created for the object and the aura starts being broadcast to neighbouring servers.
+
+Fig. \ref{sequence_diagram} demonstrates the sequence of events involved when an aura is sent, received, and collided with, resulting in an object migration.
+
+To lower inconsistencies during migration, the following user-defined tolerances are used for the aura calculations: maximum speed; maximum latency time; maximum frame-time. If velocities, latencies, or frame-time are above these tolerances, then stability is no longer guaranteed. This enables AP to deterministically indicate to the overall simulation when latency may be influencing the mutually consistent views of the servers, which in turn manifests as errors in the physics.
+
+To calculate the radius of an aura, the maximum distances travelled by objects within the delay time between simulations must first be calculated. To calculate the maximum distance an object may travel for a given time, the following formula is used: $\triangle s=v\cdot \triangle t$, where $ \triangle s$ is distance, $v$ is speed, and $ \triangle t$ is time. In this context, $ \triangle v$ is substituted with maximum speed tolerance, and $ \triangle t$ will be a multiple of the physics step time (to accommodate discrete time step calculations in the physics engine). $ \triangle t$ can be calculated using the maximum frame-time and maximum latency tolerance, discussed below.
+
+There is a time delay between the aura being created on a host and being created on a receiving server, which is made up of: up to one frame before sending the aura creation message; inter-server latency; up to one frame from the message being received and acted upon; the time delay between the aura being created and the detection of the collision between a potential remote object and the aura by the physics update step. This last time delay is accounted for by rounding the previous delays up to the nearest physics time step.
+
+Using the time delays mentioned above and substituting the relevant tolerances, the maximum displacement time ($Max_{DT}$) of a remote object is calculated using the following equation:
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\begin{equation}
+T_{R}=\ceil*{\frac{2\cdot T_{F} + T_{L}}{T_{P}}}T_{P}
+\end{equation}
+
+$T_{R}$ is the $Max_{DT}$ of a remote object, $T_{F}$ is the frame-time tolerance, $T_{L}$ is the latency tolerance and $T_{P}$ is the physics step time.
+
+The aura has to account for the maximum displacement of both the object on the host server and a potential object on the remote server. The total $Max_{DT}$ will be the sum of: a) the $Max_{DT}$ of a remote object, subtracting one physics time step, as the aura only needs to account for the displacement of the host object after the creation of the aura; b) The following time delays: a time delay of up to one frame time between the physics step of the remote server and the remote server update loop sending the migration message from the migration buffer; a time delay of the latency between servers; a time delay of up to one frame time between the message being received by a host and a host acting on the migration message and creating the migrated object in the physics engine; a delay between the migrated object being created and the collision being detected by the physics update step. This last time delay is accounted for by rounding the previous delays up to the nearest physics time step.
+
+The $Max_{DT}$ of the object on the host that is projecting the aura is therefore calculated using the following equation:
+\begin{equation}
+T_{H}=T_{R}-T_{P}+\ceil*{\frac{2\cdot T_{F} + T_{L}}{T_{P}}}T_{P}
+\end{equation}
+$T_{H}$ is the $Max_{DT}$ of the object on the host.
+
+The total $Max_{DT}$ is therefore $T_{R}+T_{H}$, which can be simplified to the following equation:
+\begin{equation}
+T_{T}=(3\ceil*{\frac{2\cdot T_{F} + T_{L}}{T_{P}}}-1)T_{P}
+\end{equation}
+$T_{T}$ is the total $Max_{DT}$.
+
+The aura of an object can then be calculated using the following equation: 
+\begin{equation}
+R_{a}=R_{o}+(V_{t}\cdot T_{T})
+\end{equation}
+$R_{a}$ is the radius of the aura in $m$, $R_{o}$ is the bounding sphere of the object, $V_{t}$ is the speed tolerance in $m\mathord{\cdot}s^{-1}$ and $T_{T}$ is the total $Max_{DT}$ in $s$.
+
+\begin{figure}[!t]	
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,every node/.style={font=\scriptsize,
+		minimum height=0.25cm,minimum width=0.5cm},,scale=1.0]
+
+\draw [line width=1pt,dash pattern=on 5pt off 5pt] (-2.0,6)-- (-2.0,-7.25);
+\draw [line width=1pt,dash pattern=on 5pt off 5pt] (2.0,6)-- (2.0,-7.25);
+\draw [line width=1pt,dash pattern=on 5pt off 5pt] (6.0,6.0)-- (6.0,-7.25);
+\draw [line width=1pt,dash pattern=on 5pt off 5pt] (-6.0,6)-- (-6.0,-7.25);
+\draw [->,line width=1pt] (-5.5,4) -- (-2.0,4);
+\draw [->,line width=1pt] (-1.5,2.5) -- (2.0,1.5);
+\draw [->,line width=1pt] (2.5,0) -- (6.0,0);
+\draw [->,line width=1pt] (5.5,-1.5) -- (2.0,-1.5);
+\draw [->,line width=1pt] (1.5,-3) -- (-2.0,-4);
+\draw [->,line width=1pt] (-2.5,-5.5) -- (-6.0,-5.5);
+\fill[line width=2pt,color=blue!20] (-6.5,5) -- (-6.5,4) -- (-5.5,4) -- (-5.5,5) -- cycle;
+\fill[line width=2pt,color=blue!20] (-2.5,3.5) -- (-2.5,2.5) -- (-1.5,2.5) -- (-1.5,3.5) -- cycle;
+\fill[line width=2pt,color=blue!20] (1.5,1) -- (1.5,0) -- (2.5,0) -- (2.5,1) -- cycle;
+\fill[line width=2pt,color=blue!20] (5.5,-0.5) -- (5.5,-1.5) -- (6.5,-1.5) -- (6.5,-0.5) -- cycle;
+\fill[line width=2pt,color=blue!20] (1.5,-2) -- (1.5,-3) -- (2.5,-3) -- (2.5,-2) -- cycle;
+\fill[line width=2pt,color=blue!20] (-2.5,-4.5) -- (-2.5,-5.5) -- (-1.5,-5.5) -- (-1.5,-4.5) -- cycle;
+\fill[line width=2pt,color=blue!20] (-6.5,-6) -- (-6.5,-7) -- (-5.5,-7) -- (-5.5,-6) -- cycle;
+\draw [line width=1pt] (-6.5,5)-- (-6.5,4);
+\draw [line width=1pt] (-6.5,4)-- (-5.5,4);
+\draw [line width=1pt] (-5.5,4)-- (-5.5,5);
+\draw [line width=1pt] (-5.5,5)-- (-6.5,5);
+\draw [line width=1pt] (-2.5,3.5)-- (-2.5,2.5);
+\draw [line width=1pt] (-2.5,2.5)-- (-1.5,2.5);
+\draw [line width=1pt] (-1.5,2.5)-- (-1.5,3.5);
+\draw [line width=1pt] (-1.5,3.5)-- (-2.5,3.5);
+\draw [line width=1pt] (1.5,1)-- (1.5,0);
+\draw [line width=1pt] (1.5,0)-- (2.5,0);
+\draw [line width=1pt] (2.5,0)-- (2.5,1);
+\draw [line width=1pt] (2.5,1)-- (1.5,1);
+\draw [line width=1pt] (5.5,-0.5)-- (5.5,-1.5);
+\draw [line width=1pt] (5.5,-1.5)-- (6.5,-1.5);
+\draw [line width=1pt] (6.5,-1.5)-- (6.5,-0.5);
+\draw [line width=1pt] (6.5,-0.5)-- (5.5,-0.5);
+\draw [line width=1pt] (1.5,-2)-- (1.5,-3);
+\draw [line width=1pt] (1.5,-3)-- (2.5,-3);
+\draw [line width=1pt] (2.5,-3)-- (2.5,-2);
+\draw [line width=1pt] (2.5,-2)-- (1.5,-2);
+\draw [line width=1pt] (-2.5,-4.5)-- (-2.5,-5.5);
+\draw [line width=1pt] (-2.5,-5.5)-- (-1.5,-5.5);
+\draw [line width=1pt] (-1.5,-5.5)-- (-1.5,-4.5);
+\draw [line width=1pt] (-1.5,-4.5)-- (-2.5,-4.5);
+\draw [line width=1pt] (-6.5,-6)-- (-6.5,-7);
+\draw [line width=1pt] (-6.5,-7)-- (-5.5,-7);
+\draw [line width=1pt] (-5.5,-7)-- (-5.5,-6);
+\draw [line width=1pt] (-5.5,-6)-- (-6.5,-6);
+\draw[color=black,align=center] (-4,3.0) node {Boundary\\Collision};
+\draw[color=black,align=center] (4.2,0.9) node {Create\\Aura};
+\draw[color=black,align=center] (0.0,2.9) node {Send\\Aura};
+\draw[color=black,align=center] (4.0,-2.5) node {Aura\\Collision};
+\draw[color=black,align=center] (-0.0,-2.5) node {Migrate\\Object};
+\draw[color=black,align=center] (-4.0,-4.5) node {Create\\Migrated\\Object};
+
+\draw (-6,6) node[draw,anchor=center,align=center,fill=white] {Server 0\\Physics Update};
+\draw (-2,6) node[draw,anchor=center,align=center,fill=white] {Server 0\\Update Loop};
+\draw (6,6) node[draw,anchor=center,align=center,fill=white] {Server 1\\Physics Update};
+\draw (2,6) node[draw,anchor=center,align=center,fill=white] {Server 1\\Update Loop};
+\end{tikzpicture}
+	\caption{Aura and migration sequence diagram}
+	\label{sequence_diagram}
+\end{figure}
+
+\section{Sub-optimal object hosting}
+As objects within each others auras need to be simulated on the same server, this can lead to objects being deep within another server's region (objects that are far from the region boundary).
+
+Clusters of objects can therefore end up being simulated with all but one of their objects in their host server's region. This is sub-optimal, as the more auras that are being maintained/exchanged, the higher the computational cost.
+
+\section{Thrashing}\label{Thrashing}
+The common term `thrashing' will be used to describe the following two scenarios that must be considered.
+
+1. An object may be overlapping two auras from different servers. Given appropriate velocity, this could result in object migration, followed by aura collision, followed by migration and then repeating the process again. For example, Objects K, L and M in Fig. \ref{AuraProj}. Object K lies inside the auras of both Object L and M. 
+
+In order to prevent this thrashing, when an object is migrated, it is also migrated with any objects found that lie within the aura of the object or have an existing aura which overlaps the migrating object's aura. This is carried out recursively to ensure all objects that are overlapping are migrated at the same time.
+
+2. Two objects on different servers may both trigger the migration of the other. For example, Objects C and D in Fig. \ref{AuraProj}. Suppose the two objects are moving towards each other. Object C collides with the aura of object D and begins migrating to Server 1. Before Object C is received (and the message processed), object D collides with the aura of Object C and begins migrating to Server 0. The two objects remain on different servers and the process can repeat again, indefinitely.
+
+When Object C is received, the object is created in Server 0's physics simulation and the aura for that object is removed from Server 0's physics simulation. 
+The next physics time-step on Server 0, the object is within the aura distance of the boundary with Server 1, a message for the aura of object C will added to the send buffer for Server 1. The next network update, the message will be sent to Server 1.
+If Object C intersects an aura from Server 1, in this case Object D's aura, it will be added to the object send buffer for Server 1. The next network update, the message will be sent to Server 1. %And the aura no longer sent?
+The message for Object C's aura is received by Server 1 and processed on the next network update, when processed, a trigger volume for Object C's aura will be created in the physics engine of Server 1. The next physics time-step on Server 1, any objects within that aura will call a trigger callback, in this case Object D, indicating that object D has collided with an aura and so should be migrated to Server 0. Object D is added to the object send buffer for Server 0 and the next network update, Object D is migrated.
+
+%TODO: Check if aura sent in addition to the object migration? Yes, but it is also sent with an aura remove message
+%TODO: Check if aura removed immediately when object is received? Will be received at the same time as the aura remove message, which will remove the aura immediately
+%TODO: WIll the immediately remove aura still trigger a callback? It shouldn't do, as it checks for removed shapes
+
+
+In order for this process to repeat, both objects must have their migrations triggered (during a physics update) before the message of the other object migration has been received and processed and a physics time step has occurred to remove the aura trigger volume from the physics simulation.
+
+In order for this to occur, each object must have its aura created (first physics time step after arrival) before the aura of the other object or the other object itself has been received (if the aura is received, it will trigger the migration immediately, so an aura will not be sent, if the other object is received, the aura will be removed). Each object has its aura received by the other server, triggering the migration of the other object. The cycle is broken once an object is received and its aura removed before the other object has its migration triggered when a physics time step occurs.
+
+%Proposed solution 1: If an object collides with an aura that has just been created (was created in the most recent physics time step), only migrate the object if the colliding object id is greater (or lower than) the object projecting the aura's id. This will allow a physics time step to occur and the aura removed, if the object projecting the aura is being migrated. Should work so long as the migration message is received and processed on the waiting server before its next physics time step, i.e. round-trip time is less than two physics time steps. Aura is sent on step 0, remote aura is received, it gets created in step 1 and ignored for the first step of existense, the migrate message is received and the aura is removed in step 2
+
+%Proposed solution 2: If an object collides with another object's aura and is also projecting an aura they will both be colliding with each other's aura (if the two objects have identical rotations or are spheres). If an object knows the other object is colliding/will collide with its aura, only migrate if object id is higher or lower or rank of server is higher or lower. Would rely on knowing the exact shape of the collider of the other object
+
+\section{Islands}
+When an object traverses a region boundary, the object is migrated only if it does not overlap an aura projected by an object from the same server. In the context of migrations, an island is defined as two or more objects located outside of their host server's region (i.e. have traversed a region boundary) but are each within the aura projected from objects owned by the same host. For example, Objects H, I, and J illustrated in Fig. \ref{AuraProj}. No objects in the island are migrated as each object is within the aura of another object in the island. This should be prevented as it causes processing and networking overhead and is unnecessary as all objects lie within the region of Server 2 and are not interacting with any other objects from Server 0. 
+
+To prevent islands, a search is performed at each time step to determine if an object is part of an island. A search is performed to determine if a potential migratory object is within a group of objects with overlapping auras, of which none are positioned within the hosting server region. If the group of objects has no members within the hosting server region then the object is part of an island and the entire island of objects is migrated. Otherwise, no action is taken. For example, in Fig. \ref{AuraProj} Object I has overlapping auras with Objects H and J. H and J are checked for overlap with the Server 0 - Server 1 region boundary and for overlap with auras from Server 0 that are intersecting the Server 0 - Server 1 boundary. In this scenario, H and J are found to be part of an island, so H, I, and J are all migrated to Server 2. If objects are found to not be part of an island, no action is taken. For example, Objects E, F, and G in Fig. \ref{AuraProj}. Object F is found to have an overlapping aura with Object E, but Object E intersects the Server 0 - Server 1 boundary, so E, F, and G are found to not be part of an island and therefore no action is taken. This solution is shown in Algorithm \ref{boundaryAlgorithm} and the problem of islands can therefore be considered solved.
+
+\section{Corner Case}
+This section discusses how AP handles corner cases, i.e., where the boundary of more than two servers meet. 
+
+An example of the corner case is illustrated in Fig. \ref{AuraProj}. Object N, hosted on Server 2, sends an aura to Server 0. Object O, on Server 1, sends an aura to Server 0. Object N's aura overlaps with Object O's on server 0. Server 2 is unaware of Object O and Server 1 is unaware of Object N. As the two auras overlap, there is a potential interaction between the objects, yet the two objects remain on separate servers. To solve this problem, auras from boundaries between two neighbouring servers are shared. In the region layout in Fig. \ref{AuraProj}, auras from a boundary are received by interested servers. In the Object N and O example, Server 2 would send Object N's aura to Server 1; when Object O collides with Object N's aura, migration to Server 2 occurs.
+
+A server has to receive the auras of all objects from neighbouring boundaries, as objects being simulated by a server can exist anywhere in a neighbouring server's region. Our assumption is that a region a server simulates is sufficiently large enough to prevent the aura overlap of objects from non-neighbouring servers.

@@ -1,0 +1,290 @@
+\chapter{Problem Definition and Proposed Solution}
+This section will discuss an implementation of AP using PhysX and RakNet.
+
+\section{System Architecture}
+The simulation space is partitioned into regions, with each region consisting of its own instance of PhysX running on a dedicated GPU-enabled machine in the cloud. The boundary between regions is defined as a vertical plane, two-dimensionally dividing the simulation space into one region per server. The network library RakNet is used for all message passing between servers. RakNet ensures messages exhibit best effort and are received in sent order.
+
+When objects project auras they are added to a send aura buffer that is sent to all servers associated to the boundary of concern. Each object has a unique identifier (ID). When an aura is received by a server, an aura is created if it does not already exist, otherwise the aura is updated using the data received. When an object is no longer projecting its aura, the ID of that object is added to the delete buffer which is then sent to all servers neighbouring the boundary.
+
+When objects traverse region boundaries, they are added to a migration buffer with all information required to duplicate an object at a neighbouring server. The contents of a migration buffer are sent to a server now responsible for hosting an object. When migration messages are received an object is created within the server's simulation.
+% ^^^^ Replace 'an' with 'each'?
+
+Clients may connect to any server and are provided with a streamed visualisation of the simulation in real-time. Clients may also interact with and influence the simulation, providing a comprehensive solution for real-time interactive physics. The client system was built using the Unreal Engine. Once a client is connected, the position and states (replicas) of all objects in the simulation are sent from each server to the client via the RakNet Replica Manager.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{ArchitectureDiagramVertical}
+	\caption{Server Architecture}
+	\label{fig_stack}
+\end{figure}
+
+\section{Algorithms}
+$AC$ is called when an object collides with an aura. A recursive search is performed in order to find all objects that would lie within each object's aura, preventing thrashing as discussed in \ref{Thrashing}. Once the recursive search is complete, all objects are added to the send buffer.
+
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+\algnewcommand{\LeftComment}[1]{\State \(\triangleright\) #1}
+\algnewcommand\And{\textbf{and}}
+\algnewcommand\Or{\textbf{or}}
+
+\begin{algorithm}
+	\caption{Object Migrate - Aura Collision ($AC$)}\label{auraAlgorithm}
+	\begin{algorithmic}[1]
+		\Procedure{OnAuraEnter}{}	\Comment{A callback on an object}
+		\LeftComment{Track visited objects to prevent infinite recursion}
+		\State $\textit{visited := \{\}}$
+		\LeftComment{Recursively send object with objects that would lie within each object's aura}
+		\State \Call{SendWithOverlaps}{$\textit{thisObject, visited}$}
+		\EndProcedure
+		\State
+		\Procedure{SendWithOverlaps}{$\textit{object, visited}$}
+		\LeftComment{Get objects whose auras overlap this object's aura} %using a $\mathcal{O}(n)$ scene query
+		\State $\textit{overlaps :=}$ \Call{GetAuraOverlaps}{$\textit{object}$} %\Comment{$\mathcal{O}(n)$ scene query}
+		\State
+		\ForAll{{$\textit{object} \in \textit{overlaps}$}} :
+		\If {$\textit{object} \not \in \textit{visited}$}:
+		\State $\textit{visited := visited + object}$
+		\State \Call{SendWithOverlaps}{$\textit{object, visited}$}
+		\EndIf
+		\EndFor
+		\State
+		\State\Call{AddToSendBuffer}{object}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$BT$ is called when an object traverses a boundary. In order to prevent `islands' forming (for example Objects H, I and J in Fig. \ref{AuraProj}), a recursive search is carried out to determine is an object is part of an island or not. If an object is found to not be part of an island, the entire cluster of objects is added to the send buffer, otherwise no action is taken.
+
+\begin{algorithm}
+	\caption{Object Migrate - Boundary Traverse ($BT$)}\label{boundaryAlgorithm}
+	\begin{algorithmic}[1]	
+		\LeftComment{Update called on each boundary}
+		\Procedure{BoundaryUpdate}{}
+		\State $\textit{checked := \{\}}$	\Comment{Used to prevent duplicate checks}
+		\State
+		\LeftComment{Loop over fully traversed objects from latest update}
+		\ForAll{{$\textit{object} \in \textit{traversed}$}} : 
+		%\If {$\textit{object.isSleeping} = \textit{false} \And \textit{object} \not \in \textit{checked}$}:
+		\If {$\textit{object} \in \textit{checked}$}:
+		\State $\textit{continue}$
+		\EndIf
+		
+		\State $\textit{island := \{\}}$
+		\State $\textit{isIsland := }\Call{IslandQuery}{\textit{object, island}}$
+		\LeftComment{IslandQuery() returns true if object is part of an island and a list of objects in the island}
+		\If {$\textit{isIsland} = \textit{true}$}:
+		\State \Call{SendGroup}{$\textit{island}$}
+		\EndIf
+		\State $\textit{checked := checked + island}$
+		\EndFor
+		%		\State $\textit{visited := \{\}}$	\Comment{Track visited to prevent infinite recursion}
+		%		\State \Call{SendWithOverlaps}{$\textit{thisObject, visited}$}
+		\EndProcedure
+		\State
+		\Function{IslandQuery}{$\textit{object, visited}$}
+		\State $\textit{visited := visited + object}$
+		\If {$\textit{object.overlapsHostRegion = true}$}
+		\State return $\textit{false}$
+		\EndIf
+		%\If {$\textit{object.boundaryCollisionCount = 0}$}
+		%\State return $\textit{false}$
+		%\EndIf
+		\State
+		\LeftComment{Get objects whose auras overlap this object's aura} %using a $\mathcal{O}(n)$ scene query
+		\State $\textit{overlaps :=}$ \Call{GetMutalAuraOverlaps}{$\textit{object}$}
+		\State
+		\LeftComment{If all objects with overlapping auras are islands, then this object is an island}
+		\State $\textit{isIsland := true}$
+		\ForAll{{$\textit{object} \in \textit{overlaps}$}} :
+		\If {$\textit{object} \not \in \textit{visited}$}:
+		\State $\textit{isIsland \&= }$ \Call{IslandQuery}{$\textit{object,visited}$}
+		\EndIf
+		\EndFor
+		\State return $\textit{isIsland}$
+		\EndFunction
+		%		
+		%		\Procedure{SendWithOverlaps}{$\textit{object, visited}$}
+		%		\State $\textit{overlaps :=}$ \Call{GetOverlaps}{$\textit{object}$} \Comment{$\mathcal{O}(n)$ scene query}
+		%		\ForAll{{$\textit{object} \in \textit{overlaps}$}} :
+		%		\If {$\textit{object} \not \in \textit{visited}$}:
+		%		\State $\textit{visited := visited + object}$
+		%		\State \Call{SendWithOverlaps}{$\textit{object, visited}$}
+		%		\EndIf
+		%		\EndFor
+		%		
+		%		\State\Call{Send}{object}
+		%		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$OBC$ is called when an object collides with a boundary. The object's aura is calculated and added to the boundary's send aura buffer. A host aura is also created, to allow for the checking of mutual aura overlaps and prevent thrashing, if this is the first boundary intersection.
+
+\begin{algorithm}
+	\caption{Create Aura - Object boundary collision ($OBC$)}\label{createAuraBoundaryAlgorithm}
+	\begin{algorithmic}[1]
+		\LeftComment{A callback on an object, called when an object collides with a boundary}
+		\Procedure{OnBoundaryEnter}{$\textit{boundary}$}
+		\State \Call{AddToAuraBuffer}{$\textit{boundary, this}$}
+		\State
+		\LeftComment{Create `host aura' so GetMutalAuraOverlaps() will detect this object's aura}
+		\If {$\textit{boundaryIntersections = 0}$}
+		\State \Call{CreateHostAura}{$\textit{}$}
+		\EndIf
+		\State $\textit{boundaryIntersections := boundaryIntersections + 1}$
+		%\State $\textit{boundariesEntered := boundariesEntered + boundary}$
+		%	\State $\textit{boundary->addToOverlappingOtherObjects(m_rigidDynamic)}$
+		%	\State $\textit{boundary->addBoundaryBodyToSendBuffer(this)}$
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$OBU$ is called once per frame that an object is intersecting a boundary. If the object is not `sleeping', a new aura is calculated and added to the boundary's send buffer and the host aura is updated.
+
+The isSleeping() function returns true if an object is sleeping. From the PhysX documentation:
+An object is considered `sleeping' when an actor does not move for a period of time. (The default PhysX period of time is $0.4s$ and this is the value used in our approach). Objects are `woken up' when they are touched by an awake object. 
+
+\begin{algorithm}
+	\caption{Update Aura - Object boundary update ($OBU$)}\label{objectWithAuraAlgorithm}
+	\begin{algorithmic}[1]
+		\LeftComment{A callback on an object, called per step per boundary the object is colliding with}
+		\Procedure{onBoundaryUpdate}{$\textit{boundary}$}
+		\If {$\textit{this.isSleeping = true}$}
+		\State $\textit{return}$
+		\EndIf
+		\LeftComment{Send Aura Delta}
+		\State \Call{AddToAuraBuffer}{$\textit{boundary, this}$} 
+		\State \Call{UpdateHostAura}{$\textit{}$}
+		%		if (!m_hasBeenSent 
+		%	&& (m_app->isBoundaryOtherActor(triggerPair.triggerActor))
+		%	&& !m_rigidDynamic->isSleeping()
+		%	&& !m_rigidDynamic->getAngularVelocity().isZero()
+		%	&& !m_rigidDynamic->getLinearVelocity().isZero()
+		%	)
+		%	{
+		%		OrionBoundaryOther* boundary = (OrionBoundaryOther*)triggerPair.triggerActor->userData;
+		%		boundary->addBoundaryBodyToSendBuffer(this);
+		%	}
+		%	
+		%	if (m_app->isBoundaryOtherActor(triggerPair.triggerActor))
+		%	{
+		%		updateBoundingBox();
+		%	}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$OBE$ is called when an object is no longer intersecting a boundary. The object is added to the boundary's remove aura buffer. If the object is no longer intersecting any boundaries, the host aura is deleted.
+
+\begin{algorithm}
+	\caption{Destroy Aura - Object boundary exit ($OBE$)}\label{destroyAuraAlgorithm}
+	\begin{algorithmic}[1]
+		\LeftComment{A callback on an object, called when an object exits a boundary}
+		\Procedure{onBoundaryExit}{$\textit{boundary}$}
+		\State \Call{AddtoDeleteAuraBuffer}{$\textit{}$}
+		\State
+		\LeftComment{If object is no longer sending an aura, no need to keep a `host aura'}
+		\State $\textit{boundaryIntersections := boundaryIntersections - 1}$
+		\If {$\textit{boundaryIntersections = 0}$}
+		\State \Call{DeleteHostAura}{$\textit{}$}
+		\EndIf
+		
+		%	// If leaving boundary of other simulation, send message removing object from other boundary triggers
+		%	if (!m_hasBeenSent && m_app->isBoundaryOtherActor(triggerPair.triggerActor))
+		%	{
+		%		OrionBoundaryOther* boundary = (OrionBoundaryOther*)triggerPair.triggerActor->userData;
+		%		vector<OrionBoundaryOther*>::iterator found = find(m_boundariesWithAuras.begin(), m_boundariesWithAuras.end(), boundary);
+		%		if (found != m_boundariesWithAuras.end())
+		%		{
+		%			boundary->addBoundaryBodyRemoveToSendBuffer(m_index);
+		%			boundary->removeFromOverlappingOtherObjects(m_rigidDynamic);
+		%			m_boundariesWithAuras.erase(find(m_boundariesWithAuras.begin(), m_boundariesWithAuras.end(), boundary));
+		%		}
+		%	}
+		%	
+		%	if (m_app->isBoundaryOtherActor(triggerPair.triggerActor))
+		%	{
+		%		m_partiallyInsideOtherCount--;
+		%		PX_ASSERT(m_partiallyInsideOtherCount >= 0);
+		%		if (m_partiallyInsideOtherCount == 0)
+		%		{
+		%			deleteBoundingBox();
+		%		}
+		%	}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$BNU$ is called once per network connection between servers. It is responsible for sending and receiving object migrations and auras between servers, including the sending and receiving of auras from boundaries between other neighbouring remote servers.
+
+\begin{algorithm}
+	\caption{Boundary Network Update ($BNU$)}\label{boundaryNetworkAlgorithm}
+	\begin{algorithmic}[1]
+		\LeftComment{Update called once per network connection}
+		\Procedure{Network Update}{}
+		\LeftComment{Exchange migrations with target server}
+		\State \Call{SendObjectsInBuffer}{}
+		\State \Call{ReceiveObjects}{}
+		\State
+		\LeftComment{Send aura state updates to all neighbours}
+		\ForAll{{$\textit{neighbour} \in \textit{neighbours}$}} :
+		\State \Call{SendAurasInBuffer}{}
+		\State \Call{SendDeleteAurasInBuffer}{}
+		\State \Call{ReceiveAuras}{}
+		\State \Call{ReceiveDeleteAuras}{}
+		\EndFor
+		%	sendRigidDynamics();
+		%recvRigidDynamicUpdate();
+		%
+		%vector<OrionAuraExchangeBoundary*>::const_iterator it;
+		%for (it = m_auraExchange.begin(); it != m_auraExchange.end(); ++it)
+		%{
+		%	sendBoundaryBodies(*it);
+		%	sendBoundaryBodiesRemove(*it);
+		%	recvBoundaryBodyUpdate(*it);
+		%	recvBoundaryBodyRemoveUpdate(*it);
+		%}
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[hbt]
+	\centering
+	\resizebox{\columnwidth}{!}{
+		\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2.5cm]
+		\node[initial,state,accepting,align=center] (R) {$Receive$};
+		\node[initial,state,accepting] (S) [below of=R] {$Inject$};
+		\node[state]         (q2) [below of=S, node distance=3cm, text width=2cm, align=center] {$Intersecting$ $Boundary$};
+		\node[state]         (q1) [left of=q2, node distance=4cm]  {$Host$ $Region$};
+		\node[state]         (q3) [right of=q2, node distance=4cm, text width=2cm, align=center] {$Boundary$ $Traversed$};
+		\node[state]         (q4) [below of=q2, node distance=4cm] {$Sent$};
+		\node[state]         (q5) [right of=q4] {$Destroyed$};
+		
+		
+		\path[->] 
+		(R) edge node {} (S)
+		(S) edge [bend right] node [left, text width=2cm, align=center] {No Collision} (q1)
+		(S) edge node [anchor=center, text width=1.5cm, align=left] {$OBC$} (q2)
+		(S) edge [bend left] node [right, text width=2cm, align=center] {Outside Owner} (q3)
+		%(q1) edge [loop above] node {} (q1)
+		%(q2) edge [loop left] node {} (q2)
+		(q3) edge [loop below] node [above] {$BT$} (q3)
+		(q1) edge node [left, text width=2cm, align=center] {$AC$} (q4)
+		(q2) edge node [anchor=center, text width=2cm, align=center] {$AC$} (q4)
+		(q3) edge node [anchor=center, text width=2cm, align=center] {$BT$/$AC$} (q4)
+		
+		(q1) edge [bend left] node [anchor=center, text width=1.5cm, align=center, above] {$OBC$} (q2)
+		(q2) edge [bend left] node [anchor=center, text width=2cm, align=center, above] {$OBE$} (q1)
+		(q3) edge [bend left] node [anchor=center, text width=2cm, align=center] {Owner Collision} (q2)
+		(q2) edge [bend left] node [anchor=center, above, text width=2cm, align=center] {Owner Exit} (q3)
+		
+		(q4) edge node {} (q5)
+		
+		%(S)  edge [loop above] node {a} (S)
+		%edge              node {a} (q1)
+		%(q1) edge [bend left]  node {a} (S)
+		%edge              node {b} (q2)
+		%(q2) edge [loop above] node {b} (q2)
+		%edge [bend left]  node {b} (q1)
+		;
+		\end{tikzpicture}
+	}
+\end{figure}
