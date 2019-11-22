@@ -279,18 +279,24 @@ Experiments were carried out where collision results were recorded and used to d
 
 \subsection{Control}
 
-A control experiment on a centralised system was performed, in which the scenario was repeated multiple times. The purpose of this experiment was to confirm the predicted maximum expected penetration. Fig. \ref{fig_ErrorCentral} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration is never greater than the maximum expected penetration.
+A control experiment on a centralised system was performed, in which the scenario was repeated multiple times. The purpose of this experiment was to confirm the predicted maximum expected penetration. Fig. \ref{fig_ErrorControlDistance} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration distance is never greater than the maximum expected penetration.
 
-% TODO: Add number of collisions and number of missed collisions
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=\textwidth]{errorGraphCentral}
-	\caption{Penetration of objects with increasing speed and maximum expected penetration}
-	\label{fig_ErrorCentral}
+	\includegraphics[width=\textwidth]{CentralCollisionsPenDistanceVsSpeed}
+	\caption{Penetration distance of collisions with varying relative speed. The maximum expected penetration distance (maximum penetration distance expected in 1 physics step) is marked with a dashed blue line. Note that no collision penetration is above the expected penetration distance.}
+	\label{fig_ErrorControlDistance}
 \end{figure}
 
 As relative speed increases, expected penetration increases and the erroneous penetration distance for the same aura error (aura too small or aura receive message delayed) also increases. Using Penetration time gives us a uniform error regardless of relative speed.
-Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and relative speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous.
+Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and relative speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous. Fig. \ref{fig_ErrorControlTime} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration time is never greater than the time of one physics step.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{CentralCollisionsPenVsSpeed}
+	\caption{Penetration time of collisions with varying relative speed. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. Note that no collision penetration is above the expected penetration time.}
+	\label{fig_ErrorControlTime}
+\end{figure}
 
 \subsection{Varying Factors}
 
