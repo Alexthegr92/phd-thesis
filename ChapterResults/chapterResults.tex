@@ -304,14 +304,11 @@ Experiments were carried out to demonstrate the effects of varying each aura cal
 
 In order to demonstrate the effect each factor has on collision correctness, one aura factor is varied per experiment and the other two factors are set to equal the tolerance values. For example, relative speed is varied, the latency between the servers is set to equal the latency tolerance value and the frame-time of each server is set to equal the frame-time tolerance value. The non-varied factors are set to equal the tolerance values as exceeding the tolerance value in one factor can be compensated for by having a value below the tolerance in a different factor. For example, the latency may exceed the tolerance by $5ms$, but the frame-time could be more than $5ms$ below the frame-time tolerance and the collision would still be expected to be correctly handled by AP.
 
-Relative speed is controlled such that the two objects used in the experiment collide with each other with that relative speed. Latency is controlled using the Traffic Manager tool to emulate latency for all communications between the servers. Half of the desired latency is applied to each server, resulting in the total desired latency between servers.
-Frame-time is controlled using a wait within the simulation's update loop, this is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. This means half of all frames are expected to be above the target frame-time, which may cause false-positives in the following experiments, however the variance in frame-time is low, so false-positives are expected to be rare.
+Relative speed is controlled such that the two objects used in the experiment collide with each other with that relative speed. Latency is controlled using the Traffic Control tool to emulate latency for all communications between the servers. The desired latency is applied as a fixed delay to each server, resulting in that delay being applied to all packets outgoing from that server. Frame-time is controlled using a wait within the simulation's update loop, this is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. This means half of all frames are expected to be above the target frame-time, which may cause false-positives in the following experiments, however the variance in frame-time is low, so false-positives are expected to be rare.
 
 AP can only lead to late or missed collisions when at least one object involved in the collision has just migrated (received since the last physics time-step). This is because non-migrating objects behave the same as objects in a centralised solution. In order to test this case, the same scenario as the control was used with two servers. The two spheres were given starting positions so the two would collide at a point when one of the objects is intersecting the server region boundary, thus creating the most likely situation for objects collide with each other in the first time-step after being migrated. Only objects that have just migrated are considered in the experiment results. 
 
-The collision point of the objects has a small random variation of point along the collision axis and the collision time of the two objects is also varied by $10$ physics time-steps to prevent producing exactly the same results each iteration, but the two objects will always collide while one of the objects is intersecting the server region boundary.
-
-The two servers use the same tolerances used in the performance experiments, a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$, maximum latency tolerance of $2ms$ and a maximum frame-time of $15ms$. Each experiment is repeated $10$ times.
+The two servers use the same tolerances used in the performance experiments, a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$, maximum latency tolerance of $2ms$ and a maximum frame-time of $15ms$. Each server has a random delay between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $10$ times.
 
 For each experiment the following graphs are shown:
 \begin{itemize}
@@ -399,7 +396,17 @@ The frame-time used is target frame time, in reality frame-time cannot be equal 
 \end{figure}
 
 \subsubsection{Evaluation}
+%TODO: The following needs to be formalised.
 The varying factors experiments demonstrate that the aura calculation is either correct or close to correct for all aura tolerance factors. For each varied factor below the tolerance value there are only a small number of erroneous collisions just below the tolerance value and no missed collisions. Once factors increase above the tolerance value erroneous collisions begin to occur with increasing number and magnitude.
+
+If the aura calculation factors remain within their respective tolerances, erroneous collisions will be small in magnitude and rare in number. %TODO: Summary Table: Row for each factor: Number of collisions below tolerance, Percentage of errors below tolerance, Mean error below tolerance
+
+%Which factors leads to greatest:
+%Ratio of errors - Relative Speed 90%+ >110m/s
+%Magnitude of errors (overall) - Relative Speed
+%Magnitude of errors (just errors) - Relative Speed
+%Max Error - Relative Speed
+
 
 %TODO: Talk about how errors increase with each factor
 %TODO: Check for small numbers of errors below tolerances
@@ -407,7 +414,7 @@ The varying factors experiments demonstrate that the aura calculation is either 
 
 \subsection{Varying Packet-Loss}
 
-In addition to varying each aura tolerance factor, an experiment was also carried out to determine the effects of packet-loss on the correctness of collisions between objects. In this experiment the packet-loss was varied from $0\%$ to $80\%$ in increments of $10\%$. Packet-loss is not factored into the aura calculation and therefore has no tolerance. Packet-loss is controlled using the Traffic Manager tool; packet-loss is emulated on each server for all communication received from the other server.
+In addition to varying each aura tolerance factor, an experiment was also carried out to determine the effects of packet-loss on the correctness of collisions between objects. In this experiment the packet-loss was varied from $0\%$ to $80\%$ in increments of $10\%$. Packet-loss is not factored into the aura calculation and therefore has no tolerance. Packet-loss is controlled using the Traffic Control tool; packet-loss is emulated on each server for all communication received from the other server.
 
 RakNet, the library used for network communication in this project, includes a reliability layer. This means if packets are lost and an acknowledgement message is not received, sending will be re-attempted. However, this takes time and therefore causes a delay in messages being received. Delays in messages will lead to erroneous collisions, therefore as packet-loss increases, erroneous collisions should increase in number and magnitude. If messages are delayed enough, the collision will be missed as the two objects pass each other on different servers without ever interacting with each other. 
 
