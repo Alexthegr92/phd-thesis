@@ -86,7 +86,7 @@ Experiments were performed on two layouts of servers: column layout and corner l
 
 The experiments were run for 60 seconds with an injection rate of 160 objects per second. For all experiments, a speed tolerance of $32m\mathord{\cdot}s^{-1}$ was used, which was the maximum expected speed for any object (based on maximum injection height and velocity, and gravity). The latency tolerance for these experiments was set to $2ms$ (based off measurements of latency between servers) and frame-time tolerance was set to $15ms$ (based off preliminary performance results). A time of $16ms$ was used for the physics time-step. Each experiment was repeated 50 times at various times of day to account for differing performance in cloud resources at different times. For each iteration, the maximum frame time of any server was aggregated for each $5s$ period. The mean of the aggregated maximum frame times of the iterations was then calculated and plotted.
 
-Experiments were conducted using AWS G2.2xlarge servers located within the same geographical region. A G2.2xlarge instance uses a 2.60GHz Intel Xeon E5-2670 CPU with 16GB RAM and an NVIDIA GRID K520 (Kepler) GPU running Amazon Linux AMI 2017.09.
+Experiments were conducted using AWS G2.2xlarge servers located within the same geographical region. A G2.2xlarge instance uses a 2.60GHz Intel Xeon E5-2670 CPU with 16GB RAM and an NVIDIA GRID K520 (Kepler) GPU running Ubuntu 18.04 LTS.
 
 Fig. \ref{fig_PerCol} shows the performance of our system with rising server numbers from 1 to 10. The graph clearly shows that the addition of servers lowers the frame time throughout the experiment. This is increasingly noticeable later in the simulation when a greater number of objects are present. For higher server numbers the reduction in maximum frame time is less than for lower numbers, which is as expected as in the ideal case the workload per server would be $1/n$ of the total workload, where $n$ is the number of servers. 
 
@@ -259,13 +259,33 @@ Erroneous collisions fall into two categories:
 \begin{itemize}
 	\item Missed collisions, collisions that should have taken place but were not detected by the physics engine e.g. Bullet through paper problem.
 	\item Late collisions, collisions that were detected later than they should have been and result in not only different collision results, but also unstable collision response.
-\end{itemize} 
+\end{itemize}
+
+%To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in discrete steps, as a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
+
+%It is possible to detect late collisions between objects. Given the relative speed of the two objects and the physics time-step, it possible to calculate the maximum expected penetration distance. If a collision is detected and it is above this value, it means it is a late collision.
+
+%Maximum penetration for a given speed occurs when two objects travelling directly towards each other have, in the final time-step before colliding the two objects have no distance between them, but are not overlapping, so not colliding. The next physics time-step, the collision will be detected and will have the maximum penetration possible for that relative speed. Re-arranging $s=d/t$, to $d=s.t$ and substituting the physics time-step for $t$, gives us the maximum distance (penetration) for a relative speed, and we are able to plot the maximum expected penetration line.
+
+%In real-time physics, speed of calculation is favoured over accuracy of collision response, as a result of this 
+
+%, this is known as the collision response (in real-time physics, speed of calculation is favoured over accuracy of collision response). High collision penetration e.g. if two objects are moving quickly towards one another, can lead to unstable collision response, which is undesirable.
+
+%Experiments were carried out where collision results were recorded and used to detect missed and late collisions of objects. The experiment scenario used only two objects, meaning if there was a missed collision there would be no collision output. The two objects start the scenario with a specified velocity (drag and gravity are disabled), the direction being directly towards the other object and the two objects were given the same speed, which is varied throughout the experiment. Spheres were used, so rotational effects don't need to be accounted for.
+
+We will now explain how a naïve system can lead to erroneous collision behaviour and AP can lead to erroneous collision behaviour if speed, frame-time, or latency exceed the user-defined tolerances. 
+
+In a hypothetical naïve system, a system that does not use AP, objects are migrated solely based on their position and objects on a remote server are not accounted for. Two objects close to the server region boundary could be occupying the same space at the same time. If one object were to be migrated to the other server, for example if the centre of the object has traversed the region boundary, then the object would be migrated into an overlapping space as the other object on the receiving server. This penetration could be much greater than would be expected in a normal collision detection and could lead to a highly erroneous collision response.
+
+AP works by predicting the future bounding sphere of both the object projecting the aura and a potential object on the remote server. When an object collides with an aura from a remote server, the object is migrated to the owner of the aura. However, the aura projection is not instantaneous and has to account for the following three factors: the speeds of both objects; the frame-times of the two servers; and the latency between the two servers. These three factors need to be known through the duration between the aura projection being initiated and a remote object being received and collided with. As it not possible to know these three factors in advance, tolerances must be used. These three tolerances are used to determine the size of the aura with the aim to ensure a remote object is migrated before a collision happens. If the speed tolerance is exceeded, an object can penetrate deeper into the aura than the maximum penetration to ensure it is migrated in time before a collision occurs. In the case of latency, the aura would potentially arrive too late on the receiving server, meaning the migration is triggered too late. In addition to this, the migrating object's arrival will be delayed, potentially leading to a late collision. In the case of frame-time, the extra delay between the messages being processed and physics time-step could cause the collision with the aura to be detected too late and potentially lead to a late collision. Furthermore, the extra delay between the migration message being received and the object being present in the physics simulation on the receiving server could cause the collision to be detected too late.
 
 %TODO: Expand on late collisions producing different results?
 
-To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in discrete steps, as a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
+%TODO: The following paragraph should probably be in a section about why late collisions are bad and why we want to avoid them.
+To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in discrete steps. As a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
 
-It is possible to detect late collisions between objects. Given the relative speed of the two objects and the physics time-step, it possible to calculate the maximum expected penetration distance. If a collision is detected and it is above this value, it means it is a late collision.
+\subsection{Collision Error Detection}
+It is possible to detect late collisions between objects; Given the relative speed of the two objects and the physics time-step, it possible to calculate the maximum expected penetration distance. If a collision is detected and it is above this value, it means it is a late collision. In addition, if no collisions occurs, it means there is a missed collision.
 
 Maximum penetration for a given speed occurs when two objects travelling directly towards each other have, in the final time-step before colliding the two objects have no distance between them, but are not overlapping, so not colliding. The next physics time-step, the collision will be detected and will have the maximum penetration possible for that relative speed. Re-arranging $s=d/t$, to $d=s.t$ and substituting the physics time-step for $t$, gives us the maximum distance (penetration) for a relative speed, and we are able to plot the maximum expected penetration line.
 
@@ -275,133 +295,259 @@ Maximum penetration for a given speed occurs when two objects travelling directl
 
 %TODO: cite that deep penetration is bad
 
-Experiments were carried out where collision results were recorded and used to detect missed and late collisions of objects. The experiment scenario used only two objects, meaning if there was a missed collision there would be no collision output. The two objects start the scenario with a specified velocity (drag and gravity are disabled), the direction being directly towards the other object and the two objects were given the same speed, which is varied throughout the experiment. Spheres were used, so rotational effects don't need to be accounted for.
+In all the following experiments collisions were recorded, for each collision, the following data is contained: Relative Speed, the speed of the two colliding objects relative to each other; Penetration, the distance the two objects overlapped when the collision was detected. Note that PhysX reports penetration of collisions as negative values and can report collisions before the two objects are intersecting, which is recorded as a positive penetration. In all experiments, the penetration is negated for simplicity. The relative speed and penetration can be used to determine if the collision was a late collision. In all the following experiment scenarios only two objects are used, meaning if there was a missed collision there would be no collision output and multiple collisions from the same pair of objects can be ignored. The two objects start the scenario with a specified velocity (drag and gravity are disabled), the direction being directly towards the other object and the two objects were given the same speed and a random variation of between $0$ and $-1m\mathord{\cdot}s^{-1}$ to prevent identical results between iterations. Spheres were used, so rotational effects, such as rotational velocity, do not need to be accounted for. Thrashing between two objects on different servers is an unsolved problem in AP; thrashing occurrences can be detected by counting the number of migrations that occur before the first collision is detected, as only two objects are involved in each experiment, the number of migrations before a collision should only be one, otherwise thrashing has occurred. For the purposes of these experiments, collisions involving thrashing will be excluded, regardless of the correctness of the collision.
 
-\subsection{Control}
+%TODO: Some justifcation for exluding thrashing?
 
-A control experiment on a centralised system was performed, in which the scenario was repeated multiple times. The purpose of this experiment was to confirm the predicted maximum expected penetration. Fig. \ref{fig_ErrorControlDistance} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration distance is never greater than the maximum expected penetration.
+\subsection{Control Experiment}
+A control experiment on a centralised system (single server, single simulation) was performed, in which the scenario was repeated multiple times. The speed of each object is increased from $1$ to $64m\mathord{\cdot}s^{-1}$ in steps of $1m\mathord{\cdot}s^{-1}$. The experiment was repeated $50$ times, for a total of $3150$ collisions. The graphs display the speed without the random variation. The purpose of this experiment was to confirm the predicted maximum expected penetration in a centralised simulation. Fig. \ref{fig_ErrorControlDistance} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration distance is never greater than the maximum expected penetration. Note that PhysX can report collisions before objects intersect, leading to the negative penetration distances shown.
+
+As speed increases, expected penetration increases. Using penetration time gives us a uniform maximum expected value regardless of speed.
+Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous. Fig. \ref{fig_ErrorControlTime} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration time is never greater than the time of one physics step, regardless of the relative speed of objects.
 
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\textwidth]{CentralCollisionsPenDistanceVsSpeed}
-	\caption{Penetration distance of collisions with varying relative speed. The maximum expected penetration distance (maximum penetration distance expected in 1 physics step) is marked with a dashed blue line. Note that no collision penetration is above the expected penetration distance.}
+	\caption{Penetration distance of collisions with varying speed. The maximum expected penetration distance of 1 physics step is marked with a dashed blue line.}
 	\label{fig_ErrorControlDistance}
 \end{figure}
-
-As relative speed increases, expected penetration increases and the erroneous penetration distance for the same aura error (aura too small or aura receive message delayed) also increases. Using Penetration time gives us a uniform error regardless of relative speed.
-Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and relative speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous. Fig. \ref{fig_ErrorControlTime} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration time is never greater than the time of one physics step.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{CentralCollisionsPenVsSpeed}
-	\caption{Penetration time of collisions with varying relative speed. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. Note that no collision penetration is above the expected penetration time.}
+	\caption{Penetration time of collisions with varying speed. The maximum expected penetration time of 1 physics step is marked with a dashed blue line.}
 	\label{fig_ErrorControlTime}
 \end{figure}
 
+%TODO: Outline: We've demonstrated a benchmark with which to compare distributed results with
+
+Using the above method to detect late collisions, we will now perform experiments on a distributed configuration of a simulation. Experiments were carried out for both variations in all three aura tolerance factors and packet-loss. Experiments were conducted using AWS G2.2xlarge servers located within the same geographical region. A G2.2xlarge instance uses a 2.60GHz Intel Xeon E5-2670 CPU with 16GB RAM and an NVIDIA GRID K520 (Kepler) GPU running Ubuntu 18.04 LTS.
+
 \subsection{Varying Factors}
+Experiments were carried out to demonstrate the effects of varying each aura calculation factor on the correctness of collisions between objects. The purpose of these experiments is to demonstrate that collisions in AP are always correct, i.e. there are no late or missed collisions, if the three factors that determine aura size remain within respective tolerances and correctness is no longer guaranteed if the tolerances are exceeded. In addition, if the aura calculation is correct, we expect to see late collisions begin to occur as soon as tolerances are exceeded. If errors do not occur as soon as the tolerances are exceeded, this is evidence that the aura radius is too large. Large auras can lead to reduced performance in AP, therefore auras that are only as large as needed to be, for the given tolerance, are desirable to maximise performance.
 
-Experiments were carried out to demonstrate the effects of varying each aura calculation factor on the correctness of collisions between objects. There are three factors that are used to determine aura size: Relative Speed; Latency; and Frame-Time. The purpose of these experiments is to demonstrate that collisions in AP are always correct if the respective values remain within their tolerances and correctness is no longer guaranteed if the tolerances are exceeded. 
+In this experiment two servers were used with one sphere being created on each server. The two spheres were given starting positions so the two would collide at a point when one of the spheres is intersecting the server region boundary, thus creating the most likely situation for spheres collide with each other in the first time-step after being migrated; this is necessary as AP can only lead to late or missed collisions when at least one sphere involved in the collision has just migrated (received since the last physics time-step). This is because non-migrating spheres behave the same as spheres in a centralised solution, therefore only collisions that involve a sphere that has just migrated are considered in the experiment results.
 
-In order to demonstrate the effect each factor has on collision correctness, one aura factor is varied per experiment and the other two factors are set to equal the tolerance values. For example, relative speed is varied, the latency between the servers is set to equal the latency tolerance value and the frame-time of each server is set to equal the frame-time tolerance value. The non-varied factors are set to equal the tolerance values as exceeding the tolerance value in one factor can be compensated for by having a value below the tolerance in a different factor. For example, the latency may exceed the tolerance by $5ms$, but the frame-time could be more than $5ms$ below the frame-time tolerance and the collision would still be expected to be correctly handled by AP.
+There are three factors that are used to determine aura size: speed; latency; and frame-time. In order to demonstrate the effect each factor has on collision correctness, one aura factor is varied per experiment and the other two factors are set to equal the tolerance values. For example, speed is varied, the latency between the servers is set to equal the latency tolerance value and the frame-time of each server is set to equal the frame-time tolerance value. The non-varied factors are set to equal the tolerance values as exceeding the tolerance value in one factor can be compensated for by having a value below the tolerance in a different factor. For example, the latency may exceed the tolerance by $5ms$, but the frame-time could be more than $5ms$ below the frame-time tolerance and the collision would still be expected to be correctly handled by AP.
 
-Relative speed is controlled such that the two objects used in the experiment collide with each other with that relative speed. Latency is controlled using the Traffic Control tool to emulate latency for all communications between the servers. The desired latency is applied as a fixed delay to each server, resulting in that delay being applied to all packets outgoing from that server. Frame-time is controlled using a wait within the simulation's update loop, this is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. This means half of all frames are expected to be above the target frame-time, which may cause false-positives in the following experiments, however the variance in frame-time is low, so false-positives are expected to be rare.
+Speed is controlled such that the two objects used in the experiment collide with each other with that desired speed. Latency is controlled using the Traffic Control tool to emulate latency for all communications between the servers. The desired latency is applied as a fixed delay to each server, resulting in that delay being applied to all packets outgoing from that server. Frame-time is controlled using a wait within the simulation's update loop, this is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. This means half of all frames are expected to be above the target frame-time, which may cause false-positives in the following experiments, however the variance in frame-time is low, so false-positives are expected to be rare. 
 
-AP can only lead to late or missed collisions when at least one object involved in the collision has just migrated (received since the last physics time-step). This is because non-migrating objects behave the same as objects in a centralised solution. In order to test this case, the same scenario as the control was used with two servers. The two spheres were given starting positions so the two would collide at a point when one of the objects is intersecting the server region boundary, thus creating the most likely situation for objects collide with each other in the first time-step after being migrated. Only objects that have just migrated are considered in the experiment results. 
+%The two servers use the same tolerances used in the performance experiments, a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$, maximum latency tolerance of $2ms$ and a maximum frame-time of $15ms$. Each server has a random delay between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $10$ times.
 
-The two servers use the same tolerances used in the performance experiments, a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$, maximum latency tolerance of $2ms$ and a maximum frame-time of $15ms$. Each server has a random delay between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $10$ times.
+\subsubsection{Experiment parameters and output}
+The two servers use the following tolerances unless otherwise stated: a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$; maximum latency tolerance of $2ms$; and a maximum frame-time tolerance of $15ms$. Each server has a random delay before starting between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $50$ times. An experiment was carried out for each aura tolerance, for each experiment, three tolerances values were chosen. The mean and $+/-2$ standard deviations of penetration time were plotted against each tolerance factor for each of the three tolerance values chosen.
 
-For each experiment the following graphs are shown:
-\begin{itemize}
-	\item Collisions, plotting as points with their penetration time against the factor that is being varied along with the maximum expected penetration time and factor tolerance. This shows all the collisions that occurs and illustrates the range of penetration times that the collisions fall within as the factor is varied. %TODO: Mean penetration time
-	\item Mean and Max errors against the varied factor. This includes both the mean error of all collisions, where correct collisions have an error of $0$ and the mean error of just the erroneous collisions. This illustrates how the magnitude of errors change as the factor is varied.
-	\item Ratio of outliers to correct collisions and ratio of misses to total collisions against the varied factor. This illustrates how the number of errors and misses changes as the factor is varied.
-\end{itemize}
+%For each experiment the following graphs are shown:
+%\begin{itemize}
+%	\item Collisions, plotting as points with their penetration time against the factor that is being varied along with the maximum expected penetration time and factor tolerance. This shows all the collisions that occurs and illustrates the range of penetration times that the collisions fall within as the factor is varied. %TODO: Mean penetration time
+%	\item Mean and Max errors against the varied factor. This includes both the mean error of all collisions, where correct collisions have an error of $0$ and the mean error of just the erroneous collisions. This illustrates how the magnitude of errors change as the factor is varied.
+%	\item Ratio of outliers to correct collisions and ratio of misses to total collisions against the varied factor. This illustrates how the number of errors and misses changes as the factor is varied.
+%\end{itemize}
 
 %TODO: Also mention very small tolerance for detecting errors, so collisions very close to the line aren't counted as errors. Have to account for floating-point errors throughout the results process.
 
-\subsubsection{Varying Relative Speed}
+\subsubsection{Varying Speed}
 
-In this experiment the relative speed of the two objects being varied from $2m\mathord{\cdot}s^{-1}$ to double tolerance, $128m\mathord{\cdot}s^{-1}$ in increments of $2m\mathord{\cdot}s^{-1}$ and repeated $10$ times.
+In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times.
 
 \begin{figure}
-	\centering
-	\includegraphics[width=\textwidth]{CollisionsPenVsSpeed}
-	\caption{Penetration time of objects with varying relative speed. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as relative speed increases beyond the tolerance.}
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsSpeedLow}
+		\caption{$16m\mathord{\cdot}s^{-1}$}
+		\label{fig_CollisionsPenVsSpeedLow}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsSpeedMid}
+		\caption{$32m\mathord{\cdot}s^{-1}$}
+		\label{fig_CollisionsPenVsSpeedMid}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsSpeedHigh}
+		\caption{$48m\mathord{\cdot}s^{-1}$}
+		\label{fig_CollisionsPenVsSpeedHigh}
+	\end{subfigure}
+	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying speed. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The speed tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsSpeed}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{MeanMaxErrorVsSpeed}
-\caption{The mean and max of collision errors with varying relative speed}
-\label{fig_MeanMaxErrorVsSpeed}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{RatiosVsSpeed}
-\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying relative speed}
-\label{fig_RatiosVsSpeed}
-\end{figure}
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=\textwidth]{CollisionsPenVsSpeed}
+%	\caption{Penetration time of objects with varying relative speed. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as relative speed increases beyond the tolerance.}
+%	\label{fig_CollisionsPenVsSpeed}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{MeanMaxErrorVsSpeed}
+%\caption{The mean and max of collision errors with varying relative speed}
+%\label{fig_MeanMaxErrorVsSpeed}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{RatiosVsSpeed}
+%\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying relative speed}
+%\label{fig_RatiosVsSpeed}
+%\end{figure}
 
 \subsubsection{Varying Latency}
 
-In this experiment the latency between the two servers was varied from $0ms$ to $40ms$ ($20*latency tolerance$) in increments of $1ms$. A high maximum factor of 20 was chosen as error increases slowly relative to the tolerance value. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
+In this experiment the latency between the two servers was varied from $0ms$ to double the following tolerances: $2ms$; $8ms$ and $16ms$ in increments of $0.05ms$, $0.25ms$ and $1ms$ respectively. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
 
 \begin{figure}
-\centering
-\includegraphics[width=\textwidth]{CollisionsPenVsLatency}
-\caption{Penetration time of objects with varying latency. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The latency tolerance is marked in a dashed green line. The number and magnitude of errors increases as latency increases beyond the tolerance.}
-\label{fig_CollisionsPenVsLatency}
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsLatencyLow}
+		\caption{$2ms$}
+		\label{fig_CollisionsPenVsLatencyLow}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsLatencyMid}
+		\caption{$8ms$}
+		\label{fig_CollisionsPenVsLatencyMid}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsLatencyHigh}
+		\caption{$16ms$}
+		\label{fig_CollisionsPenVsLatencyHigh}
+	\end{subfigure}
+	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying latency. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The latency tolerance is marked in a dashed green line.}
+	\label{fig_CollisionsPenVsLatency}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{MeanMaxErrorVsLatency}
-\caption{The mean and max of collision errors with varying latency}
-\label{fig_MeanMaxErrorVsLatency}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{RatiosVsLatency}
-\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying latency}
-\label{fig_RatiosVsLatency}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{CollisionsPenVsLatency}
+%\caption{Penetration time of objects with varying latency. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The latency tolerance is marked in a dashed green line. The number and magnitude of errors increases as latency increases beyond the tolerance.}
+%\label{fig_CollisionsPenVsLatency}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{MeanMaxErrorVsLatency}
+%\caption{The mean and max of collision errors with varying latency}
+%\label{fig_MeanMaxErrorVsLatency}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{RatiosVsLatency}
+%\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying latency}
+%\label{fig_RatiosVsLatency}
+%\end{figure}
 
 \subsubsection{Varying Frame-Time}
 
-In this experiment the frame-time was varied from $0ms$ to $30ms$ (double the frame-time tolerance) in increments of $1ms$.
-The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$
+In this experiment the frame-time was varied from $0ms$ to double the frame-time tolerance for the following frame-times: $8.33ms$ $(120Hz)$; $15ms$ $(66.67Hz)$ and $33.33ms$ $(30Hz)$. Increments of $1ms$, $1ms$ and $2ms$ were used respectively. The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$.
 
 \begin{figure}
-\centering
-\includegraphics[width=\textwidth]{CollisionsPenVsFrameTime}
-\caption{Penetration time of objects with varying frame-time. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as target frame-time increases beyond the tolerance.}
-\label{fig_CollisionsPenVsFrameTime}
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsFrameTimeLow}
+		\caption{$8.33ms$}
+		\label{fig_CollisionsPenVsFrameTimeLow}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsFrameTimeMid}
+		\caption{$15ms$}
+		\label{fig_CollisionsPenVsFrameTimeMid}
+	\end{subfigure}
+	\hfill %%
+	\begin{subfigure}[t]{0.325\columnwidth}
+		\includegraphics[width=\linewidth]{MeanPenVsFrameTimeHigh}
+		\caption{$33.33ms$}
+		\label{fig_CollisionsPenVsFrameTimeHigh}
+	\end{subfigure}
+	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying frame-time. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The frame-time tolerance is marked in a dashed green line.}
+	\label{fig_CollisionsPenVsFrameTime}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{MeanMaxErrorVsFrameTime}
-\caption{The mean and max of collision errors with varying frame-time}
-\label{fig_MeanMaxErrorVsFrameTime}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{CollisionsPenVsFrameTime}
+%\caption{Penetration time of objects with varying frame-time. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The speed tolerance is marked in a dashed green line. The number and magnitude of errors increases as target frame-time increases beyond the tolerance.}
+%\label{fig_CollisionsPenVsFrameTime}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{MeanMaxErrorVsFrameTime}
+%\caption{The mean and max of collision errors with varying frame-time}
+%\label{fig_MeanMaxErrorVsFrameTime}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{RatiosVsFrameTime}
+%\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying frame-time}
+%\label{fig_RatiosVsFrameTime}
+%\end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{RatiosVsFrameTime}
-\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying frame-time}
-\label{fig_RatiosVsFrameTime}
-\end{figure}
+\begin{table}
+	\centering
+	\begin{tabular}{llrrrr}
+		\toprule
+		\multicolumn{1}{l}{Factor} & \multicolumn{1}{l}{Tolerance} & \multicolumn{1}{l}{N} & \multicolumn{1}{l}{Late \%} & \multicolumn{1}{l}{Miss \%} & \multicolumn{1}{l}{Thrashing}  \\ 
+		\hline
+		Speed      & 16m/s     & 800  & 1     & 0.13       &    0             \\
+		Speed      & 32m/s     & 1600 & 0.688 & 0.0422     &    0             \\
+		Speed      & 48m/s     & 2372  & 0.632& 0          &    28            \\
+		Latency    & 2ms       & 1920  & 10.7 & 0          &    7             \\
+		Latency    & 8ms       & 1520  & 0    & 0          &    30            \\
+		Latency    & 16ms      & 797  & 2.50  & 0          &    53            \\
+		Frame-Time & 8.33ms    & 450  & 0     & 0          &    0             \\
+		Frame-Time & 15ms      & 800  & 1.88  & 0          &    0             \\
+		Frame-Time & 33.33ms   & 251  & 0     & 0          &    523           \\
+		\bottomrule
+	\end{tabular}
+	\caption{Below Tolerance}
+	\label{tab_BelowTolerance}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{llrrrr}
+		\toprule
+		\multicolumn{1}{l}{Factor} & \multicolumn{1}{l}{Tolerance} & \multicolumn{1}{l}{N} & \multicolumn{1}{l}{Late \%} & \multicolumn{1}{l}{Miss \%} & \multicolumn{1}{l}{Thrashing}  \\ 
+		\hline
+		Speed      & 16m/s     & 800  &   49.9  & 0           & 0               \\
+		Speed      & 32m/s     & 1589  &  48.6  & 0           & 11              \\
+		Speed      & 48m/s     & 2233  &  45.10 & 1.12        & 167             \\
+		Latency    & 2ms       & 1880  &  13.99 & 0           & 0               \\
+		Latency    & 8ms       & 1377  &  0.15  & 0           & 121             \\
+		Latency    & 16ms      & 574  &   12.20 & 0           & 226             \\
+		Frame-Time & 8.33ms    & 400  &   9.50  & 0           & 0               \\
+		Frame-Time & 15ms      & 750  &   58.13 & 0           & 0               \\
+		Frame-Time & 33.33ms   & 106  &   1.89  & 0           & 693             \\
+		\bottomrule
+	\end{tabular}
+	\caption{Above Tolerance}
+	\label{tab_AboveTolerance}
+\end{table}
 
 \subsubsection{Evaluation}
+As the speed increases, the mean penetration time increases, with the exception of 0 speed, the standard deviation remains constant, below the tolerance line, once above the tolerance line, the stand deviation increases relative to below the tolerance line, but appears to remain constant. Note that the mean error increases in discrete steps (with some small variation), this is due to the discrete physics time-steps. Object speed is application specific and objects needs to to be travelling directly towards the centre of each other and one of the objects has to be travelling above the tolerance speed, in order for errors to occur.
+
+As latency increases standard deviation remains constant below the tolerance value. With only a small number of exceptions (in $2ms$ experiment), the mean $+2$ standard deviations does not exceed the maximum expected penetration when below the latency tolerance. Above the latency tolerance value, the standard deviation increases for the $16ms$ tolerance experiment, but remains constant for the first two latency experiments. In addition, the first two experiments do not show a clear increase in mean penetration, this is due to the aura calculation's discrete nature and as $15ms$ has been used for the frame-time tolerance, small increases in latency of $2$ and $8ms$ will not show the increase in error to the next discrete step. However, in the final experiment using $16ms$, the relationship of increasing penetration as latency increases is demonstrated.
+
+Outside of cloud-server to cloud-server communication latency is prone to ``jitter'', meaning tolerances are likely to be sometime exceeded, however, ``jitter'' is for short durations and would need to take place at the same time as an object migration. However, cloud-server to cloud-server communication has negligible ``jitter'' \cite{ThousandEyesCloudPerf2018}. If collision correctness is required even in cases of ``jitter'', the latency tolerance would need to be higher than the peaks in latency. 
+
+For the first two frame-time experiments ($8.33ms$ and $15ms$ tolerance values), as frame-time increases, the mean penetration time increases and standard deviation also increases. Standard deviation increases as the delay between frame-time update and physics update can always vary between 0 and the frame-time, meaning even in high frame-time situations, the delay between frame-time update and physics update can be 0. Exceeding the frame-time tolerance very quickly leads to high max error, this is due to the delay in messages being exchanged being created by the long frame-times on both servers (this is reflected in the aura calculation by the frame-time tolerance being multiplied by 2). However, as the target frame-time increases over the tolerance, variation in error increases and max errors become less likely. For the final frame-time experiment, ($33.33ms$ tolerance value), thrashing occurs the majority of the time both above (as demonstrated in \ref{tab_BelowTolerance} and \ref{tab_AboveTolerance}) and below the tolerance, due to this the results shown in \ref{fig_CollisionsPenVsFrameTimeHigh} have a very small sample size and thus will not accurately represent the relationship between frame-time and penetration.
+
+The varying factors experiments demonstrate that the aura calculation is correct for all aura tolerance factors. For each varied factor, for all three tolerance values chosen, below the tolerance value, the mean + two standard deviations lies under the maximum penetration time expected on a centralised simulation, with only a small number of exceptions discussed above. These experiments also demonstrate the relationship between increasing the tolerance values and amount of thrashing expected to occur. There are no missed collisions, with the exception of the speed experiments, which have significantly fewer than $1\%$ misses below the tolerance and $1.12\%$ misses above the tolerance. Once factors increase above their respective tolerance values, late collisions begin to occur and the more the factors are exceeded, the number and magnitude of errors increase. This demonstrates the correctness of the aura calculation in AP.
+%Therefore, we have shown that if the aura calculation factors remain within their respective tolerances, erroneous collisions will be small in magnitude and rare in number. %TODO: Summary Table: Row for each factor: Number of collisions below tolerance, Percentage of errors below tolerance, Mean error below tolerance
+
 %TODO: The following needs to be formalised.
-The varying factors experiments demonstrate that the aura calculation is either correct or close to correct for all aura tolerance factors. For each varied factor below the tolerance value there are only a small number of erroneous collisions just below the tolerance value and no missed collisions. Once factors increase above the tolerance value erroneous collisions begin to occur with increasing number and magnitude.
 
-If the aura calculation factors remain within their respective tolerances, erroneous collisions will be small in magnitude and rare in number. %TODO: Summary Table: Row for each factor: Number of collisions below tolerance, Percentage of errors below tolerance, Mean error below tolerance
+%The varying factors experiments demonstrate that the aura calculation is either correct or close to correct for all aura tolerance factors. For each varied factor below the tolerance value there are only a small number of erroneous collisions just below the tolerance value and no missed collisions. Once factors increase above the tolerance value erroneous collisions begin to occur with increasing number and magnitude.
 
-%Which factors leads to greatest:
+%If the aura calculation factors remain within their respective tolerances, erroneous collisions will be small in magnitude and rare in number. %TODO: Summary Table: Row for each factor: Number of collisions below tolerance, Percentage of errors below tolerance, Mean error below tolerance
+
+%Which factors lead to greatest:
 %Ratio of errors - Relative Speed 90%+ >110m/s
 %Magnitude of errors (overall) - Relative Speed
 %Magnitude of errors (just errors) - Relative Speed
@@ -414,35 +560,56 @@ If the aura calculation factors remain within their respective tolerances, erron
 
 \subsection{Varying Packet-Loss}
 
-In addition to varying each aura tolerance factor, an experiment was also carried out to determine the effects of packet-loss on the correctness of collisions between objects. In this experiment the packet-loss was varied from $0\%$ to $80\%$ in increments of $10\%$. Packet-loss is not factored into the aura calculation and therefore has no tolerance. Packet-loss is controlled using the Traffic Control tool; packet-loss is emulated on each server for all communication received from the other server.
+In addition to varying each aura tolerance factor, an experiment was carried out to determine the effects of packet-loss on the correctness of collisions between objects. In this experiment the packet-loss was varied from $0\%$ to $20\%$ in increments of $1\%$. The aura calculation does not account for packet-loss and and therefore there is no tolerance. Packet-loss is controlled using the Traffic Control tool; it is simulated on each server for all communication received from the other server.
 
-RakNet, the library used for network communication in this project, includes a reliability layer. This means if packets are lost and an acknowledgement message is not received, sending will be re-attempted. However, this takes time and therefore causes a delay in messages being received. Delays in messages will lead to erroneous collisions, therefore as packet-loss increases, erroneous collisions should increase in number and magnitude. If messages are delayed enough, the collision will be missed as the two objects pass each other on different servers without ever interacting with each other. 
+RakNet, the library used for network communication in this project, includes a reliability layer, which uses best effort. This means if packets are lost and an acknowledgement message is not received, sending will be re-attempted, but message delivery cannot be guaranteed. However, this takes time and therefore causes a delay in messages being received. Delays in messages will lead to erroneous collisions, therefore as packet-loss increases, erroneous collisions should increase in number and magnitude. If messages are delayed enough, the collision will be missed as the two objects pass each other on different servers without ever interacting with each other. 
 
-%TODO: Check if aura updates are ordered, mention that here.
-%RakNet's reliability layer uses best effort, meaning messages are not guaranteed to be received, which means some messages may never be received resulting in 
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{CollisionsPenVsLoss}
-\caption{Penetration time of objects with varying packet-loss. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The number and magnitude of errors increases as packet-loss increases beyond $10\%$.}
-\label{fig_CollisionsPenVsLoss}
-\end{figure}
+\subsubsection{Experiment parameters and output}
+The two servers use the following tolerances: a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$; maximum latency tolerance of $2ms$; and a maximum frame-time tolerance of $15ms$. Each server has a random delay before starting between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $50$ times. The mean and $+/-2$ standard deviations of penetration time were plotted against each tolerance factor for each of the three tolerance values chosen. In addition, the ratio of errors to correct Collisions and misses to total collisions were plotted against packet-loss.
 
 \begin{figure}
-\centering
-\includegraphics[width=\textwidth]{MeanMaxErrorVsLoss}
-\caption{The mean and max of collision errors with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the magnitude of errors sharply increases until above $60\%$ where all collisions are missed so there is no error.}
-\label{fig_MeanMaxErrorVsLoss}
+	\includegraphics[width=\textwidth]{MeanPenVsLoss}
+	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying packet-loss. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line.}
+	%\caption{Penetration time of objects with varying packet-loss. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The number and magnitude of errors increases as packet-loss increases beyond $10\%$.}
+	\label{fig_CollisionsPenVsLoss}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{RatiosVsLoss}
+	\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying packet loss.} %As packet-loss increases from $10\%$ to $20\%$ the ratio of erroneous collisions to correct collisions sharply increases as does misses to total collisions. Above $60\%$ packet-loss, all collisions are missed.}
+	\label{fig_RatiosVsLoss}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{RatiosVsLoss}
-\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the ratio of erroneous collisions to correct collisions sharply increases as does misses to total collisions. Above $60\%$ packet-loss, all collisions are missed.}
-\label{fig_RatiosVsLoss}
-\end{figure}
+%In addition to varying each aura tolerance factor, an experiment was also carried out to determine the effects of packet-loss on the correctness of collisions between objects. In this experiment the packet-loss was varied from $0\%$ to $80\%$ in increments of $10\%$. Packet-loss is not factored into the aura calculation and therefore has no tolerance. Packet-loss is controlled using the Traffic Control tool; packet-loss is emulated on each server for all communication received from the other server.
+%
+%RakNet, the library used for network communication in this project, includes a reliability layer. This means if packets are lost and an acknowledgement message is not received, sending will be re-attempted. However, this takes time and therefore causes a delay in messages being received. Delays in messages will lead to erroneous collisions, therefore as packet-loss increases, erroneous collisions should increase in number and magnitude. If messages are delayed enough, the collision will be missed as the two objects pass each other on different servers without ever interacting with each other. 
+%
+%%TODO: Check if aura updates are ordered, mention that here.
+%%RakNet's reliability layer uses best effort, meaning messages are not guaranteed to be received, which means some messages may never be received resulting in 
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{CollisionsPenVsLoss}
+%\caption{Penetration time of objects with varying packet-loss. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The number and magnitude of errors increases as packet-loss increases beyond $10\%$.}
+%\label{fig_CollisionsPenVsLoss}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{MeanMaxErrorVsLoss}
+%\caption{The mean and max of collision errors with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the magnitude of errors sharply increases until above $60\%$ where all collisions are missed so there is no error.}
+%\label{fig_MeanMaxErrorVsLoss}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=\textwidth]{RatiosVsLoss}
+%\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying packet loss. As packet-loss increases from $10\%$ to $20\%$ the ratio of erroneous collisions to correct collisions sharply increases as does misses to total collisions. Above $60\%$ packet-loss, all collisions are missed.}
+%\label{fig_RatiosVsLoss}
+%\end{figure}
 
 \subsubsection{Evaluation}
+As packet-loss increases, late and erroneous collisions increase and late collisions increase in magnitude. This is due to messages being delayed as packets are lost and need to be re-sent by RakNet's reliability layer. Missed collisions begin to occur as soon as packet-loss exceeds $1\%$, but increase at a lower rate relative to late collisions. (Note, late collisions begin to occur from $0\%$, this is expected as all factors are set to be equal to their tolerances). These results demonstrate that AP is able to prevent $50\%$ of late collisions even in cases of packet-loss as high as (15\%) and prevent all missed collisions with up to $1\%$ packet-loss, which is much greater than would be expected in practice (0.01\%) \cite{ThousandEyesCloudPerf2018}.
 
 \section{Communication Correctness Experiments}
 %Will look for missing/duplicate objects auras. Dangling auras
