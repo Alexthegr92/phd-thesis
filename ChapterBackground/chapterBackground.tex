@@ -60,9 +60,6 @@ In streamed gaming, each game instance resides on a single server. There is no t
 \section{Cloud Computing}
 Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
 
-\section{Scalable Non-Real Time Physics}
-Includes fluid simulations, meteorological simulations. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps.
-
 %Dale's background starts here
 \subsection{Latency Test Values}
 
@@ -87,6 +84,9 @@ For our tests, we chose a variety of popular update rates found in recent triple
 To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
 
 %Dale's background ends here
+
+\section{Scalable Non-Real Time Physics}
+Includes fluid simulations, meteorological simulations. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps.
 
 \section{Background Summary}
 In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
