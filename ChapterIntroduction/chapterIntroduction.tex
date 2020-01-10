@@ -43,11 +43,12 @@ Using the recent developments in cloud technology, we explore the possibility of
 \begin{itemize}
 	%Context
 	\item Real-time physics engines overview. Introduce the reader to the topic of physics simulations. Comparison with non-real-time physics simulations. Define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance and performance budget.
-	\item Online gaming. Wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits.
+	\item Online gaming. Wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
 	\item Physics in online gaming (lack of due to challenges)
 	%Relevant Related Work
 	\item Graph-partitioning. When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there's a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
 	\item Distributed virtual environments, old way of distributing game worlds, some similar approaches (migratory), but most settled on non-migratory and the reasons why non-migratory worked better for those and migratory is required for AP.
+	\item Cloud Computing. We discuss the wider context of cloud computing and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
 	%Applications
 	\item Scientific and Engineering simulations. Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to scaled, allowing simulations that otherwise wouldn't have been able to, run in real-time.
 	\item Containerisation of Game Engines. Game engines, generally, currently run as one single application (with the exception of  databases), including graphics, physics, AI etc. AP separates out the physics element into its own container, much like many modern systems are splitting up different aspects of systems into their own containers. This containerisation of physics, means, physics can be elastically scaled independently from other systems such as graphics.
