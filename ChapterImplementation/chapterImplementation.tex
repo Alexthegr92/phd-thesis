@@ -1,6 +1,8 @@
 \chapter{Implementation}
 This section will discuss an implementation of AP using PhysX and RakNet.
 
+%TODO: Mention and justify update rate and tick-rate are the same for these experiments for the sake of simplicity.
+
 \section{System Architecture}
 The simulation space is partitioned into regions, with each region consisting of its own instance of PhysX running on a dedicated GPU-enabled machine in the cloud. The boundary between regions is defined as a vertical plane, two-dimensionally dividing the simulation space into one region per server. The network library RakNet is used for all message passing between servers. RakNet ensures messages exhibit best effort and are received in sent order.
 
