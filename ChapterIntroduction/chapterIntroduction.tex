@@ -42,17 +42,18 @@ Using the recent developments in cloud technology, we explore the possibility of
 2. Background and Related Work:
 \begin{itemize}
 	%Context
-	\item Real-time physics engines overview. Introduce the reader to the topic of physics simulations. Comparison with non-real-time physics simulations. Define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance and performance budget.
-	\item Online gaming. Wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
-	\item Physics in online gaming (lack of due to challenges)
+	\item Real-time physics engines overview. We introduce the reader to the topic of physics simulations and we compare real-time with non-real-time physics simulations. We define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance of real-time simulations and performance budget in real-time applications.
+	\item Online gaming. We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates. 
+	\item Physics in online gaming (and the lack of, due to the challenges faced).
 	%Relevant Related Work
-	\item Graph-partitioning. When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there's a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
-	\item Distributed virtual environments, old way of distributing game worlds, some similar approaches (migratory), but most settled on non-migratory and the reasons why non-migratory worked better for those and migratory is required for AP.
-	\item Cloud Computing. We discuss the wider context of cloud computing and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
+	\item Graph-partitioning. When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there’s a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
+	\item Distributed virtual environments. We look at existing ways of distributing game worlds and previous work carried out on these approaches. These fall into two categories, migratory (approach used by AP) and non-migratory. The studies found non-migratory to be the better solution when focusing on player-player interaction and we will discuss why migratory is the better solution for physics body-physics body interaction. Important concepts such as interest management are introduced to the reader.
+	\item Distributed Real-time Physics. We will discuss previous work looking specifically at distributing real-time physics and how AP differs from these approaches.
+	\item Cloud Computing. We discuss the wider context of cloud computing, how AP is deployed on the cloud and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
 	%Applications
-	\item Scientific and Engineering simulations. Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to scaled, allowing simulations that otherwise wouldn't have been able to, run in real-time.
-	\item Containerisation of Game Engines. Game engines, generally, currently run as one single application (with the exception of  databases), including graphics, physics, AI etc. AP separates out the physics element into its own container, much like many modern systems are splitting up different aspects of systems into their own containers. This containerisation of physics, means, physics can be elastically scaled independently from other systems such as graphics.
-	\item Streamed Gaming. The main foreseeable application of AP is Streamed Gaming. Large multi-player worlds, persistent and scalable. Dedicated and elastic physics nodes. Physics is no longer limited to what can be simulated on a single machine. Co-located render nodes solves the issue of higher latencies between the render node and physics simulation. 
+	\item Scientific and Engineering simulations. Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to be scaled, enabling large or complex simulations, that otherwise wouldn't have been able, to run in real-time.
+	\item Containerisation of Game Engines. Game engines, generally, currently run as one single application, including graphics, physics, AI etc. (with the exception of databases for user data). AP separates out the physics element into its own container, much like many modern systems are splitting up different aspects of systems into their own containers, for example web applications. This containerisation of physics, means, physics can be elastically scaled independently from other systems such as graphics, along with other advantages of modularity.
+	\item Streamed Gaming. The main foreseeable application of AP is Streamed Gaming, with the use of large multiplayer worlds, that are persistent and scalable with dedicated and elastic physics nodes. Physics is no longer limited to what can be simulated on a single machine and co-located render nodes solves the issue of higher latencies between the render node and physics simulation, the main problem with the use of physics in online gaming.
 \end{itemize}
 
 3. Problem Definition:
@@ -71,12 +72,16 @@ Using the recent developments in cloud technology, we explore the possibility of
 \begin{itemize}
 	\item System Architecture. We discuss how the system is organised. How AP interacts with PhysX. How messages are exchanged between servers using RakNet and how the client communicates with the servers, enabling interaction.
 	\item Algorithms. The algorithms used by AP are defined with pseudo-code and explained.
+	% The visualiser
+	\item The Visualiser. We discuss the features and implementation of the visualiser, including server and client created replicas, static objects and interactivity. The challenges of multiple servers are explained and our solutions justified. Screenshots from demo scenes have been included.
+	%Client connects to multiple servers, objects from all servers are replicated on the visualiser. Supports server-created objects, limited to pre-defined basic objects (cuboid, sphere \& capsule) and a different material per server is used to identify owning server. Also supports arbitrary client-created objects, objects with any mesh, that the server does not need to know about until it is created on the client, the client communicates all data required to create the physical object on the server, the server then simulates the created object and the object's state (position, rotation) is then replicated on the client. Client-created static objects are also supported. The visualiser also allows for interactivity, the creation of server-created objects can be triggered from the client, as well as allowing the user to reset or change scenes that are being simulated on the server.
+	%Can discuss better ways of dealing with server-created migrating objects, the lack of functional client-created object migration, scene-serialisation, interest management, mesh deformation
 \end{itemize}
 
 5. Experiments and Results
 \begin{itemize}
 	\item Scalability Experiments. We describe and justify the design of experiments designed to address the first question of this thesis: Can scalable real-time physics simulations be achieved? AP's performance is measured with different numbers of servers in different topologies. The results of which, are analysed and discussed.
-	\item Collisions Correctness Experiments. Collisions correctness is defined and erroneous collisions are classified. We describe and justify the design of experiments designed to address the second question of this thesis: Can real-time physics simulations remain correct when scaled? The correctness of collisions are measured using different conditions and tolerances. The results of which, are analysed discussed.
+	\item Collisions Correctness Experiments. Collisions correctness is defined and erroneous collisions are classified. We describe and justify the design of experiments designed to address the second question of this thesis: Can real-time physics simulations remain correct when scaled? The correctness of collisions are measured using different conditions and tolerances. The results of which, are analysed and discussed.
 \end{itemize}
 
 6. Conclusion and Future Work
