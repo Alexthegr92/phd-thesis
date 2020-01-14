@@ -1,5 +1,7 @@
 \chapter{Background and Related Work}
-\section{Real-time Physics Engines}
+\section{Real-time Physics Engines Overview}
+%We introduce the reader to the topic of physics simulations and we compare real-time with non-real-time physics simulations. We define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance of real-time simulations and performance budget in real-time applications.
+
 %We must first understand how real-time physics engines work
 %"World" is called a scene, "Bodies" are things being simulated
 %discrete simulation steps, each step simulates a period of time
@@ -27,7 +29,39 @@
 %Image of time-slots
 %Event callbacks for collisions/triggers
 
+\section{Scalable Non-Real Time Physics}
+Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
+
 \section{Online Gaming}
+%We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
+
+\subsection{Client-Hosted}
+\subsection{P2P}
+\subsection{Server-Hosted}
+\subsection{Challenges}
+
+\subsection{Update Rate Values} \label{update-rate-test-values}
+
+%Dale's work starts here
+Two of the most important variables used in configuring networked video games are the ``tick rate'' and the ``update rate''. These two terms are often confused or used interchangeably, but for the purpose of clarity, we will use the following definitions - the tick rate controls how many times per second the the simulation processes data and produces new data, whereas the update rate controls how many times per second a server will send updates to its clients over the network (or vice versa) \cite{NetcodeBattlenonsense}. These two values could differ, and some video games may opt to send network updates at lower rate to save bandwidth, for example. However, for simplicity, the update rate is the same as the tick rate in our current implementation, as network updates are performed synchronously with physics simulation steps.
+
+The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
+
+For our tests, we chose a variety of popular update rates found in recent triple-A video games: 10Hz, 30Hz, and 60Hz. 10Hz was used by \textit{Battlefield 4} at launch, and later changed to 30Hz after a software update in response to player feedback regarding poor online experience, and so this represents a low update rate. 30Hz is used by many console games or games with large environments, and could be considered an average update rate. 60Hz is used by games that require fast response times (i.e. competitive first-person shooters) and so it represents a high update rate.
+
+To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
+%Dale's work ends here
+
+\section{Physics in Online Gaming}
+%(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
+%https://books.google.co.uk/books?hl=en&lr=&id=ujfOBQAAQBAJ&oi=fnd&pg=PA307&dq=Physics+networked+games&ots=OC5YWxmd25&sig=vcxatd9Wl0_SdxCAUZvmP6BWl7I&redir_esc=y#v=onepage&q=Physics%20networked%20games&f=false
+
+\section{Graph-Partitioning}
+%When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there’s a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
+
+\section{Distributed Virtual Environments}
+%We look at existing ways of distributing game worlds and previous work carried out on these approaches. These fall into two categories, migratory (approach used by AP) and non-migratory. The studies found non-migratory to be the better solution when focusing on player-player interaction and we will discuss why migratory is the better solution for physics body-physics body interaction. Important concepts such as interest management are introduced to the reader.
+
 Although there has been research utilising multiple servers to distribute the task of solving physics based problems (e.g., \cite{mashayekhi2018automatically}), to the best of our knowledge there is no literature describing real-time interactive physics exploiting the addition of servers to gain scalability. The closest work to our research is that carried out to seek scalability in terms of player numbers in online gaming in the field of Distributed Virtual Environments (DVEs). 
 
 There are primarily two ways in which server-side resources can provide scalability in online gaming (e.g., DVEs): (1) Migratory; (2) Non-migratory. In migratory approaches, a server will assume responsibility for handling in-simulation objects within a region. When objects traverse region boundaries into a region that is the responsibility of another server, they will be handed over to the other server. In a non-migratory approach, in-simulation objects are allocated to the responsibility of a particular server at instantiation time and stay with that server until they are deleted.
@@ -36,8 +70,7 @@ The benefit of a migratory approach is that tightly coupled objects (interacting
 
 Migratory and non-migratory approaches are now described in greater detail.
 
-\section{Distributed Virtual Environments}
- In the migratory approach, a single game world exists, but is divided into geographical regions. Each region is maintained by a separate server (e.g. \cite{AnOverlappingArchitecture, ScalabilityIssues, LoadBalancingForDistributedVR, ALoadBalancingAlgorithm, SpatialOS}). The main drawback of this approach is the complexity of handling interactions between objects in different regions/servers while maintaining consistency \cite{P2PForMMOs}. A technique to minimise these issues is to use overlapping regions between spatial partitions. Servers share state information about objects in the overlapping region (examples include 'zoning' as described in \cite{AnOverlappingArchitecture} or 'sub-regions' as described in \cite{ScalabilityIssues}). Examples of games using this technology include \cite{Vanishin30:online} and \cite{WorldsAd48:online}, which use the SpatialOS platform \cite{SpatialOS}. However, the techniques used by SpatialOS are not described in any literature. Their demonstration video exhibits unnatural object "jitter", which is possibly a result of network latency. 
+In the migratory approach, a single game world exists, but is divided into geographical regions. Each region is maintained by a separate server (e.g. \cite{AnOverlappingArchitecture, ScalabilityIssues, LoadBalancingForDistributedVR, ALoadBalancingAlgorithm, SpatialOS}). The main drawback of this approach is the complexity of handling interactions between objects in different regions/servers while maintaining consistency \cite{P2PForMMOs}. A technique to minimise these issues is to use overlapping regions between spatial partitions. Servers share state information about objects in the overlapping region (examples include 'zoning' as described in \cite{AnOverlappingArchitecture} or 'sub-regions' as described in \cite{ScalabilityIssues}). Examples of games using this technology include \cite{Vanishin30:online} and \cite{WorldsAd48:online}, which use the SpatialOS platform \cite{SpatialOS}. %However, the techniques used by SpatialOS are not described in any literature. Their demonstration video exhibits unnatural object "jitter", which is possibly a result of network latency. 
  
 In the non-migratory approach, the game world is not divided into geographical regions and players are split between servers in one of two ways: (1) Several instances of the game world run with complete independence from one another (known as shards e.g.\cite{WOW}) and players have no interaction across shards \cite{P2PForMMOs}; (2) Players are distributed amongst servers by some other non-geographical method and interactions with players on other servers requiring servers to share messages \cite{LoadBalancingforMMOs}.
 
@@ -48,45 +81,113 @@ In the case of architectures not using shards, Interest Management is required t
 
 Despite DVE being a popular area of research, the literature is restricted to modelling player interaction across servers and balancing their support on different servers. Clearly, the interaction patterns of players are significantly less demanding in terms of timeliness than that of interacting physical objects.
 
+
+% Some introduction to interest management?
+\subsection{Interest Management}
+The technique presented in this paper, Aura Projection, makes use of the aura concept from Interest Management. Interest Management is a term used to describe any method of restricting message dissemination between objects within a virtual space, with the aim of reducing the network overhead when large numbers of participants or players are connected to a virtual world \cite{Morgan2005}.
+
+Interest Management can be broadly classified into two categories: Regions and Auras \cite{Morgan2005, storey2004determining}.
+\subsubsection{Regions}
+``In the region based approach the virtual world is commonly, but not always, divided into well defined uniform sized regions that are static in nature (i.e. their boundaries are defined at virtual world creation time)."\cite{storey2004determining}
+\subsubsection{Auras}
+``In the aura based approach each object is associated to an aura that defines an area of the virtual world over which an object may exert influence. Ideally, an object may potentially communicate their actions to only objects that fall within their influence."\cite{storey2004determining}\\
+
+Interest Management is relevant to our work as it enables the minimisation of network overhead in distributed virtual environments. It is important to note that objects within a virtual space are only affected by other objects in their region and neighbouring regions or objects within their area of influence. Aura Projection uses the concept of auras to minimise message passing between servers while still allowing time-space consistency to be maintained.
+
+In addition to reducing the network traffic between servers, interest management can also be utilised to reduce the required network traffic between client and servers. In terms of physics being simulated on server(s), clients will be most concerned with objects within close proximity to them and less concerned with objects beyond the range in which can be physically interacted with. In addition, clients will be more concerned with objects in their field of view than objects that can't currently be seen. An example of an interest management technique using distance and field of view is \cite{Bezerra2008}. \cite{Bezerra2008} proposes the A3 algorithm, an interest management technique for distributed simulations aiming to significantly reduce the necessary bandwidth required in a distributed game server. A3 uses a combination of a circular area of interest and field of view combined with a relevance gradient.
+
+Through the use of client interest management it would be possible to simulate a persistent world far larger than could be simulated or rendered on a single machine, yet allow a player unrestricted, seamless access to the entire world.
+
+
+\section{Distributed Real-Time Physics}
+%We will discuss previous work looking specifically at distributing real-time physics and how AP differs from these approaches.
+
+In this section we discuss research into existing methods for distributing real-time physics across a cluster of nodes in a network.
+
+Distributed Real-Time Physics has attracted a lot of commercial attention recently, for many applications including games, multi-agent AI, city planning and VR \cite{SpatialOS}. The commercial interest in Distributed Real-Time Physics is likely due to the recent availability of cloud computing, which allows for scaling of the required computing resources on-demand. On-demand scaling provides a more cost-efficient approach as opposed to the traditional use of private server clusters \cite{On-DemandResourceMMOGs}.
+
+Using Distributed Real-Time Physics removes the limitation of the computational power of a single machine (such as the limitation in server-centric architectures \cite{ScalabilityforVirtualWorlds} and avoids the complexity and communication overhead of P2P architectures such as that described in \cite{VON}) thus allowing for greater scalability in both the number of users \cite{ScalabilityIssues} and complexity and size of the Virtual Environment. 
+
+Distributed Real-Time Physics techniques fall into two main categories, those that use multiple instances of the same physics engine (as used by AP) and those that distribute particular aspects of the computational workload of a physics engine. We will now discuss both techniques.
+
+Examples of previous attempts at scaling real-time physics engine through the use of distributing a particular aspect of the workload include \cite{Morgan2005} and \cite{allard2006distributed}.
+
+\cite{Morgan2005} describes a way of scaling physics simulations through deploying a real-time collision detection service across a cluster of servers. The simulation is spatially divided into regions and each node is responsible for all narrow phase collision detections within one region. A dedicated node is responsible for determining which region an object is contained within and informing the region's node that the object should be considered for collision detection.
+Objects intersecting region boundaries are discussed in \cite{Morgan2005}; objects intersecting a region boundary result in the same collision pair appearing in more than one region, these are dealt with by ensuring only one node will enact the narrow phase collision test for the pair. The process of identifying duplicate pairs is not described. The result of the response on a single object from collisions on two nodes is also not described.
+%Two server can get different results from same collisions. What happens if there are a cluster of objects on the boundary?
+% Surely this must require considerable message exchange and introduce latency as all messages must be exchanged before progressing to the next step? Result of responses added together?
+
+% Peer to Peer networked games???
+
+In \cite{allard2006distributed}, a modular approach to physics simulations is described. A dedicated module is used for each type of object (rigid body, spring-mass, fluid etc.). Interactions are then handled between object modules through interaction modules. Each module can be run on a node in a cluster, allowing the simulation to be scaled.
+
+Techniques that distribute a particular aspect of the workload have not gained any commercial attention recently, unlike techniques that use multiple instances of the same physics engine, which we will now discuss.
+
+Examples of Distributed Real-Time Physics that use multiple instances of a physics engine include SpatialOS \cite{SpatialOS} and Aether Engine \cite{AetherEngine}. SpatialOS spatially partitions the world into regions, each region is a separate instance of a physics engine. Where regions meet, there is an overlapping area, allowing objects hosted on different servers to interact. However, the specifics of the techniques used by SpatialOS and Aether Engine are not described in any literature. The demonstration video of SpatialOS exhibits unnatural object "jitter", which is possibly a result of network latency.
+
+This thesis proposes an alternative technique to SpatialOS and Aether Engine, AP, that does not use overlapping regions and reduces the effect of communication delays between servers regarding states of physical entities. If the instability problems e.g. "jitter" can be solved, this would enable the use of Distributed Real-Time Physics for games and simulations that rely on stable and consistent physics.
+
+%In addition increases the available size and complexity of the world. Game developers design around the limitations of current technology; increasing the achievable size and complexity of virtual environments reduces this as a limitation.
+%Why spatially partitioned and not other MSDVEs?
+
+% We don't know how SpatialOS works, so maybe best to reword it as this paper describes an approach to achieve the same goal of having a distributed simulation with physics
+
+
+
+%\subsection{Distributed Architectures}
+%The complexity of the different simulations can be separated, which has advantages from a software-engineering perspective as it allows for separation of concerns. For example, one implementation of a fluid simulation could easily be replaced with another implementation without any changes to the master simulation being required.
+
+
+
+%\subsection{Our Contribution}
+%Prior research has not addressed the problem of tightly-coupled interactions of entities between servers. 
+%Tightly-coupled interactions present a challenge for MSDVEs as server communication is subject to delays and bandwidth restrictions.
+%Physical interactions, such as those required by real-time physics, near region boundaries are an example of a tightly-coupled interaction between servers. For example, Real-time physics engines typically run with a step time of 16\si{ms}, a 100\si{ms} network delay would mean a 6 step discrepancy in the states of objects, which can lead to extremes in the simulations resulting in instabilities. In addition, we will demonstrate why a naive approach to real-time physics for Spatially Partitioned MSDVEs will also inevitably lead to time-space consistency issues. 
+%
+%Techniques to deal with physical interactions at the boundary that work within the delay and bandwidth constraints of network communication, are therefore necessary in order to enable real-time physics to behave in a realistic manner across a Spatially Partitioned MSDVE.
+%We propose a new technique, Aura Projection, to address this challenge.
+
+
+
+
+
+
+\section{Cloud Computing}
+%We discuss the wider context of cloud computing, how AP is deployed on the cloud and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
+
+Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
+
+%Dale's background starts here
+\subsection{Latency Values}
+
+In order to assess the correctness of the system when subjected to varying amounts of network latency, we wanted to use latency values representative of real world configurations. A recent study performed a series of exhaustive performance tests across all major cloud service providers, including our chosen provider, Amazon Web Services (AWS) \cite{ThousandEyesCloudPerf2019}. Some of the benchmark categories included: (1) global end-user network latency - measured between a variety of global ``end-user'' machines across the Internet and different geographical cloud availability zones (AZs), (2) inter-region latency - measured between cloud hosts located in different geographical regions within the same cloud provider, and (3) inter-AZ latency - measured between cloud hosts located within the same geographical region and within the same cloud provider.
+
+The optimal deployment of a real-time distributed physics system would utilise multiple cloud hosts located within the same AZ (inter-AZ) for the lowest latencies, although we also decided to consider performance in a typical inter-region configuration as a ``worst-case'' scenario (e.g. insufficient availability in one region). We chose latency test values of 1ms, 24ms, and 75ms, as according to the study, these values represent the average inter-AZ latency, highest average Europe inter-region latency, and highest average United States inter-region latency within AWS respectively.
+
+\subsection{Packet Loss Values}
+
+Packet loss is the condition where data travelling across a computer network fails to arrive at the destination. The most common reasons for packet loss include network congestion, errors in transmission (e.g. in wireless networks), or hardware failure. According to a study carried out in 2018, packet loss within cloud providers' networks is negligible (measured at 0.01\% on average), even when traversing inter-region backbone links, or when traffic is being sent between different cloud providers, indicating a very high level of reliability \cite{ThousandEyesCloudPerf2018}. It was found that packet loss only became significant when measured between certain geographical ``end-user'' locations outside of the cloud providers' networks, and even so, was rarely measured above 1\%, with the worst case being traffic travelling in or out of China, irrespective of the cloud provider (6.3\%).
+
+We therefore do not expect a typical cloud deployment of a distributed physics system to be subject to significant packet loss, although we decided to test our system's behaviour up to what would be considered an extreme level packet loss to see what kind of effect the loss of data would have on the accuracy of the simulation. A maximum value of 20\% was used to ensure that any kind of trend would be visible.
+
+%Dale's background ends here
+
+\section{Scientific and Engineering Simulations}
+%Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to be scaled, enabling large or complex simulations, that otherwise wouldn’t have been able, to run in real-time.
+
+\section{Containerisation of Game Engines}
+%Game engines, generally, currently run as one single application, including graphics, physics, AI etc. (with the exception of databases for user data). AP separates out the physics element into its own container, much like many modern systems are splitting up different aspects of systems into their own containers, for example web applications. This containerisation of physics, means, physics can be elastically scaled independently from other systems such as graphics, along with other advantages of modularity.
+
 \section{Streamed Gaming}
+%The main foreseeable application of AP is Streamed Gaming, with the use of large multiplayer worlds, that are persistent and scalable with dedicated and elastic physics nodes. Physics is no longer limited to what can be simulated on a single machine and co-located render nodes solves the issue of higher latencies between the render node and physics simulation, the main problem with the use of physics in online gaming.
+
 Streamed Gaming (also know as Gaming as a Service) consists of cloud servers streaming to a player's device with player input being returned to the cloud server. The player's device acts as a thin client. The main benefit is that a player does not require expensive, powerful hardware, and games can be played on any operating system (e.g. Android, Linux and Mac). However, these benefits come at the cost of bandwidth and latency requirements \cite{iCloudAccess}.
 
 Streamed Gaming services currently available include \cite{NVidiaGameStream} and \cite{PSNOW}. NVIDIA GRID technology is targeted specifically at Streamed Gaming \cite{NVIDIACloud}.
 
 A drawback to streamed gaming is the requirement for a significantly more powerful machine at the server-side than what would be required if the game was played solely at the client side. This is because the server not only has to run the game, but has to process the video and audio stream into a suitable format for streaming. In addition, real-time player interaction requires low latency and high bandwidth resulting in networking infrastructure more expensive than would be expected for regular streaming services. 
 
-In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines.
-
-\section{Cloud Computing}
-Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
-
-%Dale's background starts here
-\subsection{Latency Test Values}
-
-In order to assess the correctness of the system when subjected to varying amounts of network latency, we wanted to use latency values representative of real world configurations. A recent study performed a series of exhaustive performance tests across all major cloud service providers, including our chosen provider, Amazon Web Services (AWS) \cite{ThousandEyesCloudPerf2019}. Some of the benchmark categories included: (1) global end-user network latency - measured between a variety of global ``end-user'' machines across the Internet and different geographical cloud availability zones (AZs), (2) inter-region latency - measured between cloud hosts located in different geographical regions within the same cloud provider, and (3) inter-AZ latency - measured between cloud hosts located within the same geographical region and within the same cloud provider.
-
-The optimal deployment of a real-time distributed physics system would utilise multiple cloud hosts located within the same AZ (inter-AZ) for the lowest latencies, although we also decided to consider performance in a typical inter-region configuration as a ``worst-case'' scenario (e.g. insufficient availability in one region). We chose latency test values of 1ms, 24ms, and 75ms, as according to the study, these values represent the average inter-AZ latency, highest average Europe inter-region latency, and highest average United States inter-region latency within AWS respectively.
-
-\subsection{Packet Loss Test Values}
-
-Packet loss is the condition where data travelling across a computer network fails to arrive at the destination. The most common reasons for packet loss include network congestion, errors in transmission (e.g. in wireless networks), or hardware failure. According to a study carried out in 2018, packet loss within cloud providers' networks is negligible (measured at 0.01\% on average), even when traversing inter-region backbone links, or when traffic is being sent between different cloud providers, indicating a very high level of reliability \cite{ThousandEyesCloudPerf2018}. It was found that packet loss only became significant when measured between certain geographical ``end-user'' locations outside of the cloud providers' networks, and even so, was rarely measured above 1\%, with the worst case being traffic travelling in or out of China, irrespective of the cloud provider (6.3\%).
-
-We therefore do not expect a typical cloud deployment of a distributed physics system to be subject to significant packet loss, although we decided to test our system's behaviour up to what would be considered an extreme level packet loss to see what kind of effect the loss of data would have on the accuracy of the simulation. A maximum value of 20\% was used to ensure that any kind of trend would be visible.
-
-\subsection{Update Rate Test Values} \label{update-rate-test-values}
-
-Two of the most important variables used in configuring networked video games are the ``tick rate'' and the ``update rate''. These two terms are often confused or used interchangeably, but for the purpose of clarity, we will use the following definitions - the tick rate controls how many times per second the the simulation processes data and produces new data, whereas the update rate controls how many times per second a server will send updates to its clients over the network (or vice versa) \cite{NetcodeBattlenonsense}. These two values could differ, and some video games may opt to send network updates at lower rate to save bandwidth, for example. However, for simplicity, the update rate is the same as the tick rate in our current implementation, as network updates are performed synchronously with physics simulation steps.
-
-The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
-
-For our tests, we chose a variety of popular update rates found in recent triple-A video games: 10Hz, 30Hz, and 60Hz. 10Hz was used by \textit{Battlefield 4} at launch, and later changed to 30Hz after a software update in response to player feedback regarding poor online experience, and so this represents a low update rate. 30Hz is used by many console games or games with large environments, and could be considered an average update rate. 60Hz is used by games that require fast response times (i.e. competitive first-person shooters) and so it represents a high update rate.
-
-To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
-
-%Dale's background ends here
-
-\section{Scalable Non-Real Time Physics}
-Includes fluid simulations, meteorological simulations. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps.
+In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines. The research presented in this paper is intended for use in streamed gaming. The technique presented in this paper allows multiple servers to simulate physics, meaning physics simulations are no longer limited in size and complexity to that which can be achieved by only a single server. This allows for game streaming servers to make use of multiple physics servers, the numbers of which can grow and shrink as needed by the game and greatly increase the limit on size and complexity of physics within the game.
 
 \section{Background Summary}
 In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
