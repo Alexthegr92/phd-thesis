@@ -290,3 +290,47 @@ $BNU$ is called once per network connection between servers. It is responsible f
 		\end{tikzpicture}
 	}
 \end{figure}
+
+\section{The Visualiser}
+%We discuss the features and implementation of the visualiser, including server and client created replicas, static objects and interactivity. The challenges of multiple servers are explained and our solutions justified. Screenshots from demo scenes have been included.
+We will now discuss the details of the visualiser, both the features and implementation details.
+
+The visualiser is built using Unreal Engine and the RakNet plugin.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{Blocks}
+	\caption{Stacks of objects near and on a corner boundary. This demo scene consists of two large stacks of server created cuboid replicas near the corner of four server regions. Either side of each server boundary are random injection volumes, in which server created objects are injected into the simulation, randomly, within a volume. Each colour represents a different owning server.}
+	\label{fig_screen1}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{screenshot}
+	\caption{A static object on a corner boundary surrounded by objects being simulated on different servers. This demo scene includes a client-created static object (a building), which is being simulated on all servers. Numerous server created objects surround the building, which have been triggered from within the client.}
+	\label{fig_screen2}
+\end{figure}
+
+The visualiser connects to multiple servers, objects are simulated on server and those objects from all servers are replicated on the visualiser. These are referred to as replica objects. The visualiser uses RakNet's ReplicaManager, which is responsible for: the creation of replicas objects on both the server and client; communicating the state of objects from the server to the client, in order for the replica objects to be replicated; and the deletion of replica objects. Replica objects are replicated on the visualiser by the server sending the state (position, rotation) to the client, the replica representation on the client is then updated with the newly received state from the server. The object state is optimised to reduce processing and network overhead, by only sending updates of the position and rotation to the client, when they change on the server.
+
+Replica objects can be created in one of two ways. Either by the server or by the client. We will now discuss the implementation details of each type of replica creation.
+
+The visualiser supports server-created replica objects, which are limited to pre-defined basic objects (cuboid, sphere \& capsule). A different render material per server is used to identify the owning server of each object. These server objects have pre-defined representations on the client. The server sends an identifier for the type of object, which is then created on the client. Using pre-defined objects means the whole geometry of the object does not need to be transferred to the client. This is useful for when there are a large number of identical objects as it avoids having to re-send the same geometry for each object. However, this method requires the client to know of these pre-defined types.
+
+The visualiser also supports arbitrary client-created objects. Entire scenes can be created in the client at edit-time, in the Unreal Engine Editor, and then re-created on servers when connections to the servers are made. This works for objects with any mesh, i.e. the server does not need to know about the geometry of an object when the server is built and deployed, the client communicates all data required to create the physical object on the server. All objects marked for replication on the servers are sent to all servers, if an object exists outside of a server's region, the creation is skipped, meaning the replica object is created only on the server containing the replica object. The central point of the object is used, avoiding conflicts between servers when an object exists that intersects a server region boundary.
+
+In addition to replica objects, static object can also be created by the client. As these objects are static, there is no need for their states to be replicated as they do not change over the course of the simulation. Static object work simply by the client sending the geometry, position and rotation details of the static object to all servers and the servers then re-create the static object. These static objects then remain unchanged throughout the simulation, requiring no updates to the state to be communicated to the client. Static objects are created on all servers, this could be optimised so only static objects within a server's region are created, however, AP can lead to clusters of objects being simulated outside of their host server's region, which may interact with static objects that do not exist on their host server. In addition, the cost of simulating static objects tends to be very low, as they do not require any updates as they are not dynamic. In the future, region boundaries may change; a server may become responsible for a static object previously residing in another server's region, which would then have to be communicated when the region boundaries changed, by all servers simulating all static objects, this avoids the need for extra communication when server boundaries change. With these trade-offs in mind, we have elected to create all static objects on all servers, when static objects are used in a simulation.
+
+The visualiser also allows for interactivity, the creation of server-created objects can be triggered from the client, as well as allowing the user to reset or change scenes that are being simulated on the server.
+
+Currently when server created objects are migrated between servers, the client destroys the replica and a new replica is created. This is because the simulated object is destroyed on one server and re-created on another. A better way of dealing with this, would be a procedure for handing over server-ownership of replicas, removing the need for replicas to be destroyed and recreated. This would reduce processing overhead on the client, as there is no longer a need to destroy and recreate objects when server migrations take place.
+
+%Currently there is a lack of functional client-created object migration. 
+
+The visualiser can create rigid-bodies, including rigid-bodies with multiple shapes, however, joints (constraints) are not yet supported. Joints have the added complexity of needing references to multiple objects. In order for these to be replicated on the server, these references would need to be kept and correctly refer to the corresponding objects after being transferred to the servers. This could be achieved through the joint replica containing unique references to the object replicas, which are identical on both client and server.
+
+An alternative approach to client-created simulations/scene is PhysX's scene-serialisation. PhysX has support for serialisation of a physics scene. This could be used to transfer the whole physical state of a scene to servers. This includes relationships between objects, i.e, joints and objects with multiple shapes.
+
+Currently all objects from all servers are replicated on the client with equal priority and frequency. Interest management would be required for large complex scenes as the visualiser can only replicate and render a limited number of objects.
+
+Mesh deformation would require significant network traffic, especially if done over a period of time, rather than in a single instance. Position and rotation can be replicated with small amounts of data, however, geometry data can be arbitrarily large. In mesh deformations 100s or even 1000s of vertex points can change, all of which would have to be serialised and transmitted over the network in order to be correctly replicated on the client.
