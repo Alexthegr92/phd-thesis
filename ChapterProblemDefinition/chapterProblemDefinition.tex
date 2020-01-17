@@ -1,5 +1,14 @@
 \chapter{Problem Definition and Proposed Solution}
-Our approach allows servers to assume responsibility for objects within a real-time simulation without hindering the fidelity of such a simulation. In order to maintain scalability, the extra processing overhead must be less than that gained by distributing the simulation workload. 
+%	\item Naive approach. How would a naive approach behave and what problems occur.
+%\item Considered Solutions. We consider a number of solutions to scalable real-time physics.
+%\item Proposed Solution. We look at in more detail how our solution works and justification for its choice.
+%\item Aura Calculation. A detailed look at the important aspect of AP, the aura calculation.
+%\item Sub-optimal object hosting. We look at one the predicted challenge with AP, sub-optimal object hosting and discuss a solution which can be addressed in future work.
+%\item Thrashing. A further predicted challenge with AP, this consists of two types of thrashing, two and three object thrashing, three object thrashing has been solved in this implementation of AP and we discuss solutions to two object thrashing.
+%\item Islands. A solved challenge with AP, here we discuss our solution.
+%\item Corner Case. AP has been discussed in terms of a single boundary between two servers up to this point, but in order for a general solution to be achieved, AP must be able to support boundaries between three or more servers, such as at corners.
+
+In this chapter we will discuss the requirements of a solution to scalabe real-time physics and the challenges of distributing a real-time physics engine, using a naive approach as an example. We will consider some potential solutions to distributing real-time physics and their trade-offs. Finally, we will describe our proposed solution (AP) along with high-level overviews of the challenges with this approach and our implemented and proposed solutions.
 	
 \definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
 \definecolor{dtsfsf}{rgb}{0.8274509803921568,0.1843137254901961,0.1843137254901961}
@@ -133,6 +142,16 @@ Our approach allows servers to assume responsibility for objects within a real-t
 	\caption{Aura Projection Scenarios}
 	\label{AuraProj}
 \end{figure}
+
+\section{Solution Requirements}
+
+In order for any solution to scalable real-time physics to maintain scalability, the extra processing overhead must be less than that gained by distributing the simulation workload. In addition, when scaling, a solution must maintain the correctness and fidelity of the simulation, i.e. errors should not be introduced.
+
+%TODO: Describe physics errors in detail here
+%Late collisions
+%Things not colliding (i.e. overlapping when they shouldn't be)
+%Objects not being simulated
+%Objects jittering
 
 \section{Naive Approach}\label{CrossBoundaryInteraction}
 To provide a comparison and to demonstrate our contribution to the field, a naive approach is described first. The naive approach is used to highlight the challenges faced when solving this problem.
