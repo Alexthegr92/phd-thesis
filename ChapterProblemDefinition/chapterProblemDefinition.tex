@@ -9,7 +9,61 @@
 %\item Corner Case. AP has been discussed in terms of a single boundary between two servers up to this point, but in order for a general solution to be achieved, AP must be able to support boundaries between three or more servers, such as at corners.
 
 In this chapter we will discuss the requirements of a solution to scalabe real-time physics and the challenges of distributing a real-time physics engine, using a naive approach as an example. We will consider some potential solutions to distributing real-time physics and their trade-offs. Finally, we will describe our proposed solution (AP) along with high-level overviews of the challenges with this approach and our implemented and proposed solutions.
-	
+
+\section{Solution Requirements}
+
+In order for any solution to scalable real-time physics to maintain scalability, the extra processing overhead must be less than that gained by distributing the simulation workload. In addition, when scaling, a solution must maintain the correctness and fidelity of the simulation, i.e. errors should not be introduced.
+
+%TODO: Discuss scalability
+In general terms, distributing work between servers have the following overheads: the logic of determining messages to be sent; the processing overheard of sending the messages themselves; and the logic of handling received messages from other servers.
+%For example, in a 
+To achieve the greatest scalability, a solution must minimise overheard while maximising useful work done by each server.
+
+%TODO: Describe physics errors in detail here
+%Late collisions
+%Things not colliding (i.e. overlapping when they shouldn't be)
+%Objects not being simulated
+%Objects jittering
+
+We will now discuss the types of errors that can occur in distributed real-time physics simulations. Types of errors include time-space inconsistencies, in which two different objects occupy the same space at the same time, but on different servers.
+Two objects occupying the same space at the same time can also lead to late collisions and missed collisions. 
+Diverging results and object state conflict, in which the same object has different states on different servers, which can be caused by collision response results differing on different servers.
+The same object having different states on different servers can lead to objects 'jittering', as the object state is conflicting between the two servers. 
+Objects not being simulated (missed updates), can occur when objects are migrating between servers. Objects being duplicated and objects being lost. 
+Examples and consequences of the above errors will now be described.
+
+\subsection{Diverging results}
+PhysX is non-deterministic, as a result of this, repeating the same scenario with the exact same starting parameters does not necessarily lead to the exact same end state.
+If collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results.
+The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat level plane, the cubes land is such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing, in a second iteration, the stack of cubes may collapse.
+
+\subsection{Object state conflict}
+
+\subsection{Time-space inconsistencies}
+%Objects may be unaware of objects on a different server
+
+\subsection{Late collisions}\label{lateCollisions}
+Due to latency between servers, object positions on different servers will never be agreed upon exactly by both servers. The delay between servers means positions of objects on another server is always out of date. Even in solution where a single object is simulated on both servers, due to the non-determinism of real-time physics engines, the states will diverge. 
+
+As a result of the out of date positions of objects, two objects hosted on different servers that would collide with each other, are unaware of the latest position of the other object. This means collisions between objects that are hosted on different servers will always occur late and at different positions on different servers, leading to differing results on different servers.
+
+If objects that are going to collide are migrated between servers, they need to be migrated and arrive before a collision occurs. If the arrival takes place late, this may result in the two objects overlapping significantly (occupying the same space at the same time). The consequence of these late collisions are unstable collision response. To understand how late collisions lead to unstable collision response, we must first understand how in real-time collision detection works. In real-time physics engines, objects move in discrete steps, as a result of this, when two objects collide, they overlap each other i.e. penetrate. The collision is resolved by calculating the forces resulting from the collision and moving the objects so they no longer overlap (in PhysX if penetration is high, the latter may be done over several physics time-steps). If the penetration is high, such as in the case of a late collision response or if two objects are moving at high speed towards one another, the collision response can no longer guarantee stable results.
+
+%In real-time physics, speed of calculation is favoured over accuracy of collision response, as a result of this 
+
+\subsection{Missed collisions}
+In cases of higher latency, or small or fast moving objects, collisions may be missed entirely. Similar to the bullet-through paper problem (where the discrete updating of objects means the two objects that should collide, never overlap and trigger a collision response), high latency can mean the state of a remote object can mean the state of the object is received so late that the local object that would collide, misses the object entirely. The larger or slower moving the objects involved are, the less likely this situation is to occur. Alternatively, if objects are migrated between servers, the object must arrive before the collisions happens, as discussed in \ref{lateCollisions}, if a delay in migration is severe enough, the collisions will be missed entirely.
+
+\subsection{Missed updates}
+Objects not being simulated (missed updates), can occur when objects are migrating between servers. When objects are being migrated between servers, they don't exist on any server, as a result the position and rotation of the object won't be updated. This would appear as though the object has frozen, how noticeable this would be to an observer would depend on the situation and the number of updates missed. For example, if the object is stationary or moving slowly, several time steps could be missed without be noticeable. Alternatively, in a scenario where a large object was in free-fall, very few update steps could be missed before an observer would notice that the object is not being simulated correctly.
+
+\subsection{Object duplication or loss}
+Any solution in which objects are migrated between servers is vulnerable to object duplication or loss. Networks do not provide absolute guarantee of message deliveries or order of message arrival. As a consequence of this, network messages for the migration of objects may be lost, in which case the object could be lost, if one server send a migrate message for an object and deletes the object from its simulation. Alternatively, a server may not delete the migrating object until an acknowledgement is received from the server it is migrating the object to, in which case, the acknowledgement may be lost and the object kept on the sending server, despite a duplicate of the object now existing on the receiving server. %Messages may arrive out of order
+
+%Maximum penetration for a given speed occurs when two objects travelling directly towards each other have, in the final time-step before colliding the two objects have no distance between them, but are not overlapping, so not colliding. The next physics time-step, the collision will be detected and will have the maximum penetration possible for that relative speed. Re-arranging $s=d/t$, to $d=s.t$ and substituting the physics time-step for $t$, gives us the maximum distance (penetration) for a relative speed, and we are able to plot the maximum expected penetration line.
+
+%, this is known as the collision response (in real-time physics, speed of calculation is favoured over accuracy of collision response). High collision penetration e.g. if two objects are moving quickly towards one another, can lead to unstable collision response, which is undesirable.
+
 \definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
 \definecolor{dtsfsf}{rgb}{0.8274509803921568,0.1843137254901961,0.1843137254901961}
 \definecolor{sexdts}{rgb}{0.1803921568627451,0.49019607843137253,0.19607843137254902}
@@ -142,16 +196,6 @@ In this chapter we will discuss the requirements of a solution to scalabe real-t
 	\caption{Aura Projection Scenarios}
 	\label{AuraProj}
 \end{figure}
-
-\section{Solution Requirements}
-
-In order for any solution to scalable real-time physics to maintain scalability, the extra processing overhead must be less than that gained by distributing the simulation workload. In addition, when scaling, a solution must maintain the correctness and fidelity of the simulation, i.e. errors should not be introduced.
-
-%TODO: Describe physics errors in detail here
-%Late collisions
-%Things not colliding (i.e. overlapping when they shouldn't be)
-%Objects not being simulated
-%Objects jittering
 
 \section{Naive Approach}\label{CrossBoundaryInteraction}
 To provide a comparison and to demonstrate our contribution to the field, a naive approach is described first. The naive approach is used to highlight the challenges faced when solving this problem.
