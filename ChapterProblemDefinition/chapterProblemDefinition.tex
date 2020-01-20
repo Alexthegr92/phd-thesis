@@ -8,7 +8,7 @@
 %\item Islands. A solved challenge with AP, here we discuss our solution.
 %\item Corner Case. AP has been discussed in terms of a single boundary between two servers up to this point, but in order for a general solution to be achieved, AP must be able to support boundaries between three or more servers, such as at corners.
 
-In this chapter we will discuss the requirements of a solution to scalabe real-time physics and the challenges of distributing a real-time physics engine, using a naive approach as an example. We will consider some potential solutions to distributing real-time physics and their trade-offs. Finally, we will describe our proposed solution (AP) along with high-level overviews of the challenges with this approach and our implemented and proposed solutions.
+In this chapter we will discuss the requirements of a solution to scalable real-time physics and the challenges of distributing a real-time physics engine, using a naive approach as an example. We will consider some potential solutions to distributing real-time physics and their trade-offs. Finally, we will describe our proposed solution (AP) along with high-level overviews of the challenges with this approach and our implemented and proposed solutions.
 
 \section{Solution Requirements}
 
@@ -26,21 +26,24 @@ To achieve the greatest scalability, a solution must minimise overheard while ma
 %Objects jittering
 
 We will now discuss the types of errors that can occur in distributed real-time physics simulations. Types of errors include time-space inconsistencies, in which two different objects occupy the same space at the same time, but on different servers.
-Two objects occupying the same space at the same time can also lead to late collisions and missed collisions. 
+Two objects occupying the same space at the same time, which can also lead to late collisions and missed collisions. 
 Diverging results and object state conflict, in which the same object has different states on different servers, which can be caused by collision response results differing on different servers.
 The same object having different states on different servers can lead to objects 'jittering', as the object state is conflicting between the two servers. 
 Objects not being simulated (missed updates), can occur when objects are migrating between servers. Objects being duplicated and objects being lost. 
 Examples and consequences of the above errors will now be described.
 
-\subsection{Diverging results}
+\subsection{Time-space inconsistencies}
+%Objects being simulated on different servers may end up occupying the same space.
+%If a solution is used in which 
+%Objects may be unaware of objects on a different server
+
+\subsection{Diverging results}\label{divergingResults}
 PhysX is non-deterministic, as a result of this, repeating the same scenario with the exact same starting parameters does not necessarily lead to the exact same end state.
 If collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results.
 The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat level plane, the cubes land is such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing, in a second iteration, the stack of cubes may collapse.
 
 \subsection{Object state conflict}
-
-\subsection{Time-space inconsistencies}
-%Objects may be unaware of objects on a different server
+If a solution is used in which two servers simulate the same object (such as in an overlapping region between servers), diverging results from collisions can result in the same object can end up in different states on different servers. These conflicts in state may be small, in which case they can be resolved by either choosing the state from one server or taking the average of the two objects, however, this may appear as jitter if the differences between states is large enough. Furthermore, cases may exist when the two states have diverged significantly, such as the stack of cubes example in \ref{divergingResults}, in which case averaging of the two states cannot be used. One server's state would have to be chosen, which would appear on the other server as though the objects have `teleported' (instantaneously changed position). In addition to this, prior to the server having its object's states overwritten, those objects may have affected other objects in only that server. For example, if we continue with the stack of cubes example in \ref{divergingResults}, suppose the stack of cubes fell over on one server and one of the cubes collided with a sphere, that is only being simulated by that sever (for example, if it is outside of the overlapping region). The sphere is given a velocity as a result of the collision. If the cubes in the stack are then updated to be the same as on a remote server, essentially rewriting the history of the cubes, the end result would be a stack of cubes that is upright and sphere with a velocity from a collision that has been effectively erased from the simulation history.
 
 \subsection{Late collisions}\label{lateCollisions}
 Due to latency between servers, object positions on different servers will never be agreed upon exactly by both servers. The delay between servers means positions of objects on another server is always out of date. Even in solution where a single object is simulated on both servers, due to the non-determinism of real-time physics engines, the states will diverge. 
