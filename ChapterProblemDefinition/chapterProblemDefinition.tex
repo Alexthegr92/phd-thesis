@@ -19,12 +19,6 @@ In general terms, distributing work between servers have the following overheads
 %For example, in a 
 To achieve the greatest scalability, a solution must minimise overheard while maximising useful work done by each server.
 
-%TODO: Describe physics errors in detail here
-%Late collisions
-%Things not colliding (i.e. overlapping when they shouldn't be)
-%Objects not being simulated
-%Objects jittering
-
 We will now discuss the types of errors that can occur in distributed real-time physics simulations. Types of errors include time-space inconsistencies, in which two different objects occupy the same space at the same time, but on different servers.
 Two objects occupying the same space at the same time, which can also lead to late collisions and missed collisions. 
 Diverging results and object state conflict, in which the same object has different states on different servers, which can be caused by collision response results differing on different servers.
@@ -33,14 +27,15 @@ Objects not being simulated (missed updates), can occur when objects are migrati
 Examples and consequences of the above errors will now be described.
 
 \subsection{Time-space inconsistencies}
-%Objects being simulated on different servers may end up occupying the same space.
+Objects being simulated on different servers may end up occupying the same space and the same time, which is a physical inconsistency. This error could occur due to latency issues between servers or if a naive approach is taken to handling objects near server-region boundaries. For example, in a naive approach, object ownership may be determined by the centre of the object and no special consideration is given to objects near server-region boundaries. If two objects on different servers are overlapping the boundary at the same place, but their centres remain in their owning server's region, the two objects will have no interaction, despite occupying the same space at the same time. In a centralised version of the simulation, the two objects would collide and interact as soon as the two began to overlap with each other.
 %If a solution is used in which 
 %Objects may be unaware of objects on a different server
 
 \subsection{Diverging results}\label{divergingResults}
-PhysX is non-deterministic, as a result of this, repeating the same scenario with the exact same starting parameters does not necessarily lead to the exact same end state.
-If collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results.
-The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat level plane, the cubes land is such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing, in a second iteration, the stack of cubes may collapse.
+PhysX is non-deterministic, as a result of this, repeating the same scenario with the exact same starting parameters does not necessarily lead to the exact same end state. The order in which collisions are resolved are randomised to achieve greater stability of the simulation.
+If collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results. The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat level plane, the cubes land is such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing, in a second iteration, the stack of cubes may collapse.
+
+As a consequence of non-determinism and diverging results, it is not possible to measure correctness of a distributed simulation by comparing it with a single centralised simulation, i.e. run both solutions with the exact same starting parameters and compare the final state of the distributed simulation to the centralised simulation. A distributed solution can produce a significantly different final state compared to a centralised solution, despite handling all collisions correctly.
 
 \subsection{Object state conflict}
 If a solution is used in which two servers simulate the same object (such as in an overlapping region between servers), diverging results from collisions can result in the same object can end up in different states on different servers. These conflicts in state may be small, in which case they can be resolved by either choosing the state from one server or taking the average of the two objects, however, this may appear as jitter if the differences between states is large enough. Furthermore, cases may exist when the two states have diverged significantly, such as the stack of cubes example in \ref{divergingResults}, in which case averaging of the two states cannot be used. One server's state would have to be chosen, which would appear on the other server as though the objects have `teleported' (instantaneously changed position). In addition to this, prior to the server having its object's states overwritten, those objects may have affected other objects in only that server. For example, if we continue with the stack of cubes example in \ref{divergingResults}, suppose the stack of cubes fell over on one server and one of the cubes collided with a sphere, that is only being simulated by that sever (for example, if it is outside of the overlapping region). The sphere is given a velocity as a result of the collision. If the cubes in the stack are then updated to be the same as on a remote server, essentially rewriting the history of the cubes, the end result would be a stack of cubes that is upright and sphere with a velocity from a collision that has been effectively erased from the simulation history.
