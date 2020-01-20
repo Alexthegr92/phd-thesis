@@ -248,6 +248,12 @@ $BNU$ is called once per network connection between servers. It is responsible f
 	\end{algorithmic}
 \end{algorithm}
 
+\section{FSM}
+We will now discuss the state of an object in the context of AP, i.e. not position and rotation of an object, but the state of object as it is being treated by AP.
+
+An object has two entry states, it is either received from another server via the network or it is injected into the simulation. Immediately the object's position determines its next state. If the object is not intersecting a server boundary and is not colliding with an aura, the object moves into the Host Region state. If the object is intersecting a sever boundary, it moves into the intersecting boundary state. If the object is outside of the server's region, such as is if the object is injected into a server at position the server is not responsible for, the object changes states to the boundary traversed state.
+%TODO: Remaning states and transitions
+
 \begin{figure}[hbt]
 	\centering
 	\resizebox{\columnwidth}{!}{
