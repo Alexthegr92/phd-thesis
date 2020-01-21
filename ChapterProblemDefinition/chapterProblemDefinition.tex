@@ -260,7 +260,13 @@ Rather than every object maintaining an aura, which would add overhead to the ph
 
 Fig. \ref{sequence_diagram} demonstrates the sequence of events involved when an aura is sent, received, and collided with, resulting in an object migration.
 
-To lower inconsistencies during migration, the following user-defined tolerances are used for the aura calculations: maximum speed; maximum latency time; maximum frame-time. If velocities, latencies, or frame-time are above these tolerances, then stability is no longer guaranteed. This enables AP to deterministically indicate to the overall simulation when latency may be influencing the mutually consistent views of the servers, which in turn manifests as errors in the physics.
+To lower inconsistencies during migration, the following user-defined tolerances are used for the aura calculations: 
+\begin{itemize}
+	\item $V_{t}$ - maximum speed of simulated objects.
+	\item $T_{L}$ - maximum network latency time.
+	\item $T_{F}$ - maximum frame-time (time allowed for combined frame update and network update).
+\end{itemize}
+If velocities, latencies, or frame-time are above these tolerances, then stability is no longer guaranteed. This enables AP to deterministically indicate to the overall simulation when latency may be influencing the mutually consistent views of the servers, which in turn manifests as errors in the physics.
 
 To calculate the radius of an aura, the maximum distances travelled by objects within the delay time between simulations must first be calculated. To calculate the maximum distance an object may travel for a given time, the following formula is used: $\triangle s=v\cdot \triangle t$, where $ \triangle s$ is distance, $v$ is speed, and $ \triangle t$ is time. In this context, $ \triangle v$ is substituted with maximum speed tolerance, and $ \triangle t$ will be a multiple of the physics step time (to accommodate discrete time step calculations in the physics engine). $ \triangle t$ can be calculated using the maximum frame-time and maximum latency tolerance, discussed below.
 
