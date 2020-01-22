@@ -1,0 +1,89 @@
+%% Creator: Inkscape inkscape 0.92.4, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'Architecture.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{509.47016198bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.9717119)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{Architecture.pdf}}%
+    \put(0.69174496,0.44096223){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}RakNet\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{Architecture.pdf}}%
+    \put(0.25664336,0.717831){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}PhysX\end{tabular}}}}%
+    \put(0.75410414,0.83213402){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Replicas\end{tabular}}}}%
+    \put(0.52481477,0.84471014){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Client\\spawned object\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{Architecture.pdf}}%
+    \put(0.25888936,0.58126384){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Aura projection\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{Architecture.pdf}}%
+    \put(0.47882945,0.7534773){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Objects to spawn\end{tabular}}}}%
+    \put(0.47699292,0.69113167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Objects to replicate\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{Architecture.pdf}}%
+    \put(0.50838483,0.52901515){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Incoming\\objects / auras\end{tabular}}}}%
+    \put(0.25754101,0.49388419){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Boundary buffers\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{Architecture.pdf}}%
+    \put(0.15572859,0.45941441){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.2}\smash{\begin{tabular}[t]{l}Object migration buffer\end{tabular}}}}%
+    \put(0.13684006,0.37242707){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.2}\smash{\begin{tabular}[t]{l}Aura creation/update buffer\end{tabular}}}}%
+    \put(0.17948792,0.28543791){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{0.2}\smash{\begin{tabular}[t]{l}Aura delete buffer\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{Architecture.pdf}}%
+    \put(0.25794736,0.03183386){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}One set of buffers\\per boundary\end{tabular}}}}%
+    \put(0.51073299,0.03183386){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Aura updates to\\multiple servers\end{tabular}}}}%
+    \put(0.918645,0.03951062){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Message exchange\\with multiple\\servers in cluster\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{Architecture.pdf}}%
+    \put(0.91898061,0.5301855){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$S_{1}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{Architecture.pdf}}%
+    \put(0.91898061,0.35620717){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$S_{N}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{Architecture.pdf}}%
+    \put(0.10989888,0.66685481){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Spawn received objects,\\aura updates,\\host aura updates\end{tabular}}}}%
+    \put(0.36824617,0.65815594){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Collision event\\callbacks\end{tabular}}}}%
+    \put(0.70986094,0.71399569){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{0.2}\smash{\begin{tabular}[t]{c}Replica\\manager\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{Architecture.pdf}}%
+    \put(0.65806346,0.91293777){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$C_{1}$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%
