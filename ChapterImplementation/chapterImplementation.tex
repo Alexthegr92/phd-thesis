@@ -1,6 +1,7 @@
 \chapter{Implementation}
 In this section will discuss our implementation of AP, The following will be looked at in detail: \begin{itemize}
 	\item An overview of the system architecture: How the servers are deployed in the cloud and how they communicate with a client, along with potential deployments to be investigated in the future.
+	%TODO: Add aura implmentation?
 	\item A breakdown of the components of each server.
 	\item The algorithms used by the servers to implement AP.
 	\item The life cycle of a simulated object as a finite state machine (FSM).
@@ -11,6 +12,7 @@ In this section will discuss our implementation of AP, The following will be loo
 
 \section{System Architecture}
 %TODO: Mention we're using AWS EC2 G2 instances
+%TODO: Mention Gtest for automated tests and experiments
 The simulation space is partitioned into regions, with each region consisting of its own instance of PhysX running on a dedicated GPU-enabled machine in the cloud. The boundary between regions is defined as a vertical plane, two-dimensionally dividing the simulation space into one region per server. The network library RakNet is used for all message passing between servers. RakNet ensures messages exhibit best effort and are received in sent order.
 
 When objects project auras they are added to a send aura buffer that is sent to all servers associated to the boundary of concern. Each object has a unique identifier (ID). When an aura is received by a server, an aura is created if it does not already exist, otherwise the aura is updated using the data received. When an object is no longer projecting its aura, the ID of that object is added to the delete buffer which is then sent to all servers neighbouring the boundary.
@@ -26,10 +28,13 @@ Clients connect to all servers and are provided with a streamed visualisation of
 	\caption{Network Topology. Each server is an EC2 instance in the cloud, running our implementation of AP, which includes an instance of PhysX. The client is a local machine running the visualiser built in Unreal Engine. Servers connect to each other in order to exchange messages for aura creation/update and deletion and the migration of objects. The client receives replica updates from each server as well as sending client-created replicas and static objects, and RPCs.}
 \end{figure}
 
+%TODO: Mention how auras are implemented: Aura is a trigger volume around objects. Boundary has a trigger volume, illustrate with diagram. Justify this. Mention corner case, aura is sent to both servers, illustrate with diagram. Is this mentioned elsewhere?
+
 \subsection{Server-Region Topology}
 Server-region topologies and how they affect the communication requirements between servers will now be discussed. 
 AP allows for the simulation space to be partitioned into any topology. In terms of communication, all servers need to communicate with all of their neighbours in order to satisfy the solution to the corner case, as described in \ref{CornerCase}. We define a neighbour as any server that shares a region boundary, including at a corner. The simplest topology that can be used is a column layout, as shown in \ref{ServerColumnLayout}. In column layout, servers have at most two neighbours, this topology therefore has the fewest server connection requirements.
 
+%Fewer server connection requirements doesn't necessarily mean less network traffic.
 
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \definecolor{sim}{rgb}{0,0.2,0.5}
@@ -92,7 +97,10 @@ AP allows for the simulation space to be partitioned into any topology. In terms
 	\label{ServerCornerLayout}
 \end{figure}
 
+%TODO: 3x3 diagram. Explain that opposite corners need not communicate with each other
+
 \subsection{Individual Server Breakdown}
+%TODO: Describe diagram
 
 \begin{figure}[h]
 	\centering
@@ -417,6 +425,8 @@ We will now discuss the details of the visualiser, both the features and impleme
 
 The visualiser is built using Unreal Engine and the RakNet plugin.
 
+%TODO: Add client-created server regions feature
+
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\textwidth]{Blocks}
@@ -462,6 +472,8 @@ The visualiser also allows for interactivity, the creation of server-created obj
 The user is also able to reset or change scenes that are being simulated on the server. In the visualiser, the scene can be reset on a key press. This sends an RPC to all servers, which either resets all simulations or resets the current test scenario. As all objects are deleted on the servers, any replicas on the visualiser are deleted. Also available to the player is a menu which can be opened that allows the user to select a scene to switch to. This allows the user to change the scene in the visualiser at run-time while maintaining connections with all servers.
 
 %Currently there is a lack of functional client-created object migration. 
+
+%TODO: Client breakdown + diagram
 
 \subsection{Future work}
 Currently when server created objects are migrated between servers, the client destroys the replica and a new replica is created. This is because the simulated object is destroyed on one server and re-created on another. A better way of dealing with this, would be a procedure for handing over server-ownership of replicas, removing the need for replicas to be destroyed and recreated. This would reduce processing overhead on the client, as there is no longer a need to destroy and recreate objects when server migrations take place.
