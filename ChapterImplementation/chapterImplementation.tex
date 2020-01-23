@@ -1,19 +1,14 @@
 \chapter{Implementation}
 In this section will discuss our implementation of AP, The following will be looked at in detail: \begin{itemize}
-	\item An overview of the system architecture: How the servers are deployed in the cloud and how they communicate with a client, along with potential deployments to be investigated in the future.
-	%TODO: Add aura implmentation?
-	\item A breakdown of the components of each server.
+	\item An overview of the system architecture: How the servers are deployed in the cloud and how they communicate with a client; a breakdown of the components of each server; and potential deployments to be investigated in the future.
+	\item Aura Implementation
 	\item The algorithms used by the servers to implement AP.
 	\item The life cycle of a simulated object as a finite state machine (FSM).
 	\item The features and implementation details of the visualiser, including a breakdown of the components of a client and future work to be carried out on the visualiser.
 \end{itemize}
 
-%TODO: Mention and justify update rate and tick-rate are the same for these experiments for the sake of simplicity.
-
 \section{System Architecture}
-%TODO: Mention we're using AWS EC2 G2 instances
-%TODO: Mention Gtest for automated tests and experiments
-The simulation space is partitioned into regions, with each region consisting of its own instance of PhysX running on a dedicated GPU-enabled machine in the cloud. The boundary between regions is defined as a vertical plane, two-dimensionally dividing the simulation space into one region per server. The network library RakNet is used for all message passing between servers. RakNet ensures messages exhibit best effort and are received in sent order.
+The simulation space is partitioned into regions, with each region consisting of its own instance of PhysX running on a dedicated GPU-enabled machine in the cloud. The boundary between regions is defined as a vertical plane, two-dimensionally dividing the simulation space into one region per server. The network library RakNet is used for all message passing between servers. RakNet ensures messages exhibit best effort and are received in sent order. For the purposes of simplicity, the network tick rate (the rate at which RakNet is updated) is the same as the main update rate (the rate at which the main logic of the program is updated, such as processing user input and handling callbacks from PhysX). This removes the need for the aura calculation to account for an extra time delay between network update and main update.
 
 When objects project auras they are added to a send aura buffer that is sent to all servers associated to the boundary of concern. Each object has a unique identifier (ID). When an aura is received by a server, an aura is created if it does not already exist, otherwise the aura is updated using the data received. When an object is no longer projecting its aura, the ID of that object is added to the delete buffer which is then sent to all servers neighbouring the boundary.
 
@@ -21,14 +16,16 @@ When objects traverse region boundaries, they are added to a migration buffer wi
 
 Clients connect to all servers and are provided with a streamed visualisation of the simulation in real-time. Clients may also interact with and influence the simulation through client-created replicas and static objects, and RPCs, providing a comprehensive solution for real-time interactive physics. The client system was built using the Unreal Engine. Once a client is connected, the position and states (replicas) of all objects in the simulation are sent from each server to the client via the RakNet Replica Manager.
 
+An overview of the system architecture is illustrated in Fig. \ref{SystemOverview}.
 
-\begin{figure}[h]
+For the implementation of this project, Amazon Web Services (AWS) was selected as the cloud provider, giving access to GPU-enabled instances (G2 instances). The PhysX Samples project (a publicly available project for demonstrating the features and capabilities of PhysX) was used as a starting point for this project, as this was a relatively minimal project that uses PhysX but with some useful features for use in development of this project, such as a basic renderer and many helper methods for using PhysX. For the purposes of automated testing and for running experiments, the testing library, Gtest, was used.
+
+\begin{figure}[t]
 	\centering
 	\scalebox{1.5}{\input{Figs/OurDeploymentV2.pdf_tex}}
 	\caption{Network Topology. Each server is an EC2 instance in the cloud, running our implementation of AP, which includes an instance of PhysX. The client is a local machine running the visualiser built in Unreal Engine. Servers connect to each other in order to exchange messages for aura creation/update and deletion and the migration of objects. The client receives replica updates from each server as well as sending client-created replicas and static objects, and RPCs.}
+	\label{SystemOverview}
 \end{figure}
-
-%TODO: Mention how auras are implemented: Aura is a trigger volume around objects. Boundary has a trigger volume, illustrate with diagram. Justify this. Mention corner case, aura is sent to both servers, illustrate with diagram. Is this mentioned elsewhere?
 
 \subsection{Server-Region Topology}
 Server-region topologies and how they affect the communication requirements between servers will now be discussed. 
@@ -225,6 +222,11 @@ An example of a topology that uses 4-server corners is illustrated in Fig. \ref{
 	\scalebox{1.25}{\input{Figs/EdgeBasedRenderNodes.pdf_tex}}
 	\caption{Dedicated render nodes in edge.}
 \end{figure}
+
+\section{Aura Implementation}
+Auras are implemented through the use of trigger volumes (non-physically interacting volumes, that generate trigger collision callbacks). Two trigger volumes are used for different purposes. 
+The first is used for auras that are being received from remote servers. When an aura is received, a trigger volume, consisting of a sphere, is created at the corresponding position with a given radius. The second trigger volume used is by the server-region boundaries. Each server-region boundary has a trigger volume that extends inside the server's region, it extends the same distance as the aura radius, minus the bounding sphere of an object. This is used to determine when an object should begin having it's aura sent to neighbouring servers and avoid the need for per-object checks for proximity to the server-region boundary.
+%TODO: Boundary has a trigger volume, illustrate with diagram. Mention corner case, aura is sent to both servers, illustrate with diagram. Is this mentioned elsewhere?
 
 \section{Algorithms}
 $AC$ is called when an object collides with an aura. A recursive search is performed in order to find all objects that would lie within each object's aura, preventing thrashing as discussed in \ref{Thrashing}. Once the recursive search is complete, all objects are added to the send buffer.
