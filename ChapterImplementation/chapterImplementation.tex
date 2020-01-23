@@ -32,13 +32,15 @@ Clients connect to all servers and are provided with a streamed visualisation of
 
 \subsection{Server-Region Topology}
 Server-region topologies and how they affect the communication requirements between servers will now be discussed. 
-AP allows for the simulation space to be partitioned into any topology. In terms of communication, all servers need to communicate with all of their neighbours in order to satisfy the solution to the corner case, as described in \ref{CornerCase}. We define a neighbour as any server that shares a region boundary, including at a corner. The simplest topology that can be used is a column layout, as shown in \ref{ServerColumnLayout}. In column layout, servers have at most two neighbours, this topology therefore has the fewest server connection requirements.
+AP allows for the simulation space to be partitioned into any topology. In terms of communication, all servers need to communicate with all of their neighbours in order to satisfy the solution to the corner case, as described in \ref{CornerCase}. We define a neighbour as any server that shares a region boundary, including at a corner. 
 
-%Fewer server connection requirements doesn't necessarily mean less network traffic.
+The simplest topology that can be used is a column layout, as shown in Fig. \ref{ServerColumnLayout}. In column layout, servers have at most 2 neighbours, this topology therefore has the fewest server connection requirements. It should be noted however, that fewer server connection requirements doesn't necessarily mean less network traffic as the traffic between 2 servers is dependent on the activity of the simulation near the server boundary.
 
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \definecolor{sim}{rgb}{0,0.2,0.5}
-\begin{figure}[!t]	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.5]
+
+\begin{figure}[!t]	
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.5]
 	\clip(-2.25,0) rectangle (8.4,3.75);
 	\fill[line width=0.8pt,color=sim,fill=sim,fill opacity=0.1] (-2.25,3) -- (-2.25,0) -- (8.25,0) -- (8.25,3) -- cycle;
 	\draw (-1.5,3.5) node[anchor=center] {Server 0};
@@ -59,6 +61,8 @@ AP allows for the simulation space to be partitioned into any topology. In terms
 	\label{ServerColumnLayout}
 \end{figure}
 
+Any topology more complex than columns will result in corners being present in the topology. The simplest corner that can exist is between three servers, as shown in Fig. \ref{3ServerCornerLayout}. All three server must communicate when a corner between three servers exists, this is required for the solution to the corner case (as described in \ref{CornerCase}). For example, in  Fig. \ref{3ServerCornerLayout}, a cluster of objects being hosted by server 2 may exist across the boundary between server 0, objects on the edge of the cluster may be positioned deep into server 0's region. In addition a cluster of objects being hosted on server 1 may exist across the boundary between server 1 and server 0 with some objects in the cluster being deep into server 0's region. Without the auras from the server 0 - server 1 boundary being sent to server 2 and vice versa, the two clusters will be unaware of each other's existence. From Server 0's perspective, the two clusters may have overlapping auras, and so should be being simulated on the same server. In order to prevent this, the auras from the boundaries of all neighbours need to be exchanged.
+
 \begin{figure}[!t]
 	\begin{subfigure}{.5\textwidth}
 		\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.2]
@@ -74,7 +78,7 @@ AP allows for the simulation space to be partitioned into any topology. In terms
 		\draw [line width=2pt] (-2.5,0.5)-- (-2.3,0.5);
 		\draw (-2.1,0.5) node[anchor=west] {Region Boundary};
 		\end{tikzpicture}
-		\caption{3 Server Corner Layout}
+		\caption{3 Server Corner Topology}
 		\label{3ServerCornerLayout}
 	\end{subfigure}%
 	\begin{subfigure}{.5\textwidth}
@@ -90,14 +94,94 @@ AP allows for the simulation space to be partitioned into any topology. In terms
 		\draw [line width=2pt] (0,0)-- (0,-3);
 		\end{tikzpicture}
 		\centering
-		\caption{4 Server Corner Layout}
+		\caption{4 Server Corner Topology}
 		\label{4ServerCornerLayout}
 	\end{subfigure}
 	\caption{Corner Layouts}
 	\label{ServerCornerLayout}
 \end{figure}
 
-%TODO: 3x3 diagram. Explain that opposite corners need not communicate with each other
+An example of a topology that includes corners with no more than 3 servers neighbouring is illustrated in Fig. \ref{BrickLayout}. In this topology, the maximum number of server connections required would be 6, as server 3 has 6 neighbouring servers. It should be noted that not all servers need to communicate with each other, for example server 0 does not neighbour with servers 4 or 6, so no communication is needed.
+
+\begin{figure}[!t]	
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.875]
+		\fill[line width=0.8pt,color=sim,fill=sim,fill opacity=0.1] (-6,-9) -- (-6,0) -- (12,0) -- (12,-9) -- cycle;
+		\draw [line width=2pt] (-3,-3)-- (3,-3);
+		\draw [line width=2pt] (-3,-3)-- (-3,0);
+		\draw [line width=2pt] (-3,0)-- (3,0);
+		\draw [line width=2pt] (3,0)-- (3,-3);
+		\draw [line width=2pt] (-6,-6)-- (0,-6);
+		\draw [line width=2pt] (-6,-6)-- (-6,-3);
+		\draw [line width=2pt] (-6,-3)-- (0,-3);
+		\draw [line width=2pt] (0,-3)-- (0,-6);
+		\draw [line width=2pt] (0,-6)-- (6,-6);
+		\draw [line width=2pt] (0,-6)-- (0,-3);
+		\draw [line width=2pt] (0,-3)-- (6,-3);
+		\draw [line width=2pt] (6,-3)-- (6,-6);
+		\draw [line width=2pt] (3,-3)-- (9,-3);
+		\draw [line width=2pt] (3,-3)-- (3,0);
+		\draw [line width=2pt] (3,0)-- (9,0);
+		\draw [line width=2pt] (9,0)-- (9,-3);
+		\draw [line width=2pt] (6,-6)-- (12,-6);
+		\draw [line width=2pt] (6,-6)-- (6,-3);
+		\draw [line width=2pt] (6,-3)-- (12,-3);
+		\draw [line width=2pt] (12,-3)-- (12,-6);
+		\draw [line width=2pt] (-3,-9)-- (3,-9);
+		\draw [line width=2pt] (-3,-9)-- (-3,-6);
+		\draw [line width=2pt] (-3,-6)-- (3,-6);
+		\draw [line width=2pt] (3,-6)-- (3,-9);
+		\draw [line width=2pt] (3,-9)-- (9,-9);
+		\draw [line width=2pt] (3,-9)-- (3,-6);
+		\draw [line width=2pt] (3,-6)-- (9,-6);
+		\draw [line width=2pt] (9,-6)-- (9,-9);
+		\draw (0.0,-1.5) node[anchor=center] {Server 0};
+		\draw (6,-1.5) node[anchor=center] {Server 1};
+		\draw (-3,-4.5) node[anchor=center] {Server 2};
+		\draw (3,-4.5) node[anchor=center] {Server 3};
+		\draw (9,-4.5) node[anchor=center] {Server 4};
+		\draw (0,-7.5) node[anchor=center] {Server 5};
+		\draw (6,-7.5) node[anchor=center] {Server 6};
+	\end{tikzpicture}
+	\centering
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+	\clip(-4,0) rectangle (7,1.5);
+	\draw [line width=2pt] (-0.5,0.7)-- (-0.3,0.7);
+	\draw (-0.1,0.7) node[anchor=west] {Server-Region Boundary};
+	\end{tikzpicture}
+	\caption{An example topology using only 3-server corners}
+	\label{BrickLayout}
+\end{figure}
+
+An example of a topology that uses 4-server corners is illustrated in Fig. \ref{GridLayout}. In this topology the maximum number of server connections required would be 8, as server 4 has 8 neighbouring nodes. It should be noted that not all servers need to communicate with each other, for example server 0 does not need to communicate with servers 2 or 5 as they are not neighbouring servers.
+
+\begin{figure}[!t]
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+	\fill[line width=0.8pt,color=sim,fill=sim,fill opacity=0.1] (-3,3) -- (-3,-6) -- (6,-6) -- (6,3) -- cycle;
+	\draw [line width=2pt] (-3,0)-- (6,0);
+	\draw [line width=2pt] (0,3)-- (0,-6);
+	\draw [line width=2pt] (-3,-3)-- (6,-3);
+	\draw [line width=2pt] (3,3)-- (3,-6);
+	\draw (-1.5,1.5) node[anchor=center] {Server 0};
+	\draw (1.5,1.5) node[anchor=center] {Server 1};
+	\draw (4.5,1.5) node[anchor=center] {Server 2};
+	\draw (-1.5,-1.5) node[anchor=center] {Server 3};
+	\draw (1.5,-1.5) node[anchor=center] {Server 4};
+	\draw (4.5,-1.5) node[anchor=center] {Server 5};
+	\draw (-1.5,-4.5) node[anchor=center] {Server 6};
+	\draw (1.5,-4.5) node[anchor=center] {Server 7};
+	\draw (4.5,-4.5) node[anchor=center] {Server 8};
+	\end{tikzpicture}
+	\centering
+	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+	\clip(-4,0) rectangle (7,1.5);
+	\draw [line width=2pt] (-0.5,0.7)-- (-0.3,0.7);
+	\draw (-0.1,0.7) node[anchor=west] {Server-Region Boundary};
+	\end{tikzpicture}
+	\caption{An example topology using 4-server corners}
+	\label{GridLayout}
+\end{figure}
+
+%TODO: Talk about adaptive server boundaries in the future. Talk about assumptions that clusters do not cross width between nodes and how adaptive boundaries could lead to this
 
 \subsection{Individual Server Breakdown}
 %TODO: Describe diagram
