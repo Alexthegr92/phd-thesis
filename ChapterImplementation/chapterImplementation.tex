@@ -225,8 +225,26 @@ An example of a topology that uses 4-server corners is illustrated in Fig. \ref{
 
 \section{Aura Implementation}
 Auras are implemented through the use of trigger volumes (non-physically interacting volumes, that generate trigger collision callbacks). Two trigger volumes are used for different purposes. 
-The first is used for auras that are being received from remote servers. When an aura is received, a trigger volume, consisting of a sphere, is created at the corresponding position with a given radius. The second trigger volume used is by the server-region boundaries. Each server-region boundary has a trigger volume that extends inside the server's region, it extends the same distance as the aura radius, minus the bounding sphere of an object. This is used to determine when an object should begin having it's aura sent to neighbouring servers and avoid the need for per-object checks for proximity to the server-region boundary.
-%TODO: Boundary has a trigger volume, illustrate with diagram. Mention corner case, aura is sent to both servers, illustrate with diagram. Is this mentioned elsewhere?
+The first is used for auras that are being received from remote servers. When an aura is received, a trigger volume, consisting of a sphere, is created at the corresponding position with a given radius. The second trigger volume used is by the server-region boundaries. Each server-region boundary has a trigger volume that extends inside the server's region, it extends the same distance as the aura radius, minus the bounding sphere of an object. This is used to determine when an object should begin and stop having its aura sent to neighbouring servers and avoid the need for per-object checks for proximity to the server-region boundary. When an object collides with the aura trigger boundary, the aura begins being sent, when an object leaves the aura trigger boundary, an aura delete message is sent.
+Each server-region boundary has a trigger volume, objects may collide with multiple aura trigger boundaries, meaning auras can be sent to multiple servers, as illustrated in Fig. \ref{AuraCorner}.
+%TODO: Boundary has a trigger volume, illustrate with diagram. Is this mentioned elsewhere?
+
+When a server begins communicating an aura, a message is added to the aura creation/update buffer. This message consists of the position of the centre of the aura, the radius of the aura and a flag signifying whether or not this is a creation message or not. The contents of the buffer are then broadcast to all neighbouring servers. When creation messages are received, a new aura, a sphere trigger volume, is created at that position with the given radius.
+Whenever an object projecting an aura moves, and update message is added to the aura creation/update buffer, containing the new position and radius of the aura (aura radius is currently fixed, but may become dynamic in the future). The contents of the buffer are broadcast to all neighbouring servers. When the message is received, the positions of the auras are updated. 
+%TODO: Check what happens if the aura does not currently exist.
+If an object leaves aura trigger boundary, either by moving away from the boundary or by being migrated to another server, a delete aura message is added to the aura delete buffer. The contents of the buffer are then broadcast to all neighbouring servers. When the message received, the aura trigger volume is removed from the simulation.
+
+%TODO: Check: If an object is received and an aura exists for that object, the aura is removed.
+%TODO: Talk about edge-cases of multiple types of messages being sent in on tick.
+
+%TODO: Mention that an object's bounding sphere may be intersecting the boundary trigger, but the object itself might not be. This is fine?
+
+\begin{figure}
+	\centering
+	\scalebox{0.75}{\input{Figs/AuraCorner.pdf_tex}}
+	\caption{Aura Projection at a 3-way corner intersection. When an object collides with a server aura trigger boundary, the aura begins being sent to the corresponding neighbouring server. In this scenario, an object from server 0 is colliding with two aura trigger boundaries from servers 1 and 2, meaning the aura is sent to both servers 1 and 2. $x$ is the aura distance beyond the boundary sphere of an object and the distance used by the aura trigger boundaries.}
+	\label{AuraCorner}
+\end{figure}
 
 \section{Algorithms}
 $AC$ is called when an object collides with an aura. A recursive search is performed in order to find all objects that would lie within each object's aura, preventing thrashing as discussed in \ref{Thrashing}. Once the recursive search is complete, all objects are added to the send buffer.
