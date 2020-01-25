@@ -226,10 +226,15 @@ The limitation of the use of an overseer node is the number of clients that can 
 	\caption{Edge-based overseer nodes.}
 \end{figure}
 
+In the current system architecture, the rendering work is carried out on the client machine. An alternative to this is to have the rendering performed on dedicated render nodes in the cloud, as illustrated in \ref{RenderNodes}. The results video could then be streamed to clients. This has the advantage of enabling low computational power devices, such as mobile devices, to display higher quality graphics, beyond what would be achievable on low computational power devices. Additionally, it means there is very low latency between the physics simulation and the renderer, meaning what is displayed is closer to the actual current state of the physics simulation. The disadvantage of this approach is the latency time between the client and the renderer.
+
+%TODO: Give example of long latency between client and renderer. Talk about other disadvantages, more computational workload in cloud. Compare workload of video streaming to streaming replicas.
+
 \begin{figure}
 	\centering
 	\scalebox{1.25}{\input{Figs/DedicatedRenderNodes.pdf_tex}}
 	\caption{Dedicated render nodes in cloud.}
+	\label{RenderNodes}
 \end{figure}
 
 \begin{figure}
