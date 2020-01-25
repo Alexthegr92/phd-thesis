@@ -224,20 +224,24 @@ An example of a topology that uses 4-server corners is illustrated in Fig. \ref{
 \end{figure}
 
 \section{Aura Implementation}
+How the auras in AP are implemented will now be described at a high-level, before a formal description of the algorithms using pseudo-code is given in \ref{Algorithms}.
 Auras are implemented through the use of trigger volumes (non-physically interacting volumes, that generate trigger collision callbacks). Two trigger volumes are used for different purposes. 
 The first is used for auras that are being received from remote servers. When an aura is received, a trigger volume, consisting of a sphere, is created at the corresponding position with a given radius. The second trigger volume used is by the server-region boundaries. Each server-region boundary has a trigger volume that extends inside the server's region, it extends the same distance as the aura radius, minus the bounding sphere of an object. This is used to determine when an object should begin and stop having its aura sent to neighbouring servers and avoid the need for per-object checks for proximity to the server-region boundary. When an object collides with the aura trigger boundary, the aura begins being sent, when an object leaves the aura trigger boundary, an aura delete message is sent.
 Each server-region boundary has a trigger volume, objects may collide with multiple aura trigger boundaries, meaning auras can be sent to multiple servers, as illustrated in Fig. \ref{AuraCorner}.
 %TODO: Boundary has a trigger volume, illustrate with diagram. Is this mentioned elsewhere?
 
-When a server begins communicating an aura, a message is added to the aura creation/update buffer. This message consists of the position of the centre of the aura, the radius of the aura and a flag signifying whether or not this is a creation message or not. The contents of the buffer are then broadcast to all neighbouring servers. When creation messages are received, a new aura, a sphere trigger volume, is created at that position with the given radius.
+It should be noted that an object's bounding sphere may be intersecting the boundary trigger, but the object itself may not, resulting in no aura being broadcast. However, this will not lead to problems with auras not being broadcast when a possible interaction could occur, as the bounding sphere is a simplification used for the aura. Using the actual shape of the object to determine when to begin broadcasting the aura is more accurate than the bounding sphere simplification.
+
+When a server begins communicating an aura, a message is added to the aura creation/update buffer. This message consists of the position of the centre of the aura, the radius of the aura. % and a flag signifying whether or not this is a creation message or not. Flag is not currently used as often causes issue in the corner case, possibly due to multiple types of messages concerncing one object being sent and recieved in the same tick.
+The contents of the buffer are then broadcast to all neighbouring servers. When aura creation/update messages are received and an aura for that object does not already exist, a new aura, a sphere trigger volume, is created at that position with the given radius.
 Whenever an object projecting an aura moves, and update message is added to the aura creation/update buffer, containing the new position and radius of the aura (aura radius is currently fixed, but may become dynamic in the future). The contents of the buffer are broadcast to all neighbouring servers. When the message is received, the positions of the auras are updated. 
-%TODO: Check what happens if the aura does not currently exist.
 If an object leaves aura trigger boundary, either by moving away from the boundary or by being migrated to another server, a delete aura message is added to the aura delete buffer. The contents of the buffer are then broadcast to all neighbouring servers. When the message received, the aura trigger volume is removed from the simulation.
 
-%TODO: Check: If an object is received and an aura exists for that object, the aura is removed.
-%TODO: Talk about edge-cases of multiple types of messages being sent in on tick.
+When objects collide with an aura trigger volume from an object on a remote server, a callback from PhysX is generated, when processed by AP, the colliding object is added to the migration buffer for the server the aura is being sent from. In addition, a recursive search is carried out to identify all objects within the cluster (a group of objects with overlapping auras). The entire cluster is added to the migration buffer, so that all objects in the cluster are migrated at once. The contents of the buffer are then sent to the corresponding server.
 
-%TODO: Mention that an object's bounding sphere may be intersecting the boundary trigger, but the object itself might not be. This is fine?
+In addition to auras existing as trigger volumes representing auras of remote objects, servers also track the auras of objects that they are hosting, that are having their auras broadcast. These are used to determine clusters of objects, so that clusters of objects are migrated together, at the same time. When an object begins broadcasting an aura, a query-only shape is attached to the object, which represents the object's aura. When an object is a migration candidate, a scene query is carried out, using this query-only shape, to determine which auras overlap the migration candidate's aura. Using a recursive search, involving a scene query for each object found from the prior query, it is possible to determine the objects in the cluster. If the entire cluster is outside of the host server's region, the entire cluster is added to the migration buffer and sent to the server in which the cluster resides. If any object in the cluster is still within the host server's region, no migration takes place. This prevents clusters being repeatedly being migrated back and forth between servers.
+
+%TODO: Talk about edge-cases of multiple types of messages being sent in on tick.
 
 \begin{figure}
 	\centering
@@ -246,7 +250,7 @@ If an object leaves aura trigger boundary, either by moving away from the bounda
 	\label{AuraCorner}
 \end{figure}
 
-\section{Algorithms}
+\section{Algorithms}\label{Algorithms}
 $AC$ is called when an object collides with an aura. A recursive search is performed in order to find all objects that would lie within each object's aura, preventing thrashing as discussed in \ref{Thrashing}. Once the recursive search is complete, all objects are added to the send buffer.
 
 \renewcommand{\algorithmicforall}{\textbf{for each}}
