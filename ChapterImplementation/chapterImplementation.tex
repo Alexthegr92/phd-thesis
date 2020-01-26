@@ -4,7 +4,7 @@ In this section will discuss our implementation of AP, The following will be loo
 	\item Aura Implementation
 	\item The algorithms used by the servers to implement AP.
 	\item The life cycle of a simulated object as a finite state machine (FSM).
-	\item The features and implementation details of the visualiser, including a breakdown of the components of a client and future work to be carried out on the visualiser.
+	\item The features and implementation details of the visualiser, including a description of its features and future work to be carried out on the visualiser.
 \end{itemize}
 
 \section{System Architecture}
@@ -202,7 +202,8 @@ RPCs allow the client to call procedures on the server, including the creation o
 \end{figure}
 
 \subsection{Future Architecture}
-System architectures which could be investigated in the future will now be proposed and discussed. A limitation of the current architecture is that a client must connect to all servers; servers that are responsible for running the simulation also have the overhead of connecting to many clients. An alternative to this is to make the use of an `overseer' node, which acts as a middle-man for communication with all the servers, as illustrated in Fig. \ref{OverseerNode}. The overseer node is co-located in the cloud with the simulation servers. The clients all connect to the overseer node, but all the servers only connect to one overseer node, reducing the overhead of many clients connecting to a server, freeing up computational resources on each simulation server, allowing more resources to be used for the simulation itself. An additional advantage of this approach is it allows for some fault-tolerance. If one or more simulation servers were to fail, the overseer node has a copy of the states of all objects from those servers, meaning those spatial partitions of the simulation could be restored. The disadvantage of using an overseer node is the additional latency between client and simulation server, messages now have to be processed by the overseer node between the simulation servers and clients. For example, if a replicated object moves in one of the simulation servers, the update message for that object has to be processed and sent by the simulation server, sent over the network to the overseer, received and processed by the overseer node and then sent over the network to all connected clients. The additional latency is due to the communication latency between simulation server and overseer node and the time taken to process messages on the overseer node.
+System architectures which could be investigated in the future will now be proposed and discussed. A limitation of the current architecture is that a client must connect to all servers; servers that are responsible for running the simulation also have the overhead of connecting to many clients. An alternative to this is to make the use of an `overseer' node, which acts as a middle-man for communication with all the servers, as illustrated in Fig. \ref{OverseerNode}. The overseer node is co-located in the cloud with the simulation servers. The clients all connect to the overseer node, but all the servers only connect to one overseer node, reducing the overhead of many clients connecting to a server, freeing up computational resources on each simulation server, allowing more resources to be used for the simulation itself. An additional advantage of this approach is it allows for some fault-tolerance. If one or more simulation servers were to fail, the overseer node has a copy of the states of all objects from those servers, meaning those spatial partitions of the simulation could be restored. Another advantage of overseers is it can potentially allow  some computational work to be carried out on the overseer nodes instead of the simulation nodes, such as simulation queries and non-simulation work, such as game logic, interest management.
+The disadvantage of using an overseer node is the additional latency between client and simulation server, messages now have to be processed by the overseer node between the simulation servers and clients. For example, if a replicated object moves in one of the simulation servers, the update message for that object has to be processed and sent by the simulation server, sent over the network to the overseer, received and processed by the overseer node and then sent over the network to all connected clients. The additional latency is due to the communication latency between simulation server and overseer node and the time taken to process messages on the overseer node.
 
 \begin{figure}
 	\centering
@@ -220,10 +221,13 @@ The limitation of the use of an overseer node is the number of clients that can 
 	\label{MultiOverseer}
 \end{figure}
 
+Overseer nodes could be located at the edge, geographically closer to the clients, as illustrated in \ref{EdgeOverseer}. The advantage of this approach is, there is a reduced latency between clients and overseers, meaning lower delay times between clients and the workload being carried out by the overseers, such as game logic. The disadvantage of this approach is there is higher latency between overseer nodes, which are located far apart, geographically.
+
 \begin{figure}
 	\centering
 	\scalebox{1.25}{\input{Figs/EdgeBasedOverseerNodes.pdf_tex}}
 	\caption{Edge-based overseer nodes.}
+	\label{EdgeOverseer}
 \end{figure}
 
 In the current system architecture, the rendering work is carried out on the client machine. An alternative to this is to have the rendering performed on dedicated render nodes in the cloud, as illustrated in \ref{RenderNodes}. The results video could then be streamed to clients. This has the advantage of enabling low computational power devices, such as mobile devices, to display higher quality graphics, beyond what would be achievable on low computational power devices. Additionally, it means there is very low latency between the physics simulation and the renderer, meaning what is displayed is closer to the actual current state of the physics simulation. The disadvantage of this approach is the latency time between the client and the renderer.
@@ -248,6 +252,13 @@ How the auras in AP are implemented will now be described at a high-level, befor
 Auras are implemented through the use of trigger volumes (non-physically interacting volumes, that generate trigger collision callbacks). Two trigger volumes are used for different purposes. 
 The first is used for auras that are being received from remote servers. When an aura is received, a trigger volume, consisting of a sphere, is created at the corresponding position with a given radius. The second trigger volume used is by the server-region boundaries. Each server-region boundary has a trigger volume that extends inside the server's region, it extends the same distance as the aura radius, minus the bounding sphere of an object. This is used to determine when an object should begin and stop having its aura sent to neighbouring servers and avoid the need for per-object checks for proximity to the server-region boundary. When an object collides with the aura trigger boundary, the aura begins being sent, when an object leaves the aura trigger boundary, an aura delete message is sent.
 Each server-region boundary has a trigger volume, objects may collide with multiple aura trigger boundaries, meaning auras can be sent to multiple servers, as illustrated in Fig. \ref{AuraCorner}.
+
+\begin{figure}
+	\centering
+	\scalebox{0.75}{\input{Figs/AuraCorner.pdf_tex}}
+	\caption{Aura Projection at a 3-way corner intersection. When an object collides with a server aura trigger boundary, the aura begins being sent to the corresponding neighbouring server. In this scenario, an object from server 0 is colliding with two aura trigger boundaries from servers 1 and 2, meaning the aura is sent to both servers 1 and 2. $x$ is the aura distance beyond the boundary sphere of an object and the distance used by the aura trigger boundaries.}
+	\label{AuraCorner}
+\end{figure}
 %TODO: Boundary has a trigger volume, illustrate with diagram. Is this mentioned elsewhere?
 
 It should be noted that an object's bounding sphere may be intersecting the boundary trigger, but the object itself may not, resulting in no aura being broadcast. However, this will not lead to problems with auras not being broadcast when a possible interaction could occur, as the bounding sphere is a simplification used for the aura. Using the actual shape of the object to determine when to begin broadcasting the aura is more accurate than the bounding sphere simplification.
@@ -262,13 +273,6 @@ When objects collide with an aura trigger volume from an object on a remote serv
 In addition to auras existing as trigger volumes representing auras of remote objects, servers also track the auras of objects that they are hosting, that are having their auras broadcast. These are used to determine clusters of objects, so that clusters of objects are migrated together, at the same time. When an object begins broadcasting an aura, a query-only shape is attached to the object, which represents the object's aura. When an object is a migration candidate, a scene query is carried out, using this query-only shape, to determine which auras overlap the migration candidate's aura. Using a recursive search, involving a scene query for each object found from the prior query, it is possible to determine the objects in the cluster. If the entire cluster is outside of the host server's region, the entire cluster is added to the migration buffer and sent to the server in which the cluster resides. If any object in the cluster is still within the host server's region, no migration takes place. This prevents clusters being repeatedly being migrated back and forth between servers.
 
 %TODO: Talk about edge-cases of multiple types of messages being sent in on tick.
-
-\begin{figure}
-	\centering
-	\scalebox{0.75}{\input{Figs/AuraCorner.pdf_tex}}
-	\caption{Aura Projection at a 3-way corner intersection. When an object collides with a server aura trigger boundary, the aura begins being sent to the corresponding neighbouring server. In this scenario, an object from server 0 is colliding with two aura trigger boundaries from servers 1 and 2, meaning the aura is sent to both servers 1 and 2. $x$ is the aura distance beyond the boundary sphere of an object and the distance used by the aura trigger boundaries.}
-	\label{AuraCorner}
-\end{figure}
 
 \section{Algorithms}\label{Algorithms}
 $AC$ is called when an object collides with an aura. A recursive search is performed in order to find all objects that would lie within each object's aura, preventing thrashing as discussed in \ref{Thrashing}. Once the recursive search is complete, all objects are added to the send buffer.
