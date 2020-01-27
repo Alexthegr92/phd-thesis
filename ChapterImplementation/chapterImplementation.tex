@@ -272,6 +272,7 @@ When objects collide with an aura trigger volume from an object on a remote serv
 
 In addition to auras existing as trigger volumes representing auras of remote objects, servers also track the auras of objects that they are hosting, that are having their auras broadcast. These are used to determine clusters of objects, so that clusters of objects are migrated together, at the same time. When an object begins broadcasting an aura, a query-only shape is attached to the object, which represents the object's aura. When an object is a migration candidate, a scene query is carried out, using this query-only shape, to determine which auras overlap the migration candidate's aura. Using a recursive search, involving a scene query for each object found from the prior query, it is possible to determine the objects in the cluster. If the entire cluster is outside of the host server's region, the entire cluster is added to the migration buffer and sent to the server in which the cluster resides. If any object in the cluster is still within the host server's region, no migration takes place. This prevents clusters being repeatedly being migrated back and forth between servers.
 
+%TODO: Talk about messages arriving in and out of order. RakNet's ordered feature
 %TODO: Talk about edge-cases of multiple types of messages being sent in on tick.
 
 \section{Algorithms}\label{Algorithms}
@@ -506,6 +507,10 @@ $BNU$ is called once per network connection between servers. It is responsible f
 We will now discuss the state of an object in the context of AP, i.e. not position and rotation of an object, but the state of object as it is being treated by AP.
 
 An object has two entry states, it is either received from another server via the network or it is injected into the simulation. Immediately the object's position determines its next state. If the object is not intersecting a server boundary and is not colliding with an aura, the object moves into the Host Region state. If the object is intersecting a sever boundary, it moves into the intersecting boundary state. If the object is outside of the server's region, such as is if the object is injected into a server at position the server is not responsible for, the object changes states to the boundary traversed state.
+
+%TODO: Host region to intersecting boundary or AC/Sent
+%TODO: Intersecting Boundary to Host region, to Boundary Traversed, to AC/Sent
+%TODO: Boundary Traversed, back to self (checking for islands) or Sent if island found or AC, to Intersecting Boundary
 %TODO: Remaning states and transitions
 
 \begin{figure}[hbt]
@@ -557,8 +562,6 @@ We will now discuss the details of the visualiser, both the features and impleme
 
 The visualiser is built using Unreal Engine and the RakNet plugin.
 
-%TODO: Add client-created server regions feature
-
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\textwidth]{Blocks}
@@ -604,6 +607,9 @@ The visualiser also allows for interactivity, the creation of server-created obj
 The user is also able to reset or change scenes that are being simulated on the server. In the visualiser, the scene can be reset on a key press. This sends an RPC to all servers, which either resets all simulations or resets the current test scenario. As all objects are deleted on the servers, any replicas on the visualiser are deleted. Also available to the player is a menu which can be opened that allows the user to select a scene to switch to. This allows the user to change the scene in the visualiser at run-time while maintaining connections with all servers.
 
 %Currently there is a lack of functional client-created object migration. 
+
+\subsection{Client-defined server regions}
+Through the editor at edit-time, it is possible to define the regions that each server should be responsible for. Using Unreal Engine's box colliders, a user can specify the area of each server region. Upon establishing connections with all servers, the client then communicates the area for each region with the servers through RPCs. In addition to this, servers are able to automatically calculate their neighbouring regions and establish appropriate communications with them; linking boundaries with corresponding servers and determining which servers to broadcast auras to.
 
 %TODO: Client breakdown + diagram
 
