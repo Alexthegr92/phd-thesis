@@ -504,16 +504,7 @@ $BNU$ is called once per network connection between servers. It is responsible f
 \end{algorithm}
 
 \section{FSM}
-We will now discuss the state of an object in the context of AP, i.e. not position and rotation of an object, but the state of object as it is being treated by AP.
-
-An object has two entry states, it is either received from another server via the network or it is injected into the simulation. Immediately the object's position determines its next state. If the object is not intersecting a server boundary and is not colliding with an aura, the object moves into the Host Region state. If the object is intersecting a sever boundary, it moves into the intersecting boundary state. If the object is outside of the server's region, such as is if the object is injected into a server at position the server is not responsible for, the object changes states to the boundary traversed state.
-
-%TODO: Host region to intersecting boundary or AC/Sent
-%TODO: Intersecting Boundary to Host region, to Boundary Traversed, to AC/Sent
-%TODO: Boundary Traversed, back to self (checking for islands) or Sent if island found or AC, to Intersecting Boundary
-%TODO: Remaning states and transitions
-
-\begin{figure}[hbt]
+\begin{figure}
 	\centering
 	\resizebox{\columnwidth}{!}{
 		\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2.5cm]
@@ -555,6 +546,20 @@ An object has two entry states, it is either received from another server via th
 		\end{tikzpicture}
 	}
 \end{figure}
+
+We will now discuss the state of an object in the context of AP, i.e. not position and rotation of an object, but the state of object as it is being treated by AP.
+
+Objects project auras in two states, the Intersecting Boundary and Boundary Traversed states. When entering these states and every update in which the object has moved while in these states, the object's aura is added to the send aura buffer, which is broadcast to all neighbouring servers, allowing those server's to create the object's aura. When objects leave these states, the object ID is added to the remove aura buffer, which is broadcast to all neighbouring servers and the receiving servers then delete the aura with corresponding ID.
+
+An object has two entry states, it is either received from another server via the network or it is injected into the simulation. Upon receiving an object, the object is then injected into the simulation and is moved into the inject state. Immediately the object's position determines its next state. If the object is not intersecting a server boundary and is not colliding with an aura, the object moves into the Host Region state. If the object is intersecting a sever boundary, it moves into the intersecting boundary state. If the object is outside of the server's region, such as is if the object is injected into a server at position the server is not responsible for, the object changes states to the boundary traversed state.
+
+From the host region state, an object remains in this state until it either collides with a server boundary or a remote object's aura. If colliding with a server boundary, it is moved into the Intersecting Boundary State (triggered through a PhysX callback, the OBC algorithm is run). If colliding with a remote object's aura (triggered through a PhysX callback, the AC algorithm is run), it is immediately moved into the Sent State.
+
+From the Intersecting Boundary state, an object remains in this state until on of the following occurs: the object is no longer intersecting the server boundary as is contained entirely within the host region (triggered through a PhysX callback, the OBE algorithm is run), in which case the object moves to the Host Region state; the object is no longer intersecting the server boundary and has fully traversed the boundary, in which case the object moves to the Boundary Traversed state; or the object collides with a remote object's aura (triggered through a PhysX callback, the AC algorithm is run), in which case it is immediately moved into the Sent State.
+
+From the Boundary Traversed state, an object remains in this state until one of the following occurs: the object begins intersecting the host's boundary again (triggered through a PhysX trigger collision callback), in which case the object moves to the Intersecting Boundary state; the object collides with a remote object's aura (triggered through a PhysX callback, the AC algorithm is run), in which case it is immediately moved into the Sent state; or the object cluster (group of one or more object's with overlapping auras) becomes an island (no object in cluster is intersecting the host's boundary) determined using the BT algorithm, in which case the object is moved to the sent state. The object cluster island check (BT algorithm) is performed every update, per boundary.
+
+When an object enters the Sent state, the object data is added to the object migration buffer for the destination server and is immediately moved to the Destroyed state, in which it is removed from the host's simulation.
 
 \section{The Visualiser}
 %We discuss the features and implementation of the visualiser, including server and client created replicas, static objects and interactivity. The challenges of multiple servers are explained and our solutions justified. Screenshots from demo scenes have been included.
