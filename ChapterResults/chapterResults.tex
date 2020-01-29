@@ -807,6 +807,19 @@ In this experiment the frame-time was varied from $0ms$ to double the frame-time
 	\label{tab_AboveTolerance}
 \end{table}
 
+\subsection{Thrashing}
+In addition to recording the number of collisions that resulted in thrashing, the number of times an object thrashed between servers was also measured. The number of times thrashed is determined by measuring the number of migrations away from the server that the collisions takes place on, before the collision takes place. A histogram of the number of occurrences against the number of times thrashed is shown in Fig. \ref{fig_ThrashingHistogram}. For this histogram, data from the Frame-Time $33.33ms$ experiment is used, as this provides the largest sample of thrashing. As is demonstrated in Fig. \ref{fig_ThrashingHistogram}, the most frequent number of times thrashed is 1, by a large margin followed by a downward trend.
+
+The more times thrashing occurs, the later the collision may be detected as objects continue to be updated and move without a collision occurring. It should be noted that thrashing occurring does not guarantee that a late collision will take place. The more times thrashing takes place, the more physics updates occur and the further the objects may be moved towards (and eventually overlapping) each other. Therefore, a greater number of times thrashed, means a late and incorrect collision response is more likely.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{ThrashingHistogram}
+	\caption{Thrashing Histogram. The number of occurrences vs the number of times thrashed.}
+	\label{fig_ThrashingHistogram}
+\end{figure}
+
+
 \subsubsection{Evaluation}
 As the speed increases, the mean penetration time increases, with the exception of 0 speed, the standard deviation remains constant, below the tolerance line, once above the tolerance line, the stand deviation increases relative to below the tolerance line, but appears to remain constant. Note that the mean error increases in discrete steps (with some small variation), this is due to the discrete physics time-steps. Object speed is application specific and objects needs to to be travelling directly towards the centre of each other and one of the objects has to be travelling above the tolerance speed, in order for errors to occur.
 
