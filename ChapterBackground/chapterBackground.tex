@@ -26,16 +26,25 @@ The main three aspects of the functionality of a physics engine are the followin
 
 The term `object' is used here to describe any physical entity. Objects can be any entity that physically interacts, for example, a barrel, a bullet, a fire particle, a jointed robot arm, the wheel of a vehicle, a mountain etc. The terms `world' or `scene' are often used to describe the physical system.
 
-Numerical integrator to update the positions of objects in the system using a discrete time step i.e., each step simulates a set period of time. The shorter the time period simulated, the more physically accurate the simulation will be, however, each simulation step must take less time to execute than the time it is intending to simulate, otherwise the simulation would be unable to run in real-time.
+The numerical integrator used to update the positions of objects in the system, uses a discrete time value for each step, this is known as the time step. Each step simulates a set period of time. The shorter the time period simulated, the more physically accurate the simulation will be, however, each simulation step must take less time to execute than the time it is intending to simulate, otherwise the simulation would be unable to run in real-time. It is common for the time step to be a fixed value, though physics engines can support variable time steps.
 
+\subsection{Linear Motion}
 Linear motion will first be discussed and the following variables are used:
 \begin{itemize}
-	\item $a$ - acceleration
-	\item $v$ - velocity
-	\item $s$ - displacement
-	\item $n$ - current time step
-	\item $n+1$ - next time step
+	\item $F$ - Force
+	\item $m$ - Mass
+	\item $a$ - Acceleration
+	\item $v$ - Velocity
+	\item $s$ - Displacement
+	\item $n$ - Current time step
+	\item $n+1$ - Next time step
 \end{itemize}
+
+Acceleration is calculated from the sum of the forces acting on the body and with the use of the mass of the objects and Newton's Second Law:
+
+\begin{equation}
+F=ma
+\end{equation}
 
 The simplest numerical integrator is explicit Euler (or sometimes referred to simply as Euler) integration:
 
@@ -57,10 +66,54 @@ A Symplectic Euler (Semi-Implicit Euler) Integrator is often used in physics eng
 \end{split}
 \end{equation}
 
-It is fast to compute and remains accurate over many iterations.
+Symplectic Euler is faster to compute and remains accurate over many iterations and is stable when longer time steps are used.
 
-%Update. Discrete steps.
-%The integrator. Euler and Symplectic Euler
+\subsection{Angular Motion}
+In addition to solving linear motion, physics engines also solve angular motion. Angular motion will now be discussed and the following variables are used:
+\begin{itemize}
+	\item $T$ - Torque
+	\item $I$ - Inertia Matrix or Inertia Tensor
+	\item $\alpha$ - Angular acceleration
+	\item $\omega$ - Angular velocity
+	\item $\theta$ - Orientation
+	\item $n$ - Current time step
+	\item $n+1$ - Next time step
+\end{itemize}
+
+Orientation of objects are represented using Quaternions. Torque is calculated using the following equation:
+
+\begin{equation}
+T=I\alpha
+\end{equation}
+
+This equation is the rotational equivalent of $F=ma$.
+%Inertia
+Angular velocity $\omega$ can be integrated relative to angular acceleration $\alpha$ using the following equation:
+
+\begin{equation}
+\omega_{n+1}=\omega_n+\alpha_n\Delta t
+\end{equation}
+
+Orientation $\theta$ can then be calculated using $\omega$ and the following equation:
+
+\begin{equation}
+\theta_{n+1}=\theta_n+\theta_n\omega_n\frac{\Delta t}{2}
+\end{equation}
+
+This equation is a fast approximation of orientation.
+
+\subsection{Integration comparison with non-real-time simulations}
+The equations used in real-time physics engines use iterative processes and approximate a continuous process with discrete steps. As a result, errors due to inaccuracies in the discreteness accumulate over time due to the iterative nature of the integrators. Different real-time physics engines will often give different results for the same simulation, despite identical starting parameters \cite{Boeing2007}.
+
+\subsection{Collision Detection}
+Objects are represented by geometry colliders. Collision detection works by detecting overlaps between geometry representations.
+Typically objects have simple colliders, such as boxes, capsules, cylinders and spheres. More complex colliders are often supported, such as convex and concave hulls. Colliders can either be static or dynamic.
+
+Optimisations for collision detection are used to avoid comparing every possible pair of objects. Phases of collision detection are used, known and the broadphase and the narrowphase.
+%TODO: Give examples of these
+
+
+
 %Collision detection
 %Collision response
 %Constraints
@@ -88,29 +141,49 @@ It is fast to compute and remains accurate over many iterations.
 %Image of time-slots
 %Event callbacks for collisions/triggers
 
+\subsection{Collision Response}
+
+%\subsection{Constraints}
+
+\subsection{Performance of Real-Time Physics Engines}
+In this section the performance of real-time physics engines will be discussed. Examples of different scenarios under different performance conditions will be used and discussed using time-sequence diagrams.
+
+Physics engines are kept as separate as possible from the rendering loop and other logic in the main loop. Fig. \ref{GoodPerf} shows a time sequence diagram of a game loop with good performance. The target physics time step is 16ms. Every 16ms that is passed, a physics update is triggered, simulating 16ms of the simulation. Multiple update loops can be completed between physics steps being performed.
+
 \begin{figure}
 	\centering
 	\input{Figs/GoodPerfNoVSync.pdf_tex}
-	\caption{Good performance (no VSync).}
+	\caption{Time sequence diagram of good performance.}
+	\label{GoodPerf}
 \end{figure}
+
+Fig. \ref{SubStep} shows a time sequence diagram of sub-stepping. If an update loop takes longer than the target time-step (in this case 16ms), multiple physics steps will need to be performed to update the simulation to the present time. This is known as sub-stepping. Sub-stepping is supported by PhysX. Longer update times may occur in many situations, such as a read from the hard-drive, a background process performed by the OS or particularly expensive game logic or AI task.
 
 \begin{figure}
 	\centering
 	\input{Figs/SubStepping.pdf_tex}
-	\caption{Sub-stepping.}
+	\caption{Time sequence diagram of sub-stepping.}
+	\label{SubStep}
 \end{figure}
+
+Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which the simulation is expensive to update. This could be the result of a large number of objects being simulated or complex collision detection. As a result of the expensive physics update the render frame rate is reduced to 60Hz, despite the main update only taking $~3ms$.
+%TODO: Expand this?
 
 \begin{figure}
 	\centering
 	\input{Figs/ExpensivePhysics.pdf_tex}
 	\caption{Expensive physics.}
+	\label{ExpensivePhysics}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\input{Figs/WellOfDespair.pdf_tex}
-	\caption{The well of despair.}
-\end{figure}
+%Fig. \ref{WellOfDespair} shows a time sequence diagram of a scenario in which a long update frame has occurred. The main update has taken long enough that two sub-steps must be simulated, as each sub-step takes $~9ms$, it will take $~18ms$ to simulate. As a result, the time step also misses the target of $16ms$, 
+%
+%\begin{figure}
+%	\centering
+%	\input{Figs/WellOfDespair.pdf_tex}
+%	\caption{The well of despair.}
+%	\label{WellOfDespair}
+%\end{figure}
 
 \section{Scalable Non-Real Time Physics}
 Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
