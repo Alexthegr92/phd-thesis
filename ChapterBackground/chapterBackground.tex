@@ -1,10 +1,70 @@
 \chapter{Background and Related Work}
+In this chapter, the reader is introduced to physics simulations and the differences between real-time and non-real-time simulations along with important terms, workings, important and relevant aspects of physics simulations. Along with an introduction to physics simulations, the following points will also be discussed:
+\begin{itemize}
+	\item Scalable Non-Real-Time physics
+	\item Physics in online gaming
+	\item Graph-partitioning
+	\item Distributed virtual environments
+	\item Distributed real-time physics
+	\item Cloud computing
+	\item Scientific and Engineering simulations
+	\item Containerisation of game engines
+	\item Streamed gaming
+\end{itemize}
+
 \section{Real-time Physics Engines Overview}
 %We introduce the reader to the topic of physics simulations and we compare real-time with non-real-time physics simulations. We define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance of real-time simulations and performance budget in real-time applications.
 
-%We must first understand how real-time physics engines work
-%"World" is called a scene, "Bodies" are things being simulated
-%discrete simulation steps, each step simulates a period of time
+Real-time physics simulations (physics engines) are responsible for simulating the physical behaviour of objects and are based around Newtonian mechanics. The motion of the system is calculated given the forces acting on the system, this is known as the forward dynamics problem \cite{Boeing2007}.
+
+The main three aspects of the functionality of a physics engine are the following:
+\begin{itemize}
+	\item Integration: Moving objects according to a set of physical rules and values i.e. velocity, drag, friction
+	\item Collision Detection: Checking for collisions between two or more objects
+	\item Collision Response: The reaction to collisions between objects
+\end{itemize}
+
+The term `object' is used here to describe any physical entity. Objects can be any entity that physically interacts, for example, a barrel, a bullet, a fire particle, a jointed robot arm, the wheel of a vehicle, a mountain etc. The terms `world' or `scene' are often used to describe the physical system.
+
+Numerical integrator to update the positions of objects in the system using a discrete time step i.e., each step simulates a set period of time. The shorter the time period simulated, the more physically accurate the simulation will be, however, each simulation step must take less time to execute than the time it is intending to simulate, otherwise the simulation would be unable to run in real-time.
+
+Linear motion will first be discussed and the following variables are used:
+\begin{itemize}
+	\item $a$ - acceleration
+	\item $v$ - velocity
+	\item $s$ - displacement
+	\item $n$ - current time step
+	\item $n+1$ - next time step
+\end{itemize}
+
+The simplest numerical integrator is explicit Euler (or sometimes referred to simply as Euler) integration:
+
+\begin{equation}
+\begin{split}
+	v_{n+1}=v_n+a_{n+1}{\Delta}t\\
+	s_{n+1}=s_n+v_{n}{\Delta}t
+\end{split}
+\end{equation}
+
+However, this is not often used by physics engines as it can lead to instability unless short time steps are used.
+
+A Symplectic Euler (Semi-Implicit Euler) Integrator is often used in physics engines. Symplectic Euler is similar to explicit Euler, except that the updated velocity is used before calculating the new position:
+
+\begin{equation}
+\begin{split}
+	v_{n+1}=v_n+a_n{\Delta}t\\
+	a_{n+1}=a_n+v_{n+1}{\Delta}t
+\end{split}
+\end{equation}
+
+It is fast to compute and remains accurate over many iterations.
+
+%Update. Discrete steps.
+%The integrator. Euler and Symplectic Euler
+%Collision detection
+%Collision response
+%Constraints
+%Body describes any non-point-like physical entity
 
 %Main physics loop (what goes on within a simulation step)
 %Explanation of rigid bodies, actors, shapes, constraints
@@ -13,7 +73,6 @@
 %Explanation of kinetic vs kinematic
 %Explanation of sleeping
 
-%Each simulation step must take less time to execute than the time it is simulating, otherwise the simulation is unable to run in real-time.
 %It is possible for the main application to update more often than the simulation frequency
 %It is also possible that the main application update is unable to be executed at the same frequency as the physics simulation frequency. Options are running the simulation at a bigger time-step or simulate multiple, smaller sub-steps. Trade-off between keeping consistent behaviour and performance.
 %Diagrams for above
