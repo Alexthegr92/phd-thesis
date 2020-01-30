@@ -172,7 +172,7 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 \begin{figure}
 	\centering
 	\input{Figs/ExpensivePhysics.pdf_tex}
-	\caption{Expensive physics.}
+	\caption{Time sequence diagram of expensive physics.}
 	\label{ExpensivePhysics}
 \end{figure}
 
@@ -186,7 +186,7 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 %\end{figure}
 
 \section{Scalable Non-Real Time Physics}
-Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
+Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono \cite{Chrono}. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
 
 \section{Online Gaming}
 %We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
@@ -333,6 +333,8 @@ This thesis proposes an alternative technique to SpatialOS and Aether Engine, AP
 %We discuss the wider context of cloud computing, how AP is deployed on the cloud and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
 
 Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
+
+%https://aisel.aisnet.org/cgi/viewcontent.cgi?article=3672&context=cais
 
 %Dale's background starts here
 \subsection{Latency Values}
