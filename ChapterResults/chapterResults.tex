@@ -588,12 +588,12 @@ In all the following experiments collisions were recorded, for each collision, t
 
 \subsection{Control Experiment}
 
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\textwidth]{CentralCollisionsPenDistanceVsSpeed}
-	\caption{Penetration distance of collisions with varying speed. The maximum expected penetration distance of 1 physics step is marked with a dashed blue line.}
-	\label{fig_ErrorControlDistance}
-\end{figure}
+%\begin{figure}[t]
+%	\centering
+%	\includegraphics[width=\textwidth]{CentralCollisionsPenDistanceVsSpeed}
+%	\caption{Penetration distance of collisions with varying speed. The maximum expected penetration distance of 1 physics step is marked with a dashed blue line.}
+%	\label{fig_ErrorControlDistance}
+%\end{figure}
 
 \begin{figure}[t]
 	\centering
@@ -602,11 +602,10 @@ In all the following experiments collisions were recorded, for each collision, t
 	\label{fig_ErrorControlTime}
 \end{figure}
 
-A control experiment on a centralised system (single server, single simulation) was performed, in which the scenario was repeated multiple times. The speed of each object is increased from $1$ to $64m\mathord{\cdot}s^{-1}$ in steps of $1m\mathord{\cdot}s^{-1}$. The experiment was repeated $50$ times, for a total of $3150$ collisions. The graphs display the speed without the random variation. The purpose of this experiment was to confirm the predicted maximum expected penetration in a centralised simulation. Fig. \ref{fig_ErrorControlDistance} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration distance is never greater than the maximum expected penetration. Note that PhysX can report collisions before objects intersect, leading to the negative penetration distances shown.
+A control experiment on a centralised system (single server, single simulation) was performed, in which the scenario was repeated multiple times. The speed of each object is increased from $1$ to $64m\mathord{\cdot}s^{-1}$ in steps of $1m\mathord{\cdot}s^{-1}$. The experiment was repeated $50$ times, for a total of $3150$ collisions. %Fig. \ref{fig_ErrorControlDistance} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration distance is never greater than the maximum expected penetration. 
 
 As speed increases, expected penetration increases. Using penetration time gives us a uniform maximum expected value regardless of speed.
-Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous. Fig. \ref{fig_ErrorControlTime} shows the penetration of objects with increasing speed in a centralised simulation and demonstrates that penetration time is never greater than the time of one physics step, regardless of the relative speed of objects.
-%TODO: Outline: We've demonstrated a benchmark with which to compare distributed results with
+Re-arranging $s=d/t$, to $t=d/s$ and substituting the collision penetration for $d$ and speed for $s$, gives us the penetration time for a collision. It should be noted that because physics engines work in discrete time steps, this time value does not actually reflect the real time the colliding objects were penetrating each other. Also note that PhysX can report collisions before objects intersect, leading to the negative penetration distances shown. Correct collisions result in penetration times of up to 1 physics time step and any collision penetration times over this value are considered erroneous. Fig. \ref{fig_ErrorControlTime} shows the penetration of objects with increasing speed in a centralised simulation (displaying speed without the random variation) and demonstrates that penetration time is never greater than the time of one physics step, regardless of the relative speed of objects. The purpose of this experiment was to confirm the predicted maximum expected penetration in a centralised simulation. This provides a benchmark of correctness to compare with results from experiments using multiple servers.
 
 Using the above method to detect late collisions, experiments on a distributed configuration of a simulation will now be performed. Experiments were carried out for both variations in all three aura tolerance factors and packet-loss. Experiments were conducted using AWS G2.2xlarge servers located within the same geographical region. A G2.2xlarge instance uses a 2.60GHz Intel Xeon E5-2670 CPU with 16GB RAM and an NVIDIA GRID K520 (Kepler) GPU running Ubuntu 18.04 LTS.
 
