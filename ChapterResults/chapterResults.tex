@@ -618,7 +618,7 @@ There are three factors that are used to determine aura size: speed; latency; an
 
 Speed is controlled such that the two objects used in the experiment collide with each other with that desired speed. Latency is controlled using the Traffic Control tool to emulate latency for all communications between the servers. The desired latency is applied as a fixed delay to each server, resulting in that delay being applied to all packets outgoing from that server. Frame-time is controlled using a wait within the simulation's update loop, this is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. This is illustrated in Fig. \ref{fig_FrameTimeDensity}. As a result of this, half of all frames are expected to be above the target frame-time, which may cause false-positives in detecting late collisions, in the following experiments. However, the following points should be considered: the variance in frame-time is low; longer frames have to occur exactly at the time of messages being exchanged; exceeding one factor can be compensated for by having a low value in another factor. Therefore, false-positives are expected to be rare up until the tolerance value is approached. It should be noted that variance increases with target frame-time, therefore more false-positives should expected with experiments using higher target frame-times.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{FrameTimeDensity}
 	\caption{Scaled Density of frame-times for the different target frame-times used in the collision correctness experiments. The median of each target frame-time is marked with a vertical dashed line.}
@@ -648,7 +648,7 @@ The two servers use the following tolerances unless otherwise stated: a maximum 
 
 In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{SpeedAuraSizes}
 	\caption{Size of aura vs. speed tolerance. The speed tolerances used are marked in dashed lines}
@@ -658,38 +658,38 @@ In this experiment the speed of each of the two objects was varied from $1m\math
 Fig. \ref{fig_SpeedAuraSize} shows the size of the aura (not including the bounding sphere of the object) vs increasing speed tolerance, calculated using equation \ref{auraEquation}.
 The aura size increases continuously with speed, therefore we expect late collisions to begin immediately once the the speed tolerance is exceeded. False-positives are expected due to the frame-time delay method and should increase as speed increases.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsSpeedLow}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Speed using a speed tolerance of $16m\mathord{\cdot}s^{-1}$. The speed tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsSpeedLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsSpeedMid}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Speed using a speed tolerance of $32m\mathord{\cdot}s^{-1}$. The speed tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsSpeedMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsSpeedHigh}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Speed using a speed tolerance of $48m\mathord{\cdot}s^{-1}$. The speed tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsSpeedHigh}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsSpeedLow}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying speed using a speed tolerance of $16m\mathord{\cdot}s^{-1}$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The speed tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsSpeedLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsSpeedMid}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying speed using a speed tolerance of $32m\mathord{\cdot}s^{-1}$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The speed tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsSpeedMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsSpeedHigh}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying speed using a speed tolerance of $48m\mathord{\cdot}s^{-1}$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The speed tolerance is marked in a dashed green line.}
@@ -721,7 +721,7 @@ The aura size increases continuously with speed, therefore we expect late collis
 
 In this experiment the latency between the two servers was varied from $0ms$ to double the following tolerances: $2ms$; $8ms$ and $16ms$ in increments of $0.05ms$, $0.25ms$ and $1ms$ respectively. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{LatencyAuraSizes}
 	\caption{Size of aura vs. latency tolerance. The latency tolerances used are marked in dashed lines}
@@ -730,38 +730,38 @@ In this experiment the latency between the two servers was varied from $0ms$ to 
 
 Fig. \ref{fig_LatencyAuraSize} shows the size of the aura (not including the bounding sphere of the object) vs increasing latency tolerance, calculated using equation \ref{auraEquation}. The aura size increases discretely with latency tolerance, therefore we expect late collisions to begin one the aura size required for the latency is higher than what is needed for the tolerance. In the latency tolerance experiments, this will be when latency reaches $3ms$ for the $2ms$ tolerance experiments and $20ms$ for $15ms$ tolerance experiment. Note that late collisions are not expected for the $8ms$ experiment, as $20ms$ latency is not reached. False-positives are expected due to the frame-time delay method and should increase as latency increases.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsLatencyLow}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Latency using a latency tolerance of $2ms$. The latency tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsLatencyLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsLatencyMid}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Latency using a latency tolerance of $8ms$. The latency tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsLatencyMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsLatencyHigh}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. Latency using a latency tolerance of $16ms$. The latency tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsLatencyHigh}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsLatencyLow}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying latency using a latency tolerance of $2ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The latency tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsLatencyLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsLatencyMid}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying latency using a latency tolerance of $8ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The latency tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsLatencyMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsLatencyHigh}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying latency using a latency tolerance of $16ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The latency tolerance is marked in a dashed green line.}
@@ -793,7 +793,7 @@ Fig. \ref{fig_LatencyAuraSize} shows the size of the aura (not including the bou
 
 In this experiment the frame-time was varied from $0ms$ to double the frame-time tolerance for the following frame-times: $8.33ms$ $(120Hz)$; $15ms$ $(66.67Hz)$ and $33.33ms$ $(30Hz)$. Increments of $1ms$, $1ms$ and $2ms$ were used respectively. The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{FrameAuraSizes}
 	\caption{Size of aura vs. frame-time tolerance. The frame-time tolerances used are marked in dashed lines}
@@ -802,38 +802,38 @@ In this experiment the frame-time was varied from $0ms$ to double the frame-time
 
 Fig. \ref{fig_FrameTimeAuraSize} shows the size of the aura (not including the bounding sphere of the object) vs increasing frame-time tolerance, calculated using equation \ref{auraEquation}. The aura size increases discretely with frame-time tolerance, therefore we expect late collisions to begin one the aura size required for the latency is higher than what is needed for the tolerance. In the varying frame-time experiments, this will be when frame-time reaches $16ms$ for the $8ms$ and $15ms$ tolerance experiments and $32ms$ for the $32ms$ tolerance experiment. Note that late collisions are not expected for the $8ms$ experiment, as $16ms$ frame-time is not exceeded. False-positives are expected due to the frame-time delay method and should increase as frame-time increases.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsFrameTimeLow}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. frame-time using a frame-time tolerance of $8ms$. The frame-time tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsFrameTimeLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsFrameTimeMid}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. frame-time using a frame-time tolerance of $15ms$. The frame-time tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsFrameTimeMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsFrameTimeHigh}
 	\caption{Ratio of Late to Correct Collisions and Misses to Total Collision vs. frame-time using a frame-time tolerance of $32ms$. The frame-time tolerance is marked in a dashed green line.}
 	\label{fig_RatioVsFrameTimeHigh}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsFrameTimeLow}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying frame-time using a frame-time tolerance of $8ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The frame-time tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsFrameTimeLow}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsFrameTimeMid}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying frame-time using a frame-time tolerance of $15ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The frame-time tolerance is marked in a dashed green line.}
 	\label{fig_CollisionsPenVsFrameTimeMid}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{MeanPenVsFrameTimeHigh}
 	\caption{Mean penetration time of objects with $+/-2$ standard deviations with varying frame-time using a frame-time tolerance of $32ms$. The maximum expected penetration time of 1 physics step is marked with a dashed blue line. The frame-time tolerance is marked in a dashed green line.}
@@ -967,14 +967,14 @@ RakNet, the library used for network communication in this project, includes a r
 \subsubsection{Experiment parameters and output}
 The two servers use the following tolerances: a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$; maximum latency tolerance of $2ms$; and a maximum frame-time tolerance of $15ms$. Each server has a random delay before starting between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $50$ times. The mean and $+/-2$ standard deviations of penetration time were plotted against each tolerance factor for each of the three tolerance values chosen. In addition, the ratio of errors to correct collisions and misses to total collisions were plotted against packet-loss.
 
-\begin{figure}[t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{RatiosVsLoss}
 	\caption{The ratios of erroneous collisions to correct collisions and missed collisions to total collisions with varying packet loss.} %As packet-loss increases from $10\%$ to $20\%$ the ratio of erroneous collisions to correct collisions sharply increases as does misses to total collisions. Above $60\%$ packet-loss, all collisions are missed.}
 	\label{fig_RatiosVsLoss}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}
 \includegraphics[width=\textwidth]{MeanPenVsLoss}
 \caption{Mean penetration time of objects with $+/-2$ standard deviations with varying packet-loss. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line.}
 %\caption{Penetration time of objects with varying packet-loss. Each red point represents one or more collisions. The maximum expected penetration time of 1 physics steps is marked with a dashed blue line. The number and magnitude of errors increases as packet-loss increases beyond $10\%$.}
