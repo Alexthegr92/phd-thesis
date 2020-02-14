@@ -189,33 +189,23 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono \cite{Chrono}. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
 
 \section{Online Gaming}
+In this section an overview of online gaming challenges and system architectures will be discussed. 
+
+The main challenges facing online gaming are scalability, latency, consistency, fault-tolerance, fairness, and cheating.
+Scalability in online games is measured in terms of players that can be supported \cite{turchini2015scalability}.
+Latency affects quality of experience of a game, however, this depends heavily on the game genre \cite{LatencyandPlayerActions}.
+Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PSurvey}.
+Fault-tolerance is a challenge for online gaming and can result from failures or unscheduled disconnections of server or peers which can lead to the loss of game state \cite{P2PSurvey}.
+Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PSurvey}.
+Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PSurvey}. 
+
+Online game architectures fall into the following main categories client-server, peer-to-peer, hybrid peer-to-peer and distributed server (also referred to as multiserver). Each type has advantages and disadvantages and suitability depends on a number of factors, including number of players and whether or not the game is short-session-based or persistent.
 %We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
 
-\subsection{Client-Hosted}
 
-\begin{figure}
-	\centering
-	\input{Figs/ClientHosted.pdf_tex}
-	\caption{Client hosted networked game.}
-\end{figure}
-
-\subsection{P2P}
-P2P provides scalability, but has challenges of data consistency, communication overhead and cheating. \cite{VoroGame} proposes VoroGame, which addresses these problems.
-
-% problem of maintaining data consistency between peers but does not provide any measures of protection against cheating.
-
-%VoroGame, work is distributed amongst clients.
-%VoroGame uses Voronoi spatial partitioning to assign a region to a peer and an overlay based on a distributed hash table for data distribution.
-
-%Unsuitable for real-time physics as latency is too high
-
-\begin{figure}
-	\centering
-	\input{Figs/PeerToPeer.pdf_tex}
-	\caption{Peer to peer hosted networked game.}
-\end{figure}
-
-\subsection{Server-Hosted}
+\subsection{Client-Server}
+Client-Server architecture is an architecture in which the game is executed and game state is managed entirely by the server. Clients connect to the server and receive the necessary information about the game world. All messages and interactions are sent through the game server and the server is responsible for disseminating messages to the appropriate clients. The main challenge with this approach is scalability, as a single server can only support a limited number of players. This is normally solved with the addition of more servers, i.e. switching to a distributed server architecture. As all communication goes through the server, clients do not directly communicate with each other, meaning latency can be increased for interactions with other players.
+As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the central server's sate, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PSurvey}.
 
 \begin{figure}
 	\centering
@@ -223,7 +213,33 @@ P2P provides scalability, but has challenges of data consistency, communication 
 	\caption{Server hosted networked game.}
 \end{figure}
 
-\subsection{Challenges}
+%\subsection{Client-Hosted}
+%
+%\begin{figure}
+%	\centering
+%	\input{Figs/ClientHosted.pdf_tex}
+%	\caption{Client hosted networked game.}
+%\end{figure}
+
+\subsection{Peer-to-Peer}
+Peer-to-Peer, often referred to as`P2P', is an architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as bother server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PSurvey}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PSurvey}.
+
+\begin{figure}
+	\centering
+	\input{Figs/PeerToPeer.pdf_tex}
+	\caption{Peer-to-peer hosted networked game.}
+	\label{fig_P2P}
+\end{figure}
+
+\subsection{Hybrid Peer-to-Peer}
+\subsection{Distributed server}
+
+% problem of maintaining data consistency between peers but does not provide any measures of protection against cheating.
+
+%VoroGame, work is distributed amongst clients.
+%VoroGame uses Voronoi spatial partitioning to assign a region to a peer and an overlay based on a distributed hash table for data distribution.
+
+%Unsuitable for real-time physics as latency is too high
 
 \subsection{Update Rate Values} \label{update-rate-test-values}
 
