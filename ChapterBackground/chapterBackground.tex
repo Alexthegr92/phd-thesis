@@ -246,21 +246,27 @@ Distributed server or Multi-Server architectures use multiple servers and the co
 % Dynamic load-balancing schemes can be employed
 % Hand-off between regions is complicated for players, let alone real-time physics
 
-\subsection{Update Rate Values} \label{update-rate-test-values}
+\subsection{Update Rate and Network Tick Rate} \label{update-rate-test-values}
+
+Two important aspects of online video game servers are the update rate and network tick rate, which will now both be defined. Update rate is the rate at which the server updates the game state, such as game logic updates and AI. Network tick rate is the rate at which the server communicates the game state to clients and clients communicate interactions with the server, such as movement input for a player character \cite{pisan2004challenges}. The two rates can be independent of each other and the network tick rate can be lower than the server update rate, reducing the network requirements through less frequent communication between server and client.
+
+In many cases it is not possible for a server to communicate the entire game state to the each client due to bandwidth constraints. Instead, techniques are used to prioritise and filter the information that is most relevant to each client, in order to reduce the data that needs to be communicated with clients \cite{pisan2004challenges}. These techniques are known as Interest Management and discussed further in \ref{InterestManagement}.
+
+The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick-rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates range from 60Hz for FPS to 20Hz for slower paced games \cite{lee2015evaluation}.
 
 %Dale's work starts here
-Two of the most important variables used in configuring networked video games are the ``tick rate'' and the ``update rate''. These two terms are often confused or used interchangeably, but for the purpose of clarity, we will use the following definitions - the tick rate controls how many times per second the the simulation processes data and produces new data, whereas the update rate controls how many times per second a server will send updates to its clients over the network (or vice versa) \cite{NetcodeBattlenonsense}. These two values could differ, and some video games may opt to send network updates at lower rate to save bandwidth, for example. However, for simplicity, the update rate is the same as the tick rate in our current implementation, as network updates are performed synchronously with physics simulation steps.
+%The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
 
-The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
+%For our tests, we chose a variety of popular update rates found in recent triple-A video games: 10Hz, 30Hz, and 60Hz. 10Hz was used by \textit{Battlefield 4} at launch, and later changed to 30Hz after a software update in response to player feedback regarding poor online experience, and so this represents a low update rate. 30Hz is used by many console games or games with large environments, and could be considered an average update rate. 60Hz is used by games that require fast response times (i.e. competitive first-person shooters) and so it represents a high update rate.
 
-For our tests, we chose a variety of popular update rates found in recent triple-A video games: 10Hz, 30Hz, and 60Hz. 10Hz was used by \textit{Battlefield 4} at launch, and later changed to 30Hz after a software update in response to player feedback regarding poor online experience, and so this represents a low update rate. 30Hz is used by many console games or games with large environments, and could be considered an average update rate. 60Hz is used by games that require fast response times (i.e. competitive first-person shooters) and so it represents a high update rate.
-
-To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
+%To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
 %Dale's work ends here
 
 \section{Physics in Online Gaming}
 %(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
 %https://books.google.co.uk/books?hl=en&lr=&id=ujfOBQAAQBAJ&oi=fnd&pg=PA307&dq=Physics+networked+games&ots=OC5YWxmd25&sig=vcxatd9Wl0_SdxCAUZvmP6BWl7I&redir_esc=y#v=onepage&q=Physics%20networked%20games&f=false
+
+%Predictive schemes that run locally
 
 \section{Graph-Partitioning}
 %When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there’s a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
@@ -289,7 +295,7 @@ Despite DVE being a popular area of research, the literature is restricted to mo
 
 
 % Some introduction to interest management?
-\subsection{Interest Management}
+\subsection{Interest Management}\label{InterestManagement}
 The technique presented in this paper, Aura Projection, makes use of the aura concept from Interest Management. Interest Management is a term used to describe any method of restricting message dissemination between objects within a virtual space, with the aim of reducing the network overhead when large numbers of participants or players are connected to a virtual world \cite{Morgan2005}.
 
 Interest Management can be broadly classified into two categories: Regions and Auras \cite{Morgan2005, storey2004determining}.
