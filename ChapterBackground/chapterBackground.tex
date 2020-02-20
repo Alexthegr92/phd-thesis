@@ -239,7 +239,14 @@ Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to
 %These can be broadly classified into two types: Homogeneous, in which all nodes have similar responsibilities and Heterogeneous, in which some peers be
 
 \subsubsection{Distributed server}
-Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This approach enables scalability as more servers are used, so more players can be supported. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected.
+Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This can be achieved in one of two ways, either through `shards' or through division of the game world. 
+
+In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards. 
+
+In the game world division method, there is a single instance of the game world and the workload is distributed either through each server being responsible for a region or a set of players. Division methods are discussed further in \ref{distrubted_virtual_env}. 
+a single server can be overloaded if the workload is too high for example a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers.
+
+The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected. 
 
 % Game can be divided up in very different ways. Shards, regions (migratory), player-based (non-migratory)
 % One server can overloaded if the workload is too high in one region
@@ -271,7 +278,7 @@ The rates chosen for network tick rates depend on a variety of factors, includin
 \section{Graph-Partitioning}
 %When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there’s a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
 
-\section{Distributed Virtual Environments}
+\section{Distributed Virtual Environments} \label{distrubted_virtual_env}
 %We look at existing ways of distributing game worlds and previous work carried out on these approaches. These fall into two categories, migratory (approach used by AP) and non-migratory. The studies found non-migratory to be the better solution when focusing on player-player interaction and we will discuss why migratory is the better solution for physics body-physics body interaction. Important concepts such as interest management are introduced to the reader.
 
 Although there has been research utilising multiple servers to distribute the task of solving physics based problems (e.g., \cite{mashayekhi2018automatically}), to the best of our knowledge there is no literature describing real-time interactive physics exploiting the addition of servers to gain scalability. The closest work to our research is that carried out to seek scalability in terms of player numbers in online gaming in the field of Distributed Virtual Environments (DVEs). 
