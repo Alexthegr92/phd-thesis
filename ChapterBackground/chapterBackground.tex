@@ -199,11 +199,11 @@ Fault-tolerance is a challenge for online gaming and can result from failures or
 Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PSurvey}.
 Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PSurvey}. 
 
+\subsection{Architectures}
 Online game architectures fall into the following main categories client-server, peer-to-peer, hybrid peer-to-peer and distributed server (also referred to as multiserver). Each type has advantages and disadvantages and suitability depends on a number of factors, including number of players and whether or not the game is short-session-based or persistent.
 %We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
 
-
-\subsection{Client-Server}
+\subsubsection{Client-Server}
 Client-Server architecture is a type of architecture in which the game is executed and game state is managed entirely by the server. Clients connect to the server and receive the necessary information about the game world. All messages and interactions are sent through the game server and the server is responsible for disseminating messages to the appropriate clients. The main challenge with this approach is scalability, as a single server can only support a limited number of players. This is normally solved with the addition of more servers, i.e. switching to a distributed server architecture. As all communication goes through the server, clients do not directly communicate with each other, meaning latency can be increased for interactions with other players.
 As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the central server's sate, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PSurvey}.
 
@@ -221,7 +221,7 @@ As there is only one central version of the game state, consistency resolution i
 %	\caption{Client hosted networked game.}
 %\end{figure}
 
-\subsection{Peer-to-Peer}
+\subsubsection{Peer-to-Peer}
 Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as bother server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PSurvey}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PSurvey}.
 
 %VoroGame, work is distributed amongst clients.
@@ -234,11 +234,11 @@ Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the 
 	\label{fig_P2P}
 \end{figure}
 
-\subsection{Hybrid Peer-to-Peer}
+\subsubsection{Hybrid Peer-to-Peer}
 Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to-peer architectures. The peer-to-peer part of the system can be responsible for different aspects of the system, including Cooperative Message Dissemination, State Distribution, Basic Server Control and distributing software updates. \cite{P2PSurvey}. Hybrid Peer-to-Peer enable trade-offs between consistency control and scalability are enabled, depending on how the system is divided between server and peer-to-peer.
 %These can be broadly classified into two types: Homogeneous, in which all nodes have similar responsibilities and Heterogeneous, in which some peers be
 
-\subsection{Distributed server}
+\subsubsection{Distributed server}
 Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This approach enables scalability as more servers are used, so more players can be supported. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected.
 
 % Game can be divided up in very different ways. Shards, regions (migratory), player-based (non-migratory)
@@ -252,7 +252,7 @@ Two important aspects of online video game servers are the update rate and netwo
 
 In many cases it is not possible for a server to communicate the entire game state to the each client due to bandwidth constraints. Instead, techniques are used to prioritise and filter the information that is most relevant to each client, in order to reduce the data that needs to be communicated with clients \cite{pisan2004challenges}. These techniques are known as Interest Management and discussed further in \ref{InterestManagement}.
 
-The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick-rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
+The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
 
 %Dale's work starts here
 %The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
