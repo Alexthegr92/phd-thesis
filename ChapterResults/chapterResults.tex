@@ -638,7 +638,7 @@ Speed is controlled such that the two objects used in the experiment collide wit
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{FrameTimeDensity}
-	\caption{Scaled Density of frame-times for the different target frame-times used in the collision correctness experiments. The median of each target frame-time is marked with a vertical dashed line.}
+	\caption{Scaled Density of frame-times for the different target frame-times used in the collision correctness experiments. The median of each target frame-time is marked with a vertical dashed line. As target frame-time increases, the distribution of actual frame-time also increases. Frame-time is controlled using a wait within the simulation's update loop, which is limited to a target frame-time as the resultant frame-times are a normal distribution with the target frame-time as the median. As a result of this, half of all frames are expected to be above the target frame-time, which may cause false-positives in detecting late collisions.}
 	\label{fig_FrameTimeDensity}
 \end{figure}
 
