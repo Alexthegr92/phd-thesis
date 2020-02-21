@@ -191,13 +191,36 @@ Scalable Non-Real Time Physics include fluid simulations, meteorological simulat
 \section{Online Gaming}
 In this section an overview of online gaming challenges and system architectures will be discussed. 
 
-The main challenges facing online gaming are scalability, latency, consistency, fault-tolerance, fairness, and cheating.
-Scalability in online games is measured in terms of players that can be supported \cite{turchini2015scalability}.
-Latency affects quality of experience of a game, however, this depends heavily on the game genre \cite{LatencyandPlayerActions}.
+The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability.
+
+\subsection{Consistency}
 Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PSurvey}.
+
+\subsection{Latency}
+Latency can significantly affect the quality of experience of a game and can impact both a player's performance in a game \cite{EffectsofLossandLatency, claypool2010latency} and subjective perception of the game \cite{dick2005analysis}. However, this depends heavily on the game genre and actions taken by the player \cite{LatencyandPlayerActions, claypool2010latency}. Fig. \ref{fig_LatencyCompensation} shows an example of the effects of latency on a networked game. Where the target appears to the player and hitboxes on the server used to detect a player's shot are significantly different.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{Figs/LagCompensation.jpg}
+	\caption{ A screenshot taken when 200ms of latency was present on a client. The red hitboxes show the target position on the client (100ms + interpolated period). While the user command was travelling to the server, the target continued to move to the left. When the user command arrived at the server, the server reverted the target position (blue hitboxes) using the estimated time of the command execution. The server calculates whether or not the hist was successful and sends a confirmation message to the client \cite{Source}.}
+	\label{fig_LatencyCompensation}
+\end{figure}
+
+\subsection{Fault-tolerance}
 Fault-tolerance is a challenge for online gaming and can result from failures or unscheduled disconnections of server or peers which can lead to the loss of game state \cite{P2PSurvey}.
+
+\subsection{Fairness}
 Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PSurvey}.
+
+\subsection{Cheating}
 Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PSurvey}. 
+
+\subsection{Scalability}
+Scalability in online games is measured in terms of players that can be supported \cite{turchini2015scalability}. An online gaming system's ability to scale depends upon the architecture employed. The different architectures than can be used will now be discussed.
+
+%This screenshot was taken on a listen server with 200 milliseconds of lag (using net_fakelag), right after the server confirmed the hit. The red hitbox shows the target position on the client where it was 100ms + interp period ago. Since then, the target continued to move to the left while the user command was travelling to the server. After the user command arrived, the server restored the target position (blue hitbox) based on the estimated command execution time. The server traces the shot and confirms the hit (the client sees blood effects).
+
+%Client and server hitboxes don't exactly match because of small precision errors in time measurement. Even a small difference of a few milliseconds can cause an error of several inches for fast-moving objects. Multiplayer hit detection is not pixel perfect and has known precision limitations based on the tickrate and the speed of moving objects. 
 
 \subsection{Architectures}
 Online game architectures fall into the following main categories client-server, peer-to-peer, hybrid peer-to-peer and distributed server (also referred to as multiserver). Each type has advantages and disadvantages and suitability depends on a number of factors, including number of players and whether or not the game is short-session-based or persistent.
@@ -244,7 +267,7 @@ Distributed server or Multi-Server architectures use multiple servers and the co
 In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards. 
 
 In the game world division method, there is a single instance of the game world and the workload is distributed either through each server being responsible for a region or a set of players. Division methods are discussed further in \ref{distrubted_virtual_env}. 
-a single server can be overloaded if the workload is too high for example a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers.
+a single server can be overloaded if the workload is too high for example a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers as latency will always exist between servers.
 
 The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected. 
 
@@ -268,6 +291,7 @@ The rates chosen for network tick rates depend on a variety of factors, includin
 
 %To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
 %Dale's work ends here
+
 
 \section{Physics in Online Gaming}
 %(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
