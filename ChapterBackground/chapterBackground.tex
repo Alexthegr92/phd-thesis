@@ -191,7 +191,7 @@ Scalable Non-Real Time Physics include fluid simulations, meteorological simulat
 \section{Online Gaming}
 %TODO: Change to include related work will be discussed
 In this section an overview of online gaming challenges and architectures will be discussed. 
-The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. The purpose  of this study is to demonstrate scalability and consistency of real-time physics through the use of a distributed server architecture, therefore in the following section we will define consistency with respect to online gaming and discuss existing work addressing it. Additionally Fault-tolerance, fairness and cheating will also be briefly explained, although they are not the main focus of this study, this is intended to make the reader aware of the challenges different architectures address. 
+The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. The purpose  of this study is to demonstrate scalability and consistency of real-time physics through the use of a distributed server architecture, therefore in the following section we will define consistency with respect to online gaming and discuss existing work addressing it. Additionally, latency, fault-tolerance, fairness and cheating will also be briefly explained, although they are not the main focus of this study, this is intended to make the reader aware of the challenges different architectures address. 
 Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
 
 \subsection{Consistency}
@@ -303,16 +303,11 @@ The rates chosen for network tick rates depend on a variety of factors, includin
 \subsection{Dead-Reckoning}
 
 \subsection{Protocols}
+Games use both TCP (Transmission Control Protocol) and UDP (User Datagram Protocol). Most games use the UDP network protocol for transmission of short and time sensitive data and TCP for long and content-aware data, providing services such as matchmaking \cite{2018NetworkTraffic, 2012PacketLevelTraffic}. UDP offers best effort communication . Unlike TCP, UDP is a connection-less protocol and does not guarantee data delivery, but suffers from less latency. In many situations in online games, lost packets are not critical, for example in an online game in which  the server informs each client of the positions of each player, there are a large number of updates, meaning a missed update is not critical \cite{pisan2004challenges}. 
+%Network play in online games has to be constructed around latency and packet-loss
 
-
-%Dale's work starts here
-%The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
-
-%For our tests, we chose a variety of popular update rates found in recent triple-A video games: 10Hz, 30Hz, and 60Hz. 10Hz was used by \textit{Battlefield 4} at launch, and later changed to 30Hz after a software update in response to player feedback regarding poor online experience, and so this represents a low update rate. 30Hz is used by many console games or games with large environments, and could be considered an average update rate. 60Hz is used by games that require fast response times (i.e. competitive first-person shooters) and so it represents a high update rate.
-
-%To achieve these update rates, a ``frame-time'' parameter is present in the simulation, which controls how long a complete frame (physics time step and network update combined) should take in milliseconds by delaying execution appropriately.
-%Dale's work ends here
-
+\subsection{RakNet}
+RakNet is the gaming network library used in the development of the implementation of this project. RakNet uses UDP but also provides a reliability and ordering layer. When messages have the reliable option enabled, RakNet guarantees that UDP packets will arrive at their destination eventually. When messages. When messages have the ordered option enabled, RakNet guarantees that the packets are ordered at the destination. Ordering has the advantage of removing the need to handle out of order packets \cite{RakNetReliability}.
 
 \section{Physics in Online Gaming}
 %(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
