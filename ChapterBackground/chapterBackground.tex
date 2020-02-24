@@ -196,8 +196,20 @@ The main challenges facing online gaming are consistency, latency, fault-toleran
 \subsection{Consistency}
 Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PSurvey}.
 
+%Strong Consistency
+%Weak Consistency
+%2 of 3, availability, network partitioning, consistency
+%An Enhanced Dead Reckoning Model for Physics-Aware Multiplayer Computer Games
+%Peer-to-Peer Architectures for Massively Multiplayer Online Games: A Survey
+%TODO: Talk about consistency in Proposed Solution
+
 \subsection{Latency}
 Latency can significantly affect the quality of experience of a game and can impact both a player's performance in a game \cite{EffectsofLossandLatency, claypool2010latency} and subjective perception of the game \cite{dick2005analysis}. However, this depends heavily on the game genre and actions taken by the player \cite{LatencyandPlayerActions, claypool2010latency}. Fig. \ref{fig_LatencyCompensation} shows an example of the effects of latency on a networked game. Where the target appears to the player and hitboxes on the server used to detect a player's shot are significantly different.
+
+% Latency and scalability: a survey of issues and techniques for supporting networked games
+% Synchronization Technique - Lock-step
+% Optimistic Technique
+%TODO: Talk about latency compensation in Proposed Solution
 
 \begin{figure}
 	\centering
@@ -211,6 +223,8 @@ Fault-tolerance is a challenge for online gaming and can result from failures or
 
 \subsection{Fairness}
 Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PSurvey}.
+
+%MANAGING LATENCY AND FAIRNESS IN NETWORKED GAMES 
 
 \subsection{Cheating}
 Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PSurvey}. 
@@ -262,19 +276,17 @@ Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to
 %These can be broadly classified into two types: Homogeneous, in which all nodes have similar responsibilities and Heterogeneous, in which some peers be
 
 \subsubsection{Distributed server}
+% TODO: More references for this
 Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This can be achieved in one of two ways, either through `shards' or through division of the game world. 
 
-In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards. 
+In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards \cite{P2PSurvey}.
 
 In the game world division method, there is a single instance of the game world and the workload is distributed either through each server being responsible for a region or a set of players. Division methods are discussed further in \ref{distrubted_virtual_env}. 
-a single server can be overloaded if the workload is too high for example a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers as latency will always exist between servers.
+a single server can be overloaded if the workload is too high, for example, by a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers as latency will always exist between servers \cite{P2PSurvey}.
 
-The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected. 
+The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected \cite{P2PSurvey}.
 
-% Game can be divided up in very different ways. Shards, regions (migratory), player-based (non-migratory)
-% One server can overloaded if the workload is too high in one region
-% Dynamic load-balancing schemes can be employed
-% Hand-off between regions is complicated for players, let alone real-time physics
+%TODO: Mention cost? Persistent games?
 
 \subsection{Update Rate and Network Tick Rate} \label{update-rate-test-values}
 
@@ -283,6 +295,8 @@ Two important aspects of online video game servers are the update rate and netwo
 In many cases it is not possible for a server to communicate the entire game state to the each client due to bandwidth constraints. Instead, techniques are used to prioritise and filter the information that is most relevant to each client, in order to reduce the data that needs to be communicated with clients \cite{pisan2004challenges}. These techniques are known as Interest Management and discussed further in \ref{InterestManagement}.
 
 The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
+
+%TODO: Mention delta-update techniques, advantages and problems created
 
 %Dale's work starts here
 %The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
