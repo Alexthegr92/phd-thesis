@@ -189,9 +189,10 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono \cite{Chrono}. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
 
 \section{Online Gaming}
-In this section an overview of online gaming challenges and system architectures will be discussed. 
-
-The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability.
+%TODO: Change to include related work will be discussed
+In this section an overview of online gaming challenges and architectures will be discussed. 
+The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. The purpose  of this study is to demonstrate scalability and consistency of real-time physics through the use of a distributed server architecture, therefore in the following section we will define consistency with respect to online gaming and discuss existing work addressing it. Additionally Fault-tolerance, fairness and cheating will also be briefly explained, although they are not the main focus of this study, this is intended to make the reader aware of the challenges different architectures address. 
+Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
 
 \subsection{Consistency}
 Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PSurvey}.
@@ -296,7 +297,13 @@ In many cases it is not possible for a server to communicate the entire game sta
 
 The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
 
+\subsection{Delta-Update}
 %TODO: Mention delta-update techniques, advantages and problems created
+
+\subsection{Dead-Reckoning}
+
+\subsection{Protocols}
+
 
 %Dale's work starts here
 %The ideal update rate depends on a number of factors such as the complexity of the simulation, the required level of accuracy, the number of network peers involved, and availability of bandwidth. Some simulations with large environments may need to send and receive large network packets. If a competitive video game requires fast reaction times and tight synchronisation between a client and a server, it may use a higher update rate - for example, competitive sessions of \textit{Counter-Strike} may use an update rate of 60Hz or more. In contrast, a game such as \textit{Minecraft} that does not require this level of responsiveness but does offer large environments could use a lower update rate of 20Hz to conserve bandwidth and reduce processing overheads \cite{lee2015evaluation}.
