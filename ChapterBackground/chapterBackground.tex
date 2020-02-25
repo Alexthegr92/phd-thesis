@@ -297,8 +297,9 @@ In many cases it is not possible for a server to communicate the entire game sta
 
 The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only became noticeable if it exceeded $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
 
-\subsection{Delta-Update}
-%TODO: Mention delta-update techniques, advantages and problems created
+\subsection{Delta-Encoding}
+%TODO: Mention Delta-Encoding is used between servers for auras in implementation
+A common optimisation used by networked games is delta-encoding. Typically in games entities and their state change little from one update to the next, i.e. it is expected that only a small number of entities change between updates. Delta-encoding reduces network traffic by the server only encoding the difference (delta) between updates, reducing the size of messages that need to be sent \cite{bharambe2006colyseus}. Additionally, if an object's state has not changed, no message is required to be sent, dramatically reducing network overhead in cases of a large number of objects which are not changing. The main drawback of this technique is a missed update message sent to a client would lead to a different entity state from that point for that client and can lead to missing entities or entities that have been deleted on the server, remaining on the client. As result of this, delta-encoding either requires reliable message transmission between server and client or a periodically transmitted full "key" frame, containing the state of all entities \cite{bharambe2004supporting}.
 
 \subsection{Dead-Reckoning}
 
