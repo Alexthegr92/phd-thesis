@@ -307,8 +307,14 @@ A common optimisation used by networked games is delta-encoding. Typically in ga
 Games use both TCP (Transmission Control Protocol) and UDP (User Datagram Protocol). Most games use the UDP network protocol for transmission of short and time sensitive data and TCP for long and content-aware data, providing services such as matchmaking \cite{2018NetworkTraffic, 2012PacketLevelTraffic}. UDP offers best effort communication . Unlike TCP, UDP is a connection-less protocol and does not guarantee data delivery, but suffers from less latency. In many situations in online games, lost packets are not critical, for example in an online game in which  the server informs each client of the positions of each player, there are a large number of updates, meaning a missed update is not critical \cite{pisan2004challenges}. 
 %Network play in online games has to be constructed around latency and packet-loss
 
-\subsection{RakNet}
-RakNet is the gaming network library used in the development of the implementation of this project. RakNet uses UDP but also provides a reliability and ordering layer. When messages have the reliable option enabled, RakNet guarantees that UDP packets will arrive at their destination eventually. When messages. When messages have the ordered option enabled, RakNet guarantees that the packets are ordered at the destination. Ordering has the advantage of removing the need to handle out of order packets \cite{RakNetReliability}.
+\section{RakNet}
+RakNet is the gaming network library used in the development of the implementation of this project. Features of RakNet used by this study's implementation will now be described.
+
+\subsection{Reliability and Ordering layer}
+RakNet uses UDP but also provides a reliability and ordering layer. When messages have the reliable option enabled, RakNet guarantees that UDP packets will arrive at their destination eventually. When messages. When messages have the ordered option enabled, RakNet guarantees that the packets are ordered at the destination. Ordering has the advantage of removing the need to handle out of order packets \cite{RakNetReliability}.
+
+\subsection{Replica Manager}
+RakNet provides a replica manager plugin, which supports the use of replicas and delta-encoding for the updates of their states. Replicas are replicated entities, hosted by one node and replicated on connected nodes. For example, a server is responsible for the updates if a set of entities, the entities are then replicated on all connected clients. This manager handles the broadcast of: existing game entities to new connections, new game entities to existing connections; deleted game entities to existing entities and updates of states of replicated entities \cite{RakNetReplica}.
 
 \section{Physics in Online Gaming}
 %(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
