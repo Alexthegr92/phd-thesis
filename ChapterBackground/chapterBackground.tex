@@ -419,15 +419,32 @@ This thesis proposes an alternative technique to SpatialOS and Aether Engine, AP
 
 
 \section{Cloud Computing}
+In the section a brief overview of cloud computing is given, deployment and service models are discussed. This study's implementation is deployed on the chosen cloud provider, Amazon Web Services (AWS). The latency and packet-loss conditions that affect AP are presented and these values will used to inform the correctness experiments performed on AP.
+
 %We discuss the wider context of cloud computing, how AP is deployed on the cloud and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
 
-Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
+Cloud computing is a large scale distributed computing paradigm \cite{2008CloudComputing}. Cloud providers offer flexible, real-time on-demand services, including servers, storage and applications. Cloud Computing allows compute resources to be rapidly and elasticity provisioned \cite{2012CloudComputing}.
+
+Cloud deployment models are categorised into the following:
+\begin{itemize}
+\item Private cloud - Set up within an organisation's internal data centre. This is much more secure than the public cloud due to its internal only exposure and access is limited to designated users within an organisation \cite{2012CloudComputing}.
+\item Public cloud - Resources are provided by a third-party provider. Users request resources in a self-service manner over the Internet. Users are typically charged on a pay-per-use model. Public clouds are less secure than private cloud as users have more responsibility in ensuring the security of their applications and data from potential malicious attacks from other users in the cloud. Public clouds offer far greater resources than a private cloud, allowing spikes in demand to be provided for  \cite{2012CloudComputing}.
+\item Hybrid cloud - A private cloud linked to one or more public clouds. This provides solutions with more secure control over data and applications while still allowing public access over the internet \cite{2012CloudComputing}.
+\end{itemize}
+
+Cloud Computing Service Models are categorised into the following:
+\begin{itemize}
+	\item Infrastructure – as – a—Service (IaaS) - Provides basic hosting of resources, e.g. Virtual Machines (VM)s and storage \cite{2012CloudComputing}.
+	\item Platform – as – a –Service (PaaS) - Provide the ability to build or deploy applications on top of IaaS \cite{2012CloudComputing}.
+	\item Software –as –a –Service (SaaS) - Provides entire sets of applications running in the cloud. Users have no responsibility or management oversight for SaaS. Examples include Gmail from Google \cite{2012CloudComputing}.	
+\end{itemize}
+
+%Previously scaling up software would require a single machine with more computing power or a dedicated cluster. Cloud computing allows for on demand allocation of resources, dramatically cutting the cost. There has been a big move to abstract architecture away from the applications running on it, containers such as docker and even further with things like Google's App Engine.
 
 %https://aisel.aisnet.org/cgi/viewcontent.cgi?article=3672&context=cais
 
 %Dale's background starts here
 \subsection{Latency Values}
-
 In order to assess the correctness of the system when subjected to varying amounts of network latency, we wanted to use latency values representative of real world configurations. A recent study performed a series of exhaustive performance tests across all major cloud service providers, including our chosen provider, Amazon Web Services (AWS) \cite{ThousandEyesCloudPerf2019}. Some of the benchmark categories included: (1) global end-user network latency - measured between a variety of global ``end-user'' machines across the Internet and different geographical cloud availability zones (AZs), (2) inter-region latency - measured between cloud hosts located in different geographical regions within the same cloud provider, and (3) inter-AZ latency - measured between cloud hosts located within the same geographical region and within the same cloud provider.
 
 The optimal deployment of a real-time distributed physics system would utilise multiple cloud hosts located within the same AZ (inter-AZ) for the lowest latencies, although we also decided to consider performance in a typical inter-region configuration as a ``worst-case'' scenario (e.g. insufficient availability in one region). We chose latency test values of 1ms, 24ms, and 75ms, as according to the study, these values represent the average inter-AZ latency, highest average Europe inter-region latency, and highest average United States inter-region latency within AWS respectively.
