@@ -461,8 +461,14 @@ Another factor that affects the performance of networked applications is packet-
 
 The chosen values for the packet-loss correctness experiment range from $0\%-20\%$. These values cover the entire range of expected packet-loss values while running in the cloud, as well as beyond those values, in order to determine what impact severe packet-loss would have on the correctness of AP and establish the trend increasing packet-loss has.
 
-\section{Scientific and Engineering Simulations}
+\section{Real-time Physics for Scalable Simulations}
 %Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to be scaled, enabling large or complex simulations, that otherwise wouldn’t have been able, to run in real-time.
+
+In the past, real-time physics engines have not always been suitable for use in simulations \cite{Boeing2007}. However, in recent years significant effort has been put towards realism of real-time physics engines and the mathematical error has reduced. Commercial game engines (using real-time physics) are finding their use in other industries, including their application in virtual simulations (e.g. \cite{Xu2017, Lu2017, Shah2018}, collaborative VR \cite{NVIDIAHolodeck} and in film production \cite{mehta2015animated}.
+
+%TODO: The advantages of real-time physics for non-game applications?
+
+However, real-time physics for use in other applications has been bounded by the computational power of a single machine. For large, detailed and/or dynamic simulations, this may be insufficient \cite{koszela2018distributed}. Prior to the proprietary commercial software SpatialOS \cite{SpatialOS} and Aether Engine \cite{AetherEngine}, real-time physics simulations have been limited to what can be achieved on a single machine. Scalability in simulations can be achieved by distributing a real-time physics engine across multiple machines, alleviating the computation limit of just one machine. This would allow many more applications to take advantage of real-time physics. This study aims to bring the methods for distributing real-time physics into an academic setting for the first time.
 
 \section{Containerisation of Game Engines}
 %Game engines, generally, currently run as one single application, including graphics, physics, AI etc. (with the exception of databases for user data). AP separates out the physics element into its own container, much like many modern systems are splitting up different aspects of systems into their own containers, for example web applications. This containerisation of physics, means, physics can be elastically scaled independently from other systems such as graphics, along with other advantages of modularity.
