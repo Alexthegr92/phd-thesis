@@ -106,12 +106,13 @@ This equation is a fast approximation of orientation.
 The equations used in real-time physics engines use iterative processes and approximate a continuous process with discrete steps. As a result, errors due to inaccuracies in the discreteness accumulate over time due to the iterative nature of the integrators. Different real-time physics engines will often give different results for the same simulation, despite identical starting parameters \cite{Boeing2007}.
 
 \subsection{Collision Detection}\label{collision_detection}
-Objects are represented by geometry colliders. Collision detection works by detecting overlaps between geometry representations.
+Objects are represented by geometry colliders. Collision detection works by detecting overlaps between geometry representations  (contact determination).
 Typically objects have simple colliders, such as boxes, capsules, cylinders and spheres. More complex colliders are often supported, such as convex and concave hulls. Colliders can either be static or dynamic.
 
 Optimisations for collision detection are used to avoid comparing every possible pair of objects. Phases of collision detection are used, known and the broadphase and the narrowphase.
 %TODO: Give examples of these
 
+In addition to informing the collision response phase, callbacks can also be generated, allowing any part of the software to be informed of collision events that have taken place. For example, the game logic may receive events of when a bullet hits an avatar in order to determine when a player has been shot in a shooting game.
 
 
 %Collision detection
@@ -143,6 +144,7 @@ Optimisations for collision detection are used to avoid comparing every possible
 
 \subsection{Collision Response}
 
+Collision response is the phase of the real-time physics loop which deals with integrating into the model the effect produced by contacts between entities within the system. Collision response will taken into account mass, coefficient of restitution (loss of kinetic energy during a collisions) and the location and angle of the collision. Collision response can be very simple to calculate for simple geometric shapes, but becomes expensive when more complex mesh representations are used.
 %\subsection{Constraints}
 
 \subsection{Performance of Real-Time Physics Engines}
