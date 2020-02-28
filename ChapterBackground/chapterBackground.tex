@@ -301,8 +301,6 @@ The rates chosen for network tick rates depend on a variety of factors, includin
 %TODO: Mention Delta-Encoding is used between servers for auras in implementation
 A common optimisation used by networked games is delta-encoding. Typically in games entities and their state change little from one update to the next, i.e. it is expected that only a small number of entities change between updates. Delta-encoding reduces network traffic by the server only encoding the difference (delta) between updates, reducing the size of messages that need to be sent \cite{bharambe2006colyseus}. Additionally, if an object's state has not changed, no message is required to be sent, dramatically reducing network overhead in cases of a large number of objects which are not changing. The main drawback of this technique is a missed update message sent to a client would lead to a different entity state from that point for that client and can lead to missing entities or entities that have been deleted on the server, remaining on the client. As result of this, delta-encoding either requires reliable message transmission between server and client or a periodically transmitted full "key" frame, containing the state of all entities \cite{bharambe2004supporting}.
 
-\subsection{Dead-Reckoning}
-
 \subsection{Protocols}
 Games use both TCP (Transmission Control Protocol) and UDP (User Datagram Protocol). Most games use the UDP network protocol for transmission of short and time sensitive data and TCP for long and content-aware data, providing services such as matchmaking \cite{2018NetworkTraffic, 2012PacketLevelTraffic}. UDP offers best effort communication . Unlike TCP, UDP is a connection-less protocol and does not guarantee data delivery, but suffers from less latency. In many situations in online games, lost packets are not critical, for example in an online game in which  the server informs each client of the positions of each player, there are a large number of updates, meaning a missed update is not critical \cite{pisan2004challenges}. 
 %Network play in online games has to be constructed around latency and packet-loss
@@ -316,14 +314,38 @@ RakNet uses UDP but also provides a reliability and ordering layer. When message
 \subsection{Replica Manager}
 RakNet provides a replica manager plugin, which supports the use of replicas and delta-encoding for the updates of their states. Replicas are replicated entities, hosted by one node and replicated on connected nodes. For example, a server is responsible for the updates if a set of entities, the entities are then replicated on all connected clients. This manager handles the broadcast of: existing game entities to new connections, new game entities to existing connections; deleted game entities to existing entities and updates of states of replicated entities \cite{RakNetReplica}.
 
-\section{Physics in Online Gaming}
+\section{Consistency in Real-Time Physics}
 %(and the lack of, due to the challenges faced). Mostly limited to dead-reckoning
 %https://books.google.co.uk/books?hl=en&lr=&id=ujfOBQAAQBAJ&oi=fnd&pg=PA307&dq=Physics+networked+games&ots=OC5YWxmd25&sig=vcxatd9Wl0_SdxCAUZvmP6BWl7I&redir_esc=y#v=onepage&q=Physics%20networked%20games&f=false
 
 %Predictive schemes that run locally
 
-\section{Graph-Partitioning}
-%When it comes to spatially-partitioning a simulation, the problem is essentially a graph partitioning problem, where objects are nodes and if there’s a possible interaction, an edge exists. Useful for terms, comparisons with and future work on load-balancing will heavily involve this.
+Maintaining consistency in the physics aspect of games when distributed is great challenge, this is due to the time-sensitive nature of physics (millisecond differences can result in completely divergent results, discussed further in \ref{divergingResults}) \cite{2012EnhancedDeadReckoning}.
+
+Consistency in physics can be divided into two categories:
+\begin{itemize}
+\item Consistency in simulation view, for example, differences between the physics simulation on the server and a client.
+\item Consistency within the simulation itself (when the simulation is distributed between devices).
+\end{itemize}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{Figs/DeadReckoning}
+	\caption{An example of dead-reckoning \cite{2012EnhancedDeadReckoning}.}
+	\label{fig_DeadReckoning}
+\end{figure}
+
+The former is a very common issue in online gaming, particularly due to high latency and limited bandwidth between servers and client, necessitating the need for client-side correction techniques. The most common technique used is dead-reckoning, shown in Fig. \ref{fig_DeadReckoning}. Dead-reckoning's use in games is well researched, including the suitability for different genres \cite{2002DeadReckoningSuitability}, the accuracy of dead-reckoning \cite{2004AccuracyDeadReckoning}, its effects on fairness \cite{2005FairnessDeadReckoning} and enhancements of the technique, such as \cite{2012EnhancedDeadReckoning} which takes into account environmental objects when dead-reckoning is performed.
+
+Although these correction techniques may be suitable for handling inconsistencies in simulation view between servers and clients, they are not suitable for maintaining consistency within a distributed simulation, which is the focus of this study. This is because in order to prevent diverging results, strong consistency of collisions must be maintained (discussed further in \ref{divergingResults}). 
+
+Gameplay aspects of games, such as life/death and score decisions require a high-level of consistency in order to maintain fairness \cite{savery2014consistency}. As a result of the inconsistencies in distributed real-time physics and importance of consistency in gameplay, this leaves game developers with two choices:
+\begin{enumerate}
+	\item Don't distribute the simulation of the physics, meaning the server(s) simulate the physics for the game (removing inconsistencies within the simulation, but not inconsistencies between the server and client). However, this uses up limited computational resources in single server systems or in the case of multi-server systems, creating complex problems at the boundaries between servers. Problems include not only the handing off of physical entities between servers, but also the interaction of entities between servers and inconsistencies between simulating servers.
+	\item Allow physics to be simulated on clients, distributing physics between clients, creating consistency problems. Due to the physics consistency problems, physics would be unable to influence gameplay, otherwise sacrifices to fairness would need be made.
+\end{enumerate}
+
+This study aims to address the problems of consistency in distributing real-time physics between servers in multi-server networked games. This would allow for physics to play a larger role in game, including have large influences on gameplay in networked games.
 
 \section{Distributed Virtual Environments} \label{distrubted_virtual_env}
 %We look at existing ways of distributing game worlds and previous work carried out on these approaches. These fall into two categories, migratory (approach used by AP) and non-migratory. The studies found non-migratory to be the better solution when focusing on player-player interaction and we will discuss why migratory is the better solution for physics body-physics body interaction. Important concepts such as interest management are introduced to the reader.
