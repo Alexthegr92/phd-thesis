@@ -257,6 +257,10 @@ In the context of real-time physics simulations, auras appear on the receiving s
 
 When an aura is no longer being projected for an object (boundary not overlapped), the server simulating that object sends a message to any servers receiving the aura to remove the aura of that object.
 
+In summary, objects that are being hosted by a remote server are consistency-aware, through the use of auras. The system doesn't know exactly where the object will be, but can guarantee it will be within the aura by the time an interaction takes place.
+A small amount of availability is sacrificed (in the region of 10ms) as objects migrate between servers, in order to achieve eventual consistency while maintaining network partitioning.
+In terms of collisions between objects, AP provides strong consistency. All collisions between objects only take place on a single server, removing the possibility of inconsistencies between servers. Network partitioning is sacrificed in order to achieve strong consistency.% and no sacrifice to availability is made.
+
 \section{Aura Calculation}
 Calculating an aura size is key to creating a scalable solution balanced against consistency: (1) Auras that are too small will result in a faster simulation but with more missed interactions; (2) Auras that are too large will include more calculations that are simply not required, increasing server load and decreasing scalability. Therefore, how auras are calculated will be carefully described and justified. 
 
