@@ -15,7 +15,7 @@ In this chapter, the reader is introduced to physics simulations and the differe
 \section{Real-time Physics Engines Overview}
 %We introduce the reader to the topic of physics simulations and we compare real-time with non-real-time physics simulations. We define terms, workings, important and relevant aspects, e.g. body types, uses in games and simulations, typical scales and performance of real-time simulations and performance budget in real-time applications.
 
-Real-time physics simulations (physics engines) are responsible for simulating the physical behaviour of objects and are based around Newtonian mechanics. The motion of the system is calculated given the forces acting on the system, this is known as the forward dynamics problem \cite{Boeing2007}.
+Real-time physics simulations (physics engines) are responsible for simulating the physical behaviour of objects and are based around Newtonian mechanics. The motion of the system is calculated given the forces acting on the system and this is known as the forward dynamics problem \cite{Boeing2007}.
 
 The main three aspects of the functionality of a physics engine are the following:
 \begin{itemize}
@@ -26,7 +26,7 @@ The main three aspects of the functionality of a physics engine are the followin
 
 The term `object' is used here to describe any physical entity. Objects can be any entity that physically interacts, for example, a barrel, a bullet, a fire particle, a jointed robot arm, the wheel of a vehicle, a mountain etc. The terms `world' or `scene' are often used to describe the physical system.
 
-The numerical integrator used to update the positions of objects in the system, uses a discrete time value for each step, this is known as the time step. Each step simulates a set period of time. The shorter the time period simulated, the more physically accurate the simulation will be, however, each simulation step must take less time to execute than the time it is intending to simulate, otherwise the simulation would be unable to run in real-time. It is common for the time step to be a fixed value, though physics engines can support variable time steps.
+The numerical integrator used to update the positions of objects in the system, uses a discrete time value. Each discrete time value is known as a time step. Each step simulates a set period of time. The shorter the time period simulated, the more physically accurate the simulation will be, however, each simulation step must take less time to execute than the time it is intending to simulate, otherwise the simulation would be unable to run in real-time. It is common for the time step to be a fixed value, though physics engines can support variable time steps.
 
 \subsection{Linear Motion}
 Linear motion will first be discussed and the following variables are used:
@@ -57,7 +57,7 @@ The simplest numerical integrator is explicit Euler (or sometimes referred to si
 
 However, this is not often used by physics engines as it can lead to instability unless short time steps are used.
 
-A Symplectic Euler (Semi-Implicit Euler) Integrator is often used in physics engines. Symplectic Euler is similar to explicit Euler, except that the updated velocity is used before calculating the new position:
+A symplectic Euler (semi-implicit Euler) integrator is often used in physics engines. Symplectic Euler is similar to explicit Euler, except that the updated velocity is used before calculating the new position:
 
 \begin{equation}
 \begin{split}
@@ -144,7 +144,7 @@ In addition to informing the collision response phase, callbacks can also be gen
 
 \subsection{Collision Response}
 
-Collision response is the phase of the real-time physics loop which deals with integrating into the model the effect produced by contacts between entities within the system. Collision response will taken into account mass, coefficient of restitution (loss of kinetic energy during a collisions) and the location and angle of the collision. Collision response can be very simple to calculate for simple geometric shapes, but becomes expensive when more complex mesh representations are used.
+Collision response is the phase of the real-time physics loop which deals with integrating into the model the effect produced by contacts between entities within the system. Collision response will take into account mass, coefficient of restitution (loss of kinetic energy during a collisions) and the location and angle of the collision. Collision response can be very simple to calculate for simple geometric shapes, but becomes expensive when more complex mesh representations are used.
 %\subsection{Constraints}
 
 \subsection{Performance of Real-Time Physics Engines}
@@ -245,7 +245,7 @@ Online game architectures fall into the following main categories client-server,
 
 \subsubsection{Client-Server}
 Client-Server architecture is a type of architecture in which the game is executed and game state is managed entirely by the server. Clients connect to the server and receive the necessary information about the game world. All messages and interactions are sent through the game server and the server is responsible for disseminating messages to the appropriate clients. The main challenge with this approach is scalability, as a single server can only support a limited number of players. This is normally solved with the addition of more servers, i.e. switching to a distributed server architecture. As all communication goes through the server, clients do not directly communicate with each other, meaning latency can be increased for interactions with other players.
-As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the central server's sate, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PSurvey}.
+As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the sate of the central server, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PSurvey}.
 
 \begin{figure}
 	\centering
@@ -262,7 +262,7 @@ As there is only one central version of the game state, consistency resolution i
 %\end{figure}
 
 \subsubsection{Peer-to-Peer}
-Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as bother server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PSurvey}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PSurvey}.
+Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as both server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PSurvey}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PSurvey}.
 
 %VoroGame, work is distributed amongst clients.
 %VoroGame uses Voronoi spatial partitioning to assign a region to a peer and an overlay based on a distributed hash table for data distribution.
@@ -311,7 +311,7 @@ Games use both TCP (Transmission Control Protocol) and UDP (User Datagram Protoc
 RakNet is the gaming network library used in the development of the implementation of this project. Features of RakNet used by this study's implementation will now be described.
 
 \subsection{Reliability and Ordering layer}
-RakNet uses UDP but also provides a reliability and ordering layer. When messages have the reliable option enabled, RakNet guarantees that UDP packets will arrive at their destination eventually. When messages. When messages have the ordered option enabled, RakNet guarantees that the packets are ordered at the destination. Ordering has the advantage of removing the need to handle out of order packets \cite{RakNetReliability}.
+RakNet uses UDP but also provides a reliability and ordering layer. When messages have the reliable option enabled, RakNet guarantees that UDP packets will arrive at their destination eventually. When messages have the ordered option enabled, RakNet guarantees that the packets are ordered at the destination. Ordering has the advantage of removing the need to handle out of order packets \cite{RakNetReliability}.
 
 \subsection{Replica Manager}
 RakNet provides a replica manager plugin, which supports the use of replicas and delta-encoding for the updates of their states. Replicas are replicated entities, hosted by one node and replicated on connected nodes. For example, a server is responsible for the updates if a set of entities, the entities are then replicated on all connected clients. This manager handles the broadcast of: existing game entities to new connections, new game entities to existing connections; deleted game entities to existing entities and updates of states of replicated entities \cite{RakNetReplica}.
@@ -392,13 +392,13 @@ Through the use of client interest management it would be possible to simulate a
 \section{Distributed Real-Time Physics}
 %We will discuss previous work looking specifically at distributing real-time physics and how AP differs from these approaches.
 
-In this section we discuss research into existing methods for distributing real-time physics across a cluster of nodes in a network.
+In this section research into existing methods for distributing real-time physics across a cluster of nodes in a network will be discussed.
 
 Distributed Real-Time Physics has attracted a lot of commercial attention recently, for many applications including games, multi-agent AI, city planning and VR \cite{SpatialOS}. The commercial interest in Distributed Real-Time Physics is likely due to the recent availability of cloud computing, which allows for scaling of the required computing resources on-demand. On-demand scaling provides a more cost-efficient approach as opposed to the traditional use of private server clusters \cite{On-DemandResourceMMOGs}.
 
 Using Distributed Real-Time Physics removes the limitation of the computational power of a single machine (such as the limitation in server-centric architectures \cite{ScalabilityforVirtualWorlds} and avoids the complexity and communication overhead of P2P architectures such as that described in \cite{VON}) thus allowing for greater scalability in both the number of users \cite{ScalabilityIssues} and complexity and size of the Virtual Environment. 
 
-Distributed Real-Time Physics techniques fall into two main categories, those that use multiple instances of the same physics engine (as used by AP) and those that distribute particular aspects of the computational workload of a physics engine. We will now discuss both techniques.
+Distributed Real-Time Physics techniques fall into two main categories, those that use multiple instances of the same physics engine (as used by AP) and those that distribute particular aspects of the computational workload of a physics engine. Both techniques will now be discussed.
 
 Examples of previous attempts at scaling real-time physics engine through the use of distributing a particular aspect of the workload include \cite{Morgan2005} and \cite{allard2006distributed}.
 
@@ -411,7 +411,7 @@ Objects intersecting region boundaries are discussed in \cite{Morgan2005}; objec
 
 In \cite{allard2006distributed}, a modular approach to physics simulations is described. A dedicated module is used for each type of object (rigid body, spring-mass, fluid etc.). Interactions are then handled between object modules through interaction modules. Each module can be run on a node in a cluster, allowing the simulation to be scaled.
 
-Techniques that distribute a particular aspect of the workload have not gained any commercial attention recently, unlike techniques that use multiple instances of the same physics engine, which we will now discuss.
+Techniques that distribute a particular aspect of the workload have not gained any commercial attention recently, unlike techniques that use multiple instances of the same physics engine, which will now be discussed.
 
 Examples of Distributed Real-Time Physics that use multiple instances of a physics engine include SpatialOS \cite{SpatialOS} and Aether Engine \cite{AetherEngine}. SpatialOS spatially partitions the world into regions, each region is a separate instance of a physics engine. Where regions meet, there is an overlapping area, allowing objects hosted on different servers to interact. However, the specifics of the techniques used by SpatialOS and Aether Engine are not described in any literature. The demonstration video of SpatialOS exhibits unnatural object "jitter", which is possibly a result of network latency.
 
@@ -443,7 +443,7 @@ This thesis proposes an alternative technique to SpatialOS and Aether Engine, AP
 
 
 \section{Cloud Computing}
-In the section a brief overview of cloud computing is given, deployment and service models are discussed. This study's implementation is deployed on the chosen cloud provider, Amazon Web Services (AWS). The latency and packet-loss conditions that affect AP are presented and these values will used to inform the correctness experiments performed on AP.
+In this section a brief overview of cloud computing is given, deployment and service models are discussed. This study's implementation is deployed on the chosen cloud provider, Amazon Web Services (AWS). The latency and packet-loss conditions that affect AP are presented and these values will used to inform the correctness experiments performed on AP.
 
 %We discuss the wider context of cloud computing, how AP is deployed on the cloud and also specifically conditions that affect AP in the cloud, i.e. latency and packet-loss
 
@@ -510,10 +510,12 @@ Streamed Gaming services currently available include \cite{NVidiaGameStream} and
 
 A drawback to streamed gaming is the requirement for a significantly more powerful machine at the server-side than what would be required if the game was played solely at the client side. This is because the server not only has to run the game, but has to process the video and audio stream into a suitable format for streaming. In addition, real-time player interaction requires low latency and high bandwidth resulting in networking infrastructure more expensive than would be expected for regular streaming services. 
 
-In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines. The research presented in this paper is intended for use in streamed gaming. The technique presented in this paper allows multiple servers to simulate physics, meaning physics simulations are no longer limited in size and complexity to that which can be achieved by only a single server. This allows for game streaming servers to make use of multiple physics servers, the numbers of which can grow and shrink as needed by the game and greatly increase the limit on size and complexity of physics within the game.
+In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines. The technique presented in this study, AP, is intended for use in streamed gaming. AP allows multiple servers to simulate physics, meaning physics simulations are no longer limited in size and complexity to that which can be achieved by only a single server. This allows for game streaming servers to make use of multiple physics servers, the numbers of which can grow and shrink as needed by the game and greatly increase the limit on size and complexity of physics within the game.
 
 \section{Background Summary}
-In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
+%In physics simulations, there must be an object present in the solving phase for it to be considered in the overall solution of the scenario. A non-migratory approach requires a "ghost" representation of the object in a remote server to enable interaction. Given the calculations and discretisation steps, a "ghost" object takes up just as many resources in deriving a solution as a real object. This rules out the non-migratory approach for our problem. This leaves migratory.
+%
+%Migratory approaches are concerned with managing the network traffic for those entities that could possibly exist on two servers but can only be solved on one. Such objects need to be placed with an owning server while minimising the effect of thrashing (where an algorithm frequently transfers objects between servers).
 
-Migratory approaches are concerned with managing the network traffic for those entities that could possibly exist on two servers but can only be solved on one. Such objects need to be placed with an owning server while minimising the effect of thrashing (where an algorithm frequently transfers objects between servers). In the rest of this paper, we describe our approach to solving this algorithmically, present how a working implementation was achieved, and present results evidencing our work. This is the first presentation of literature that can demonstrate real-time scalable server-side physics modelling and is a significant contribution to reducing the cost of commercialised streamed gaming.
+For the remainder of this research, we describe our approach to solving this algorithmically, present how a working implementation was achieved, and present results evidencing our work. This is the first presentation of literature that can demonstrate real-time scalable server-side physics modelling and is a significant contribution to reducing the cost of commercialised streamed gaming.
 
