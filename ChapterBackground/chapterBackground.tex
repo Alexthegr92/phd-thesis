@@ -197,7 +197,7 @@ The main challenges facing online gaming are consistency, latency, fault-toleran
 Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
 
 \subsection{Consistency}
-Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PSurvey}.
+Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PForMMOs}.
 
 %Strong Consistency
 %Weak Consistency
@@ -222,15 +222,15 @@ Latency can significantly affect the quality of experience of a game and can imp
 \end{figure}
 
 \subsection{Fault-tolerance}
-Fault-tolerance is a challenge for online gaming and can result from failures or unscheduled disconnections of server or peers which can lead to the loss of game state \cite{P2PSurvey}.
+Fault-tolerance is a challenge for online gaming and can result from failures or unscheduled disconnections of server or peers which can lead to the loss of game state \cite{P2PForMMOs}.
 
 \subsection{Fairness}
-Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PSurvey}.
+Fairness is the degree of difference among all players’ gaming environments, i.e. players should be treated equally and no game advantage/disadvantage should be given to players due to factors like latency \cite{P2PForMMOs}.
 
 %MANAGING LATENCY AND FAIRNESS IN NETWORKED GAMES 
 
 \subsection{Cheating}
-Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PSurvey}. 
+Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PForMMOs}. 
 
 \subsection{Scalability}
 Scalability in online games is measured in terms of players that can be supported \cite{turchini2015scalability}. An online gaming system's ability to scale depends upon the architecture employed. The different architectures than can be used will now be discussed.
@@ -245,7 +245,7 @@ Online game architectures fall into the following main categories client-server,
 
 \subsubsection{Client-Server}
 Client-Server architecture is a type of architecture in which the game is executed and game state is managed entirely by the server. Clients connect to the server and receive the necessary information about the game world. All messages and interactions are sent through the game server and the server is responsible for disseminating messages to the appropriate clients. The main challenge with this approach is scalability, as a single server can only support a limited number of players. This is normally solved with the addition of more servers, i.e. switching to a distributed server architecture. As all communication goes through the server, clients do not directly communicate with each other, meaning latency can be increased for interactions with other players.
-As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the sate of the central server, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PSurvey}.
+As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the sate of the central server, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PForMMOs}.
 
 \begin{figure}
 	\centering
@@ -262,7 +262,7 @@ As there is only one central version of the game state, consistency resolution i
 %\end{figure}
 
 \subsubsection{Peer-to-Peer}
-Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as both server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PSurvey}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PSurvey}.
+Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as both server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of peer-to-peer can be reduced in short-session-based games, making these architectures better suited to those games \cite{P2PForMMOs}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PForMMOs}.
 
 %VoroGame, work is distributed amongst clients.
 %VoroGame uses Voronoi spatial partitioning to assign a region to a peer and an overlay based on a distributed hash table for data distribution.
@@ -275,19 +275,19 @@ Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the 
 \end{figure}
 
 \subsubsection{Hybrid Peer-to-Peer}
-Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to-peer architectures. The peer-to-peer part of the system can be responsible for different aspects of the system, including Cooperative Message Dissemination, State Distribution, Basic Server Control and distributing software updates. \cite{P2PSurvey}. Hybrid Peer-to-Peer enable trade-offs between consistency control and scalability are enabled, depending on how the system is divided between server and peer-to-peer.
+Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to-peer architectures. The peer-to-peer part of the system can be responsible for different aspects of the system, including Cooperative Message Dissemination, State Distribution, Basic Server Control and distributing software updates. \cite{P2PForMMOs}. Hybrid Peer-to-Peer enable trade-offs between consistency control and scalability are enabled, depending on how the system is divided between server and peer-to-peer.
 %These can be broadly classified into two types: Homogeneous, in which all nodes have similar responsibilities and Heterogeneous, in which some peers be
 
 \subsubsection{Distributed server}
 % TODO: More references for this
 Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This can be achieved in one of two ways, either through `shards' or through division of the game world. 
 
-In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards \cite{P2PSurvey}.
+In the `shards' method, complete and separate instances of the game world exist, each maintained by one serve. Each server is responsible for a different set of clients. The game can be scaled through the introduction of more servers, supporting more clients. However, as each instance of the game world is separate, there can be no interaction in the game world between players on different shards \cite{P2PForMMOs}.
 
 In the game world division method, there is a single instance of the game world and the workload is distributed either through each server being responsible for a region or a set of players. Division methods are discussed further in \ref{distrubted_virtual_env}. 
-a single server can be overloaded if the workload is too high, for example, by a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers as latency will always exist between servers \cite{P2PSurvey}.
+a single server can be overloaded if the workload is too high, for example, by a large number of players in a region being managed by a single server. Dynamic load-balancing schemes can be employed to improve distribution between servers. The disadvantage of this approach is the need for complex hand-offs when players migrate or interact between servers and can lead to consistency problems between servers as latency will always exist between servers \cite{P2PForMMOs}.
 
-The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected \cite{P2PSurvey}.
+The distributed server approach enables scalability as more servers can be utilised, allowing support for more players. However, depending on workload distribution, more problems are introduced. Fault-tolerance is potentially higher than a single server solution, even if no backup system is employed, as only players connected to the failing server will be affected \cite{P2PForMMOs}.
 
 %TODO: Mention cost? Persistent games?
 
@@ -511,7 +511,7 @@ Streamed Gaming services currently available include NVidia Geforce Now \cite{NV
 
 A drawback to streamed gaming is the requirement for a significantly more powerful machine at the server-side than what would be required if the game was played solely at the client side. This is because the server not only has to run the game, but has to process the video and audio stream into a suitable format for streaming. In addition, real-time player interaction requires low latency and high bandwidth resulting in networking infrastructure more expensive than would be expected for regular streaming services. 
 
-In recent years, streamed gaming has become an active area of research, with many studies focusing on the effects of latency on the quality of service, e.g. \cite{shea2013cloud, chen2011measuring, jarschel2011evaluation, lee2012all, choy2012brewing, chen2013quality}. The challenges in streamed gaming that remain are both technical as well as economical \cite{2016SurveyOnCloudGaming}.
+In recent years, streamed gaming has become an active area of research, with many studies focusing on the effects of latency on the quality of service, e.g. \cite{CloudGamingArchPerf, chen2011measuring, jarschel2011evaluation, lee2012all, choy2012brewing, chen2013quality}. The challenges in streamed gaming that remain are both technical as well as economical \cite{2016SurveyOnCloudGaming}.
 
 In streamed gaming, each game instance resides on a single server. There is no technology to balance the real-time requirements of the game across multiple servers. The core problem is that all gaming technology is built and designed for single console/PC install and the greatest bottleneck is the inability to share physics calculations across machines. 
 
