@@ -1,14 +1,15 @@
 \chapter{Background and Related Work}
 In this chapter, the reader is introduced to physics simulations and the differences between real-time and non-real-time simulations along with important terms, workings, important and relevant aspects of physics simulations. Along with an introduction to physics simulations, the following points will also be discussed:
 \begin{itemize}
-	\item Scalable Non-Real-Time physics
-	\item Physics in online gaming
-	\item Graph-partitioning
+	\item Scalable non-real-time physics
+	\item Online gaming
+	\item RakNet
+	\item Consistency in real-time physics
 	\item Distributed virtual environments
 	\item Distributed real-time physics
 	\item Cloud computing
-	\item Scientific and Engineering simulations
-	\item Containerisation of game engines
+	\item Real-time physics for scalable simulations
+	\item Microservices for game engines
 	\item Streamed gaming
 \end{itemize}
 
@@ -504,7 +505,7 @@ A microservice architecture for a game engine would create a more cost efficient
 \section{Streamed Gaming}
 %The main foreseeable application of AP is Streamed Gaming, with the use of large multiplayer worlds, that are persistent and scalable with dedicated and elastic physics nodes. Physics is no longer limited to what can be simulated on a single machine
 
-Streamed Gaming (also know as Gaming as a Service) consists of cloud servers streaming to a player's device with player input being returned to the cloud server. The player's device acts as a thin client. The main benefit is that a player does not require expensive, powerful hardware, and games can be played on any operating system (e.g. Android, Linux and Mac). However, these benefits come at the cost of bandwidth and latency requirements \cite{iCloudAccess}.
+Streamed Gaming (also know as Gaming as a Service or Cloud Gaming) consists of cloud servers streaming to a player's device with player input being returned to the cloud server. The player's device acts as a thin client. The main benefit is that a player does not require expensive, powerful hardware, and games can be played on any operating system (e.g. Android, Linux and Mac). However, these benefits come at the cost of bandwidth and latency requirements \cite{iCloudAccess}.
 
 The first successful demonstration of game streaming was in 2001 by G-cluster, whom publicly demonstrated game streaming over WiFi to a PDA in 2001 and launched a game-on-demand service in 2004 \cite{2016SurveyOnCloudGaming}. In the late 2000s, more companies introduced game streaming platforms such as OnLive \cite{OnLive}, Gaikai, and GameNow \cite{GameNow}. Due to financial difficulty in 2012, OnLive sold their patents to Sony and Gaikai and in 2012, Gaikai was bought by PSNOW \cite{PSNOW}.
 Streamed Gaming services currently available include NVidia Geforce Now \cite{NVidiaGameStream}, PSNOW \cite{PSNOW}, Google Stadia\cite{Stadia} and Microsoft xCloud\cite{xCloud}. NVIDIA GRID hardware technology is targeted specifically at Streamed Gaming \cite{NVIDIACloud}.
@@ -526,5 +527,8 @@ AP allows multiple servers to simulate physics, meaning physics simulations are 
 %
 %Migratory approaches are concerned with managing the network traffic for those entities that could possibly exist on two servers but can only be solved on one. Such objects need to be placed with an owning server while minimising the effect of thrashing (where an algorithm frequently transfers objects between servers).
 
+The reader has been provided a brief overview of the working of real-time physics and introduced to important terms and concepts. The current state of online gaming has been discussed, including the main challenges faced. In addition, aspects of online gaming that are relevant to this study have been presented in greater detail. The challenges in physics in online gaming are those of latency and consistency i.e. maintaining consistent states while latency exists between servers. Techniques for handling consistency on longer time scales (100s of milliseconds), such as interactions between players, already exist and compensation techniques (based on dead-reckoning) exist to reduce the perceived differences in physics state due high latency between clients and servers. However, neither of these are appropriate for distributing the simulation across multiple machines. Therefore this study intends to address this challenge through the use of a novel technique called AP.
+
+The applications of AP in both scalable games and simulations, as well as in cloud gaming, have been discussed. AP is a move towards real-time physics as a microservice for a microservice-based game engine, which can better take advantage of cloud infrastructure, ideal for cloud gaming. AP also provides a means of scaling real-time physics simulations beyond what can be achieved on a single machine.
 For the remainder of this research, we describe our approach to solving this algorithmically, present how a working implementation was achieved, and present results evidencing our work. This is the first presentation of literature that can demonstrate real-time scalable server-side physics modelling and is a significant contribution to reducing the cost of commercialised streamed gaming.
 
