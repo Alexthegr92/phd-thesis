@@ -55,7 +55,9 @@ AP uses PhysX (from Nvidia) as the physics engine \cite{PhysX}, providing a simu
 \section{Outline}
 %TODO: Make sure this is up to date
 The following section provides an outline for this study:
-2. Background and Related Work:
+\begin{enumerate}
+	
+\item Background and Related Work:
 \begin{itemize}
 	%Context
 	\item Real-time physics engines overview. The reader is introduced to the topic of physics simulations and real-time and non-real-time physics simulations are compared. The following are defined: terms; workings; important and relevant aspects, e.g. body types; uses in games and simulations; typical scales and performance of real-time simulations; and performance budget in real-time applications.
@@ -71,10 +73,10 @@ The following section provides an outline for this study:
 	%Applications
 	\item Real-time Physics for Scalable Simulations. Real-time simulations are being used more in scientific research, however these are limited to what can be achieved on a single machine. AP allows real-time physics simulations to be scaled, enabling large or complex simulations that otherwise wouldn't have been able, to run in real-time.
 	\item Microservices for Game Engines. Game engines, generally, currently run as one single application (monolith), including graphics, physics, AI etc. (with the exception of databases for user data). AP separates out the physics element into its own microservice, much like many modern systems are splitting up different aspects of systems into their own microservices, for example web applications. This separation of physics into a microservice means physics can be elastically scaled independently from other systems such as graphics, along with other advantages of modularity.
-	\item Streamed Gaming. The main foreseeable application of AP is Streamed Gaming, with the use of large multiplayer worlds, that are persistent and scalable with dedicated and elastic physics nodes. Physics is no longer limited to what can be simulated on a single machine and co-located render nodes solves the issue of higher latencies between the render node and physics simulation, the main problem with the use of physics in online gaming.
+	\item Streamed Gaming. The main foreseeable application of AP is Streamed Gaming, with the use of large multiplayer worlds, that are persistent and scalable with dedicated and elastic physics nodes. Through the use of AP physics is no longer limited to what can be simulated on a single machine.% and co-located render nodes solves the issue of higher latencies between the render node and physics simulation, the main problem with the use of physics in online gaming.
 \end{itemize}
 
-3. Problem Definition:
+\item Problem Definition:
 \begin{itemize}
 	\item Solution Requirements. What is required of a solution to scalable real-time physics is discussed.
 	\item Naive approach. How would a naive approach behave and what problems occur.
@@ -87,7 +89,7 @@ The following section provides an outline for this study:
 	\item Corner Case. AP has been discussed in terms of a single boundary between two servers up to this point, but in order for a general solution to be achieved, AP must be able to support boundaries between three or more servers, such as at corners.
 \end{itemize}
 
-4. Implementation
+\item Implementation
 \begin{itemize}
 	\item System Architecture. How the deployment system is structured. How AP interacts with PhysX. How messages are exchanged between servers using RakNet and how the client communicates with the servers, enabling interaction.
 	\item Aura Implementation. A high-level overview of how the auras are implemented in AP.
@@ -99,14 +101,15 @@ The following section provides an outline for this study:
 	%Can discuss better ways of dealing with server-created migrating objects, the lack of functional client-created object migration, scene-serialisation, interest management, mesh deformation
 \end{itemize}
 
-5. Experiments and Results
+\item Experiments and Results
 \begin{itemize}
 	\item Scalability Experiments. The design of experiments designed to address the first question of this thesis: "Can scalable real-time physics simulations be achieved?" are described and justified. AP's performance is measured with different numbers of servers in different topologies. The results of which, are analysed and discussed.
 	\item Collisions Correctness Experiments. Collisions correctness is defined and erroneous collisions are classified. The design of experiments designed to address the second question of this thesis: "Can real-time physics simulations remain correct when scaled?" are described and justified. The correctness of collisions are measured using different conditions and tolerances. The results of which, are analysed and discussed.
 \end{itemize}
 
-6. Conclusion and Future Work
+\item Conclusion and Future Work
 \begin{itemize}
 	\item Conclusion. The results and findings of this study's experiments are used to answer the questions asked in this thesis: "Can scalable real-time physics simulations be achieved?" and "Can real-time physics simulations remain correct when scaled?"
 	\item Future Work. Future possible research into scalable real-time physics is discussed and future implementation and experimentation plans for AP are described.
 \end{itemize}
+\end{enumerate}
