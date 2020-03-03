@@ -342,13 +342,26 @@ The former is a very common issue in online gaming, particularly due to high lat
 
 Although these correction techniques may be suitable for handling inconsistencies in simulation view between servers and clients, they are not suitable for maintaining consistency within a distributed simulation, which is the focus of this study. This is because in order to prevent diverging results, strong consistency of collisions must be maintained (discussed further in \ref{divergingResults}). 
 
-Gameplay aspects of games, such as life/death and score decisions require a high-level of consistency in order to maintain fairness \cite{savery2014consistency}. As a result of the inconsistencies in distributed real-time physics and importance of consistency in gameplay, this leaves game developers with two choices:
+There are two approaches to handling the authority of physics in networked games:
+%As a result of the inconsistencies in distributed real-time physics and importance of consistency in gameplay, this leaves game developers with two approaches:
+
 \begin{enumerate}
-	\item Don't distribute the simulation of the physics, meaning the server(s) simulate the physics for the game (removing inconsistencies within the simulation, but not inconsistencies between the server and client). However, this uses up limited computational resources in single server systems or in the case of multi-server systems, creating complex problems at the boundaries between servers. Problems include not only the handing off of physical entities between servers, but also the interaction of entities between servers and inconsistencies between simulating servers.
-	\item Allow physics to be simulated on clients, distributing physics between clients, creating consistency problems. Due to the physics consistency problems, physics would be unable to influence gameplay, otherwise sacrifices to fairness would need be made.
+	\item Server-authoritative physics - the server is responsible for simulating the physics aspect of the game
+	\item Client-authoritative physics - the physics is simulated on the clients in a distributed manner
 \end{enumerate}
 
-This study aims to address the problems of consistency in distributing real-time physics between servers in multi-server networked games. This would allow for physics to play a larger role in game, including have large influences on gameplay in networked games.
+Server-authoritative physics on a single server does not suffer from inconsistencies within the simulation, meaning there is no potential for the physics state to diverge as there is only one single simulation. Inconsistencies between the server and client will exist due to latency, but the state on the client can be corrected. However, server-authoritative physics uses up limited computational resources in single server systems.
+
+Server-authoritative physics multi-server systems creates complex problems at the boundaries between servers. These boundary problems include:
+\begin{itemize}
+\item The handing off (migration) of physical entities between servers
+\item Maintaining consistent states of physical entities between servers
+\item The interaction of entities between servers, i.e. objects being simulated on different servers that should physically interact with each other
+\end{itemize}
+
+Client-authoritative physics creates consistency problems within the simulation, as the physics states on different clients will quickly diverge (discussed further in \ref{divergingResults}). This is especially true with high latencies and limited bandwith experienced between clients. Client-side resources, both computational and network must be sacrificied in order to attempt to reach consensus on the physics state, however, inconsistencies will always be present.  Gameplay aspects of games, such as life/death and score decisions require a high-level of consistency in order to maintain fairness \cite{savery2014consistency}. Due to these consistency problems, physics is unable to influence gameplay without sacrifices to fairness being made.
+
+This study aims to address the problems of consistency in distributing real-time physics between servers in multi-server networked games. This would allow for physics to play a larger role in networked games, including having significant influences on gameplay.
 
 \section{Distributed Virtual Environments} \label{distrubted_virtual_env}
 %We look at existing ways of distributing game worlds and previous work carried out on these approaches. These fall into two categories, migratory (approach used by AP) and non-migratory. The studies found non-migratory to be the better solution when focusing on player-player interaction and we will discuss why migratory is the better solution for physics body-physics body interaction. Important concepts such as interest management are introduced to the reader.
