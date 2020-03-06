@@ -8,7 +8,7 @@
 %\item Islands. A solved challenge with AP, here we discuss our solution.
 %\item Corner Case. AP has been discussed in terms of a single boundary between two servers up to this point, but in order for a general solution to be achieved, AP must be able to support boundaries between three or more servers, such as at corners.
 
-In this chapter the requirements of a solution to scalable real-time physics and the challenges of distributing a real-time physics engine will be discussed, using a naive approach as an example. Some potential solutions to distributing real-time physics and their trade-offs will be considered. Finally, our proposed solution (AP) will be described, along with high-level overviews of the challenges with this approach and our implemented and proposed solutions.
+In this chapter the requirements of a solution to scalable real-time physics and the challenges of distributing a real-time physics engine will be discussed, using a naive approach as an example. Some potential solutions to distributing real-time physics and their trade-offs will be considered. Finally, this study's proposed solution, AP, (originally presented in \cite{brown2019aura}) will be described, along with high-level overviews of the challenges with this approach and the implemented solutions for the solved problems and proposed solutions for the remaining problems.
 
 \section{Solution Requirements}
 
@@ -380,14 +380,16 @@ As objects within each others auras need to be simulated on the same server, thi
 
 Clusters of objects can therefore end up being simulated with all but one of their objects in their host server's region. This is sub-optimal, as the more auras that are being maintained/exchanged, the higher the computational cost.
 
+The solution to this problem is to dynamically move the server-region boundaries to prevent clusters of objects having the majority of the objects outside of their host server region or even avoid be moved to avoid intersecting large clusters of objects entirely. However, this solution is not yet implemented in AP.
+
 \section{Thrashing}\label{Thrashing}
 The common term `thrashing' will be used to describe the following two scenarios that must be considered.
 
-1. An object may be overlapping two auras from different servers. Given appropriate velocity, this could result in object migration, followed by aura collision, followed by migration and then repeating the process again. For example, Objects K, L and M in Fig. \ref{AuraProj}. Object K lies inside the auras of both Object L and M. 
+1. 3-Object Thrashing - An object may be overlapping two auras from different servers. Given appropriate velocity, this could result in object migration, followed by aura collision, followed by migration and then repeating the process again. For example, Objects K, L and M in Fig. \ref{AuraProj}. Object K lies inside the auras of both Object L and M. 
 
 In order to prevent this thrashing, when an object is migrated, it is also migrated with any objects found that lie within the aura of the object or have an existing aura which overlaps the migrating object's aura. This is carried out recursively to ensure all objects that are overlapping are migrated at the same time.
 
-2. Two objects on different servers may both trigger the migration of the other. For example, Objects C and D in Fig. \ref{AuraProj}. Suppose the two objects are moving towards each other. Object C collides with the aura of object D and begins migrating to Server 1. Before Object C is received (and the message processed), object D collides with the aura of Object C and begins migrating to Server 0. The two objects remain on different servers and the process can repeat again, indefinitely.
+2. 2-Object Thrashing - Two objects on different servers may both trigger the migration of the other. For example, Objects C and D in Fig. \ref{AuraProj}. Suppose the two objects are moving towards each other. Object C collides with the aura of object D and begins migrating to Server 1. Before Object C is received (and the message processed), object D collides with the aura of Object C and begins migrating to Server 0. The two objects remain on different servers and the process can repeat again, indefinitely.
 
 When Object C is received, the object is created in Server 0's physics simulation and the aura for that object is removed from Server 0's physics simulation. 
 The next physics time-step on Server 0, the object is within the aura distance of the boundary with Server 1, a message for the aura of object C will added to the send buffer for Server 1. The next network update, the message will be sent to Server 1.
@@ -418,3 +420,13 @@ This section discusses how AP handles corner cases, i.e., where the boundary of 
 An example of the corner case is illustrated in Fig. \ref{AuraProj}. Object N, hosted on Server 2, sends an aura to Server 0. Object O, on Server 1, sends an aura to Server 0. Object N's aura overlaps with Object O's on server 0. Server 2 is unaware of Object O and Server 1 is unaware of Object N. As the two auras overlap, there is a potential interaction between the objects, yet the two objects remain on separate servers. To solve this problem, auras from boundaries between two neighbouring servers are shared. In the region layout in Fig. \ref{AuraProj}, auras from a boundary are received by interested servers. In the Object N and O example, Server 2 would send Object N's aura to Server 1; when Object O collides with Object N's aura, migration to Server 2 occurs.
 
 A server has to receive the auras of all objects from neighbouring boundaries, as objects being simulated by a server can exist anywhere in a neighbouring server's region. Our assumption is that a region a server simulates is sufficiently large enough to prevent the aura overlap of objects from non-neighbouring servers.
+
+\section{Summary}
+In this chapter, the following points have been addressed:
+\begin{itemize}
+	\item The requirements of a solution to scalable real-time physics.
+	\item The challenges of distributing a real-time physics engine and potential solutions.
+	\item A description and justification of AP, including the aura calculation.
+	\item The implemented solutions to the problems of: 3-object thrashing; islands; and the corner case.
+	\item The proposed solutions to: sub-optimal object hosting and 2-object thrashing, which are not yet implemented.
+\end{itemize}
