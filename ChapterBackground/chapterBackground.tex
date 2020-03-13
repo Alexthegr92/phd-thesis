@@ -169,7 +169,7 @@ Fig. \ref{SubStep} shows a time sequence diagram of sub-stepping. If an update l
 	\label{SubStep}
 \end{figure}
 
-Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which the simulation is expensive to update. This could be the result of a large number of objects being simulated or complex collision detection. As a result of the expensive physics update the render frame rate is reduced to 60Hz, despite the main update only taking $~3ms$.
+Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which the physics simulation is expensive to step. This could be the result of a large number of objects being simulated or complex collision detection. As a result of the expensive physics update the render frame rate is reduced to 60Hz, despite the main update only taking $~3ms$.
 %TODO: Expand this?
 
 \begin{figure}
@@ -189,16 +189,17 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 %\end{figure}
 
 \section{Scalable Non-Real Time Physics}
-Scalable Non-Real Time Physics include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a Scalable Non-Real Time Physics is Project Chrono \cite{Chrono}. Non-real time physics simulation work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
+Scalable non-real time physics simulations include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a scalable non-real time physic is Project Chrono \cite{Chrono}. Non-real time physics simulations work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
 
 \section{Online Gaming}
 %TODO: Change to include related work will be discussed
 In this section an overview of online gaming challenges and architectures will be discussed. 
-The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. The purpose  of this study is to demonstrate scalability and consistency of real-time physics through the use of a distributed server architecture, therefore in the following section we will define consistency with respect to online gaming and discuss existing work addressing it. Additionally, latency, fault-tolerance, fairness and cheating will also be briefly explained, although they are not the main focus of this study, this is intended to make the reader aware of the challenges different architectures address. 
-Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
+The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. 
+These will all be briefly explained, although they are not all the main focus of this study, this is intended to make the reader aware of the challenges different architectures address. Finally, important aspects of online gaming that are relevant to this study are also discussed. The purpose of this study is to demonstrate scalability and consistency of real-time physics through the use of a distributed server architecture. In later sections, consistency will be defined in greater detail with respect to real-time physics and online gaming and existing work addressing scalability and consistency will be discussed. 
+%Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
 
 \subsection{Consistency}
-Consistency, as online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PForMMOs}.
+As online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order or messages lost entirely, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PForMMOs}.
 
 %Strong Consistency
 %Weak Consistency
@@ -234,7 +235,7 @@ Fairness is the degree of difference among all players’ gaming environments, i
 Cheating is when players maliciously gain an unfair advantage in a game. Cheating reduces the quality of experience for non-cheating players and is a main concern in the design of game architecture \cite{P2PForMMOs}. 
 
 \subsection{Scalability}
-Scalability in online games is measured in terms of players that can be supported \cite{turchini2015scalability}. An online gaming system's ability to scale depends upon the architecture employed. The different architectures than can be used will now be discussed.
+Scalability in online games is typically measured in terms of players that can be supported \cite{turchini2015scalability}. An online gaming system's ability to scale depends upon the architecture employed, discussed below. However, scalability in terms of supported players should not be confused with the scalability of real-time physics, which is the focus of this study. Scalability of real-time physics can be measured in terms of objects that can be simulated while maintaining real-time speeds.
 
 %This screenshot was taken on a listen server with 200 milliseconds of lag (using net_fakelag), right after the server confirmed the hit. The red hitbox shows the target position on the client where it was 100ms + interp period ago. Since then, the target continued to move to the left while the user command was travelling to the server. After the user command arrived, the server restored the target position (blue hitbox) based on the estimated command execution time. The server traces the shot and confirms the hit (the client sees blood effects).
 
