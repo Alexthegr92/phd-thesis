@@ -648,3 +648,18 @@ An alternative approach to client-created simulations/scene is PhysX's scene-ser
 Currently all objects from all servers are replicated on the client with equal priority and frequency. Interest management could be employed for large complex scenes as the visualiser can only replicate and render a limited number of objects.
 
 Mesh deformation is a technique sometimes used in video games, in which the geometric mesh representation of an object is deformed, often as a result of physical interaction. Mesh deformation is not currently supported in AP and would require significant network traffic, especially if done over a period of time (a series of many deformations), rather than in a single instance. Position and rotation can be replicated with small amounts of data, however, geometry data can be arbitrarily large. In mesh deformations 100s or even 1000s of vertex points can change, all of which would have to be serialised and transmitted over the network in order to be correctly replicated on the client.
+
+The implementation of AP will be discussed in this section. The following work is based on the implementation of AP used in \cite{brown2019aura}, however, with many newer additions. We include full details of the implementation of AP to give a complete and whole solution.
+
+\section{Implementation Summary}
+In this chapter the following points were discussed: 
+\begin{itemize}
+	\item The system architecture of AP, including how the servers are deployed in the cloud and how they communicate with a client.
+	\item A breakdown of the components of each server.
+	\item Topologies of server regions, including examples and the communication requirements between servers.
+	\item Potential server deployments to be investigated in the future, such as the use of overseer nodes and dedicated render nodes for game streaming.
+	\item A high-level description of the aura implementation including justifications for design decisions made.
+	\item The algorithms used by the servers to implement AP.
+	\item The life cycle of a simulated object as an FSM.
+	\item The features and implementation details of the visualiser, including a description of its features and future work to be carried out on the visualiser.
+\end{itemize}
