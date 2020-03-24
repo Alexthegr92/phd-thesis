@@ -51,7 +51,7 @@ The purpose of this study is to test the following hypotheses: "Can scalable rea
 The requirements needed for a solution to scalable real-time physics are discussed and several different approaches are considered before justifying the approach taken in this study's proposed solution. 
 A prototype solution to scalable real-time physics, Aura Projection (AP), has been developed for this study and has provided a means of testing the above hypotheses through experiments that have been put forward by this study. AP was first presented in \cite{brown2019aura}.
 AP uses PhysX \cite{PhysX} (from Nvidia) as the physics engine, providing a simulation with equal accuracy and behaviour to commercial video games. The main challenge addressed by AP is to deploy multiple instances of PhysX in the cloud, across multiple servers and through the use of messaging services, while allowing objects within the physics simulation to be seamlessly passed and interact across server-region boundaries. Achieving interactions of objects across server-region boundaries is a complex problem to solve and small errors can easily be discerned by the player in the form of `jitter'. In some cases errors can lead to great anomalies in behaviour and results in servers having significantly different states for the same set of objects.
-
+\\
 \section{Outline}
 %TODO: Make sure this is up to date
 The following section provides an outline for this study:

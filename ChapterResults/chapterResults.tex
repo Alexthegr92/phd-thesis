@@ -86,6 +86,13 @@ Experiments were performed on two layouts of servers: column layout and corner l
 \label{ColumnLayout}
 \end{figure}
 
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\textwidth]{ColPerformance}
+\caption{Performance of increasing numbers of servers with an accumulating number of objects (in column layout)}
+\label{fig_PerCol}
+\end{figure}
+
 The experiments were run for 60 seconds with an injection rate of 160 objects per second. For all experiments, a speed tolerance of $32m\mathord{\cdot}s^{-1}$ was used, which was the maximum expected speed for any object (based on maximum injection height and velocity, and gravity). The latency tolerance for these experiments was set to $2ms$ (based off measurements of latency between servers) and frame-time tolerance was set to $15ms$ (based off preliminary performance results). A time of $16ms$ was used for the physics time-step. Each experiment was repeated 50 times at various times of day to account for differing performance in cloud resources at different times. For each iteration, the maximum frame time of any server was aggregated for each $5s$ period. The mean of the aggregated maximum frame times of the iterations was then calculated and plotted.
 
 Experiments were conducted using AWS G2.2xlarge servers located within the same geographical region. A G2.2xlarge instance uses a 2.60GHz Intel Xeon E5-2670 CPU with 16GB RAM and an NVIDIA GRID K520 (Kepler) GPU running Ubuntu 18.04 LTS.
@@ -93,13 +100,6 @@ Experiments were conducted using AWS G2.2xlarge servers located within the same 
 Fig. \ref{fig_PerCol} shows the performance of our system with rising server numbers from 1 to 10. The graph clearly shows that the addition of servers lowers the frame time throughout the experiment. This is increasingly noticeable later in the simulation when a greater number of objects are present. For higher server numbers the reduction in maximum frame time is less than for lower numbers, which is as expected as in the ideal case the workload per server would be $1/n$ of the total workload, where $n$ is the number of servers. 
 
 From these observations it can be concluded that this system is scalable in column configuration as the addition of servers results in increased performance.
-
-\begin{figure}[!t]
-	\centering
-	\includegraphics[width=\textwidth]{ColPerformance}
-	\caption{Performance of increasing numbers of servers with an accumulating number of objects (in column layout)}
-	\label{fig_PerCol}
-\end{figure}
 
 Experiments were also carried out using servers in a corner layout. The layouts of 3 and 4 servers are shown in Fig. \ref{ServerCorner}, in which the 4 server case is a 2x2 grid with a single corner intersection in the centre. The 9 server case is a 3x3 grid with 4 corner intersections. Injection rates and volume dimensions remain the same as in the column based experiments. Fig. \ref{fig_PerCor} shows the graph illustrating performance. The graph demonstrates that increasing the number of servers lowers the frame time. The additional processing overhead of exchanging more messages with more neighbouring servers in the 9 server experiment is outweighed by the performance gains of additional servers.
 
@@ -538,7 +538,7 @@ From these observations it may be declared that this system is scalable in corne
 	\caption{Performance of increasing numbers of servers with an accumulating number of objects (in corner layout)}
 	\label{fig_PerCor}
 \end{figure}
-
+\clearpage
 \section{Collision Correctness Experiments}
 In the following section the correctness of collisions between objects is explored, i.e. do objects have the same collision behaviour in a AP as they do in a centralised system.
 
