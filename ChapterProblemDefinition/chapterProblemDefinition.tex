@@ -62,7 +62,7 @@ The challenges involved with two servers reaching a consensus on the state of an
 Objects not being simulated (missed updates), can occur when objects are migrating between servers. When objects are being migrated between servers, they don't exist on any server, as a result the position and rotation of the object will not be updated. This would appear as though the object has frozen, how noticeable this would be to an observer would depend on the situation and the number of updates missed. For example, if the object is stationary or moving slowly, several time steps could be missed without being noticeable. Alternatively, in a scenario where a large object was in a fast free-fall, very few update steps could be missed before an observer would notice that the object is not being simulated correctly.
 
 \subsection{Object duplication or loss}
-Any solution in which objects are migrated between servers is vulnerable to object duplication or loss. Networks do not provide absolute guarantee of message deliveries or order of message arrival. As a consequence of this, network messages for the migration of objects may be lost, in which case the object could be lost. For example, if one server sends a migrate message for an object and deletes the object from its simulation and the message is lost and the object never gets received and created on the receiving server. Alternatively, a server may not delete the migrating object until an acknowledgement is received from the server it is migrating the object to, in which case, the acknowledgement may be lost and the object kept on the sending server, despite a duplicate of the object now existing on the receiving server. %Messages may arrive out of order
+Any solution in which objects are migrated between servers is vulnerable to object duplication or loss. Networks do not provide absolute guarantee of message deliveries or order of message arrival. As a consequence of this, network messages for the migration of objects may be lost, in which case the object could be lost. For example, if one server sends a migrate message for an object and deletes the object from its simulation and the message is lost and the object never gets received and created on the receiving server. Alternatively, a server may not delete the migrating object until an acknowledgement is received from the server it is migrating the object to. In this case, the acknowledgement may be lost and the object kept on the sending server, despite a duplicate of the object now existing on the receiving server. %Messages may arrive out of order
 
 %Maximum penetration for a given speed occurs when two objects travelling directly towards each other have, in the final time-step before colliding the two objects have no distance between them, but are not overlapping, so not colliding. The next physics time-step, the collision will be detected and will have the maximum penetration possible for that relative speed. Re-arranging $s=d/t$, to $d=s.t$ and substituting the physics time-step for $t$, gives us the maximum distance (penetration) for a relative speed, and we are able to plot the maximum expected penetration line.
 
@@ -206,7 +206,14 @@ To provide a comparison and to demonstrate this study's contribution to the fiel
 
 Assuming a migratory approach in which servers are responsible for a geographic area, when one object crosses a boundary between geographic areas, such an object's hosting must be transferred to the appropriate server. It is handling this transfer that is the underlying problem.
 
-Accomplishing a transfer with a simple message from one server to another is charged with many problems: (1) the message may be lost and the object disappears; (2) the message may be delayed and the object disappears and reappears; (3) there may be more than one candidate server for hosting (if object travelling quickly) resulting in duplication of an object; (4) the server an object leaves may be unaware of when it should stop simulating the object (resulting in duplicated objects)\cite{High-performanceServerSystems}; (5) an object may be colliding with another object across the boundary and the collision would be missed if both objects are hosted on different servers (objects may pass through each other).
+Accomplishing a transfer with a simple message from one server to another is charged with many problems: 
+\begin{itemize}
+	\item The message may be lost and the object disappears.
+	\item The message may be delayed and the object disappears and reappears.
+	\item There may be more than one candidate server for hosting (if object travelling quickly) resulting in duplication of an object.
+	\item The server an object leaves may be unaware of when it should stop simulating the object (resulting in duplicated objects \cite{High-performanceServerSystems}).
+	\item An object may be colliding with another object across the boundary and the collision would be missed if both objects are hosted on different servers (objects may pass through each other).
+\end{itemize}
 
 For additional clarity consider objects A and B in Fig. \ref{AuraProj}. Each server is aware of the objects they host but not other objects. As such, objects A and B would not interact and not collide with each other, creating a time-space inconsistency. A time-space inconsistency is defined as two objects occupying the same space at the same time. If Object B has a velocity directed towards the boundary, it would continue at its initial velocity until it traversed the boundary, at which point it would migrate to server 0. Upon completion of the migration, objects A and B would overlap far more than would be expected in a typical simulation, resulting in a late and inappropriate collision response.
 
@@ -220,8 +227,10 @@ Simulate objects overlapping the boundary on both servers, however, results woul
 Simulate objects overlapping the boundary and objects interacting with those on both servers, e.g. by using an overlapping region. Object may interact with objects not in the overlapping region, so the results would diverge or the overlapping region would have to dynamically change in order to keep all interacting objects within the overlapping region. Even if all objects interacting were in the overlapping region, results would still diverge due to non-determinism of real-time physics engines. The divergence of results due to non-determinism could be corrected by periodically synchronising the objects (ensuring the objects have the same state on both servers), however, this would appear as jitter as objects would be moved from one position to their corrected position instantaneously. In addition, this would require additional network overhead for the syncing of objects between servers and extra computational overhead of needing to simulate objects twice.
 
 There would be a trade-off with this approach, either:
-1) Frequent messages are sent with small corrections for objects, appearing as jitter. This would require lots of computational and network overhead. 
-2) Infrequent messages with large corrections for objects, appearing as objects moving large distances instantaneously but would require less computational and network overhead.
+\begin{enumerate}
+	\item Frequent messages are sent with small corrections for objects, appearing as jitter. This would require lots of computational and network overhead. 
+	\item Infrequent messages with large corrections for objects, appearing as objects moving large distances instantaneously but would require less computational and network overhead.
+\end{enumerate}
 
 For new objects entering the overlapping region, there will be a delay before the new object appears on both servers, network delays would affect this and could lead to the two simulations diverging significantly. For example, if there are two fast moving objects on a collision course with each other that are expected to collide in the overlapping region. Due to network delays, each server only becomes aware of the other object once the objects have already passed each other, as a result the collision is missed entirely and the result is incorrect compared to a centralised simulation.
 %For example, a newly entered object from one server knocked over a stack of cubes in the overlapping region, if there was a long delay in communication, the receiving server might one physics timestep be unaware of any collision, the next timestep it would update to many timesteps after the collision
@@ -239,17 +248,24 @@ This could also lead to jitter, if two objects are in contact (i.e. colliding ov
 
 % Collisions may not be missed if there is deep penetration as PhysX won't move objects all the way out of a collision if the collision is deep enough.
 
-This approach would be affected by network delays. For example, using the stacked cubes example. Say the two cubes are free-falling. If the bottom cube was being simulated on a different server, the position of the bottom cube would only be updated whenever a message was received from the remote server to do so. If there was a long delay between messages from the remote server, for example, from a spike in latency or a sudden big loss in packets, the cube would not be updated and appear to have stopped falling. As the bottom cube has stopped on the receiving server, the top cube remains stationary, as it is in contact with the bottom cube. On the remote server, if messages are being received, the cube would be stationary and appear to be floating, as from its server's perspective, it is in contact with the bottom cube. As a result, both servers have incorrect states compared to a centralised simulation.
+This approach would be affected by network delays. For example, using the stacked cubes example. Say the two cubes are free-falling and the bottom cube is being simulated on a different server, the position of the bottom cube would only be updated whenever a message was received from the remote server. If there was a long delay between messages from the remote server, for example, from a spike in latency or a sudden large loss in packets, the cube would not be updated and appear to have stopped falling. As the bottom cube has stopped on the receiving server, the top cube remains stationary, as it is in contact with the bottom cube. On the remote server, if messages are being received, the cube would be stationary and appear to be floating, as from its server's perspective, it is in contact with the bottom cube. As a result, both servers have incorrect states compared to a centralised simulation.
 
 
-\subsection{All object interactions on same server}
+\subsection{All object interactions on the same server}
 Simulate all objects that are interacting with each other on the same server. Auras could be used to determine which objects are potentially interacting. Auras of objects would need to be exchanged. Solution would need to manage the number of auras exchanged to reduce this overhead.
 
 \section{Proposed Solution}
 % Introduce this in context of above section
 We term this study's approach Aura Projection (AP). AP tackles the problem of maintaining consistency across regions while ensuring timeliness of a simulation. In particular, AP provides the building blocks of a scalable solution to server-side physics simulations by handling all configurations of boundary cases in migratory approaches. 
 
-In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. In other words, auras act as a request for objects to be migrated. Any object colliding with the aura is migrated to the server the aura came from. The presence of an aura allows: (1) the prediction of future hosting requirements allowing time to transfer objects; (2) a narrowing of interest in only considering a subset of objects promoting a scalable solution; (3) an unhindered physics simulation for existing objects; (4) limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability). In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
+In AP, an object maintains an aura, an area of interest around the object, that indicates its possible future location and, therefore, aids in identifying near future interactions. In other words, auras act as a request for objects to be migrated. Any object colliding with the aura is migrated to the server the aura came from. The presence of an aura allows: 
+\begin{itemize}
+	\item The prediction of future hosting requirements allowing time to transfer objects.
+	\item A narrowing of interest in only considering a subset of objects promoting a scalable solution.
+	\item An unhindered physics simulation for existing objects.
+	\item Limiting communications requirements between servers based on focusing message passing overhead on interacting objects (promoting scalability).
+\end{itemize}
+In essence, AP ensures that any two objects that may be interacting are always being simulated on the same server. For example, objects C and D illustrated in Fig. \ref{AuraProj}. Object C projects its aura into Server 1, Object D collides with the aura and is migrated to Server 0, allowing continued interaction to occur.
 
 Messages are sent between servers where aura overlap occurs across a geographic boundary. We term this phase of the algorithm as an object projecting its aura onto another server. %The receiving server can then predict and prepare for the possibility of interaction if an object was migrated to it. 
 
@@ -262,7 +278,12 @@ A small amount of availability is sacrificed (in the region of 10ms) as objects 
 In terms of collisions between objects, AP provides strong consistency. All collisions between objects only take place on a single server, removing the possibility of inconsistencies between servers. Network partitioning is sacrificed in order to achieve strong consistency.% and no sacrifice to availability is made.
 
 \section{Aura Calculation}
-Calculating an aura size is key to creating a scalable solution balanced against consistency: (1) Auras that are too small will result in a faster simulation but with more missed interactions; (2) Auras that are too large will include more calculations that are simply not required, increasing server load and decreasing scalability. Therefore, how auras are calculated will be carefully described and justified. 
+Calculating an aura size is key to creating a scalable solution balanced against consistency:
+\begin{enumerate}
+	\item Auras that are too small will result in a faster simulation but with more missed interactions.
+	\item Auras that are too large will include more calculations that are simply not required, increasing server load and decreasing scalability.
+\end{enumerate}
+Therefore, how auras are calculated will be carefully described and justified. 
 
 Spheres are used to represent auras. This bounding volume is computationally efficient as rotational calculations are not required in determining its correct alignment. Auras accommodate the displacement of objects using an estimated network latency based on historic monitoring, in addition to the distance a remote object may be predicted to penetrate an aura (considering velocities).
 
@@ -380,7 +401,7 @@ As objects within each others auras need to be simulated on the same server, thi
 
 Clusters of objects can therefore end up being simulated with all but one of their objects in their host server's region. This is sub-optimal, as the more auras that are being maintained/exchanged, the higher the computational cost.
 
-The solution to this problem is to dynamically move the server-region boundaries to prevent clusters of objects having the majority of the objects outside of their host server region or even avoid be moved to avoid intersecting large clusters of objects entirely. However, this solution is not yet implemented in AP.
+The solution to this problem is to dynamically move the server-region boundaries to prevent clusters of objects having the majority of the objects outside of their host server region or the server-region boundaries could be moved in such a way as to avoid intersecting large clusters of objects entirely. However, this solution is not yet implemented in AP.
 
 \section{Thrashing}\label{Thrashing}
 The common term `thrashing' will be used to describe the following two scenarios that must be considered.
