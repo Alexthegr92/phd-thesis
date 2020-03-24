@@ -1022,3 +1022,18 @@ The two servers use the following tolerances: a maximum speed tolerance of $32m\
 %\end{figure}
 
 As packet-loss increases, late and erroneous collisions increase and late collisions increase in magnitude. This is due to messages being delayed as packets are lost and need to be re-sent by RakNet's reliability layer. Missed collisions begin to occur as soon as packet-loss exceeds $1\%$, but increase at a lower rate relative to late collisions. (Note, late collisions begin to occur from $0\%$, this is expected as all factors are set to be equal to their tolerances). These results demonstrate that AP is able to prevent $50\%$ of late collisions even in cases of packet-loss as high as (15\%) and prevent all missed collisions with up to $1\%$ packet-loss, which is much greater packet-loss than would be expected in practice (0.01\%) \cite{ThousandEyesCloudPerf2018}.
+
+\section{Results Summary}
+In this chapter, the design for the experiments for testing both the scalability and correctness of AP were presented and justified. The results of these experiments were analysed and evaluated. 
+
+The results from the experiments demonstrate the contribution of this study:
+\begin{itemize}
+	\item AP is scalable, proving real-time physics simulations can be scaled.
+	\item AP provides at minimum, an approximate solution to maintaining correctness of real-time physics when scaled.
+\end{itemize}
+
+The results from the scalability experiments demonstrate that AP is scalable, as the addition of more servers improves the overall performance of the system (measured using the maximum frame-time of all servers). This holds true even in the corner cases, including when the communication requirements between servers are at the highest, when using 9 servers in a grid layout.
+
+The results from the collision correctness experiments demonstrate that AP provides at minimum, an approximate solution to ensuring the correctness of collisions across server boundaries when AP is employed. Collisions were shown to be correct in the majority of cases. False-positives were expected in the results due to the limitations of the experiments. The correctness was measured using the `penetration time' of two objects colliding, one of which was intersecting the server-region boundary. The three factors that influence the aura calculation (speed, latency \& frame-time) were independently tested using different values for each (based on values used by commercial games). Thrashing results, which made up a small portion of the results (except in the final frame-time experiment) were excluded and it assumed these errors will be fixed in the future.
+
+Additionally, increasing packet-loss was also tested, which also demonstrated that collisions remain correct in the majority of cases even when exceeding values that would be expected in practice.
