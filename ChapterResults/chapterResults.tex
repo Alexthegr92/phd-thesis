@@ -645,7 +645,7 @@ Speed is controlled such that the two objects used in the experiment collide wit
 
 %The two servers use the same tolerances used in the performance experiments, a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$, maximum latency tolerance of $2ms$ and a maximum frame-time of $15ms$. Each server has a random delay between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $10$ times.
 
-\subsubsection{Experiment parameters and output}
+For the varying factors experiments, the following parameters were used and output given.
 The two servers use the following tolerances unless otherwise stated: a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$; maximum latency tolerance of $2ms$; and a maximum frame-time tolerance of $15ms$. Each server has a random delay before starting between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $50$ times. An experiment was conducted for each aura tolerance value. The aura size for the varying tolerances are plotted and the tolerances used are marked. For each experiment, three tolerances values were chosen. For each tolerance value, the following output graphs were plotted:
 \begin{itemize}
 	\item The ratio of late to correct collisions and ratio of misses to total collision.
@@ -661,9 +661,7 @@ The two servers use the following tolerances unless otherwise stated: a maximum 
 
 %TODO: Also mention very small tolerance for detecting errors, so collisions very close to the line aren't counted as errors. Have to account for floating-point errors throughout the results process.
 
-\subsubsection{Varying Speed}
-
-In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times.
+The first experiment conducted was the varying speed experiment. In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times.
 
 \begin{figure}
 	\centering
@@ -734,9 +732,7 @@ The aura size increases continuously with speed, therefore we expect late collis
 %\label{fig_RatiosVsSpeed}
 %\end{figure}
 
-\subsubsection{Varying Latency}
-
-In this experiment the latency between the two servers was varied from $0ms$ to double the following tolerances: $2ms$; $8ms$ and $16ms$ in increments of $0.05ms$, $0.25ms$ and $1ms$ respectively. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
+The second experiment conducted was the varying latency experiment. In this experiment the latency between the two servers was varied from $0ms$ to double the following tolerances: $2ms$; $8ms$ and $16ms$ in increments of $0.05ms$, $0.25ms$ and $1ms$ respectively. The latency used is the target latency, in reality the latency will never exactly be equal to $0ms$.
 
 \begin{figure}
 	\centering
@@ -806,9 +802,7 @@ Fig. \ref{fig_LatencyAuraSize} shows the size of the aura (not including the bou
 %\label{fig_RatiosVsLatency}
 %\end{figure}
 
-\subsubsection{Varying Frame-Time}
-
-In this experiment the frame-time was varied from $0ms$ to double the frame-time tolerance for the following frame-times: $8.33ms$ $(120Hz)$; $15ms$ $(66.67Hz)$ and $33.33ms$ $(30Hz)$. Increments of $1ms$, $1ms$ and $2ms$ were used respectively. The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$.
+The third experiment conducted was the varying frame-time experiment. In this experiment the frame-time was varied from $0ms$ to double the frame-time tolerance for the following frame-times: $8.33ms$ $(120Hz)$; $15ms$ $(66.67Hz)$ and $33.33ms$ $(30Hz)$. Increments of $1ms$, $1ms$ and $2ms$ were used respectively. The frame-time used is target frame time, in reality frame-time cannot be equal to exactly $0ms$.
 
 \begin{figure}
 	\centering
@@ -920,7 +914,6 @@ Fig. \ref{fig_FrameTimeAuraSize} shows the size of the aura (not including the b
 	\label{tab_AboveTolerance}
 \end{table}
 
-\subsubsection{Thrashing}
 In addition to recording the number of collisions that resulted in thrashing, the number of times an object thrashed between servers was also measured. The number of times thrashed is determined by measuring the number of migrations away from the server that the collisions takes place on, before the collision takes place. A histogram of the number of occurrences against the number of times thrashed is shown in Fig. \ref{fig_ThrashingHistogram}. For this histogram, data from the Frame-Time $33.33ms$ experiment is used, as this provides the largest sample of thrashing. Fig. \ref{fig_ThrashingHistogram} demonstrates that the most frequent number of times thrashed is 1, by a large margin followed by a downward trend.
 
 The more times thrashing occurs, the later the collision may be detected as objects continue to be updated and move without a collision occurring. It should be noted that thrashing occurring does not guarantee that a late collision will take place. The more times thrashing takes place, the more physics updates occur and the further the objects may be moved towards (and eventually overlapping) each other. Therefore, a greater number of times thrashed, means a late and incorrect collision response is more likely, but not guaranteed.
@@ -932,7 +925,7 @@ The more times thrashing occurs, the later the collision may be detected as obje
 	\label{fig_ThrashingHistogram}
 \end{figure}
 
-\subsubsection{Evaluation - Speed}
+\subsection{Experiment- Varying Factors Evaluation}
 As the speed increases, the proportion of late collisions to correct collisions increases, as shown in Figs. \ref{fig_RatioVsSpeedLow}, \ref{fig_RatioVsSpeedMid} and \ref{fig_RatioVsSpeedHigh}. When speed is below the speed tolerance, late collisions do not exceed 10\%. This 10\% is assumed to be caused by false-positives. Once above the speed tolerance, the proportion of late collisions increases immediately, which is predicted by the aura calculation. Missed collisions begin to occur when speed exceed $80ms^{-1}$ in the $48ms^{-1}$ experiment, this is due to objects travelling so quickly, the objects completely pass one another, missing the collision entirely.
 
 It should also be noted that object speed is application specific and objects need to be travelling directly towards the centre of each other and one of the objects has to be travelling above the tolerance speed, in order for errors to occur.
@@ -940,7 +933,6 @@ It should also be noted that object speed is application specific and objects ne
 As the speed increases, the mean penetration time increases, as shown in Figs. \ref{fig_CollisionsPenVsSpeedLow}, \ref{fig_CollisionsPenVsSpeedMid} and \ref{fig_CollisionsPenVsSpeedHigh}. With the exception of the starting speed, the standard deviation remains constant below the tolerance line. Once speed increases above the tolerance line, the standard deviation initially increases, but appears to remain constant after the initial increase. 
 %Note that the mean error increases in discrete steps (with some small variation), this is due to the discrete physics time-steps.
 
-\subsubsection{Evaluation - Latency}
 As the latency increases, the proportion of late collisions to correct collisions increases, as shown in Fig. \ref{fig_RatioVsLatencyHigh}. However, Figs. \ref{fig_RatioVsLatencyLow} and \ref{fig_RatioVsLatencyLow} do not show this relationship. In the $2ms$ latency tolerance experiment, late collisions do not exceed $20\%$, which is assumed to be accounted for by false-positives. The aura calculation predicts that late collisions should start occurring once $3ms$ has been exceeded, however, this is not observed, as the proportion does not increase above what would be expected for false-positives.
 In the $8ms$ latency tolerance experiment, late collisions do not exceed $2\%$, which is assumed to be accounted for by false-positives. This remains the case even when the tolerance is exceeded. The aura calculation predicts that late collisions will not begin to occur until $20ms$ latency is reached, which this experiment does not reach, therefore no late collisions outside of false-positives are expected. In the $16ms$ latency tolerance experiment, late collisions do not exceed $3\%$ below the tolerance, which is assumed to be accounted for by false-positives. The aura calculation predicts that late collisions will not begin to occur until $20ms$ latency is reached. In Fig. \ref{fig_RatioVsLatencyHigh} we see the proportion of errors increase from $20ms$ and above, however, it does not exceed the expected false-positive proportion until $25ms$ latency is reached.
 %TODO: Re-run latency experiment, larger sample size?
@@ -953,14 +945,12 @@ The $2ms$ latency tolerance experiment exhibits more false-positives than the ot
 
 Outside of cloud-server to cloud-server communication latency is prone to ``jitter'', meaning tolerances are likely to be sometime exceeded, however, ``jitter'' is for short durations and would need to take place at the same time as an object migration. However, cloud-server to cloud-server communication has negligible ``jitter'' \cite{ThousandEyesCloudPerf2018}. If collision correctness is required even in cases of ``jitter'', the latency tolerance would need to be higher than the peaks in latency. 
 
-\subsubsection{Evaluation - Frame-Time}
 As frame-time increases, the proportion of late collisions to correct collisions increases, as shown in Figs. \ref{fig_RatioVsLatencyLow} and \ref{fig_RatioVsLatencyMid}, however in \ref{fig_RatioVsLatencyHigh} the sample size is small above the tolerance line due to the high occurrences of thrashing and so the relationship in this experiment can not be deduced. For the $8ms$ and $15ms$ experiments the late collisions do not exceed 10\% and are assumed to be accounted for by false-positives. In the $8ms$ frame-time tolerance experiment, late collisions are not expected to occur until $16ms$ frame-time, based on the aura size. Late collisions do not exceed $20\%$ and is assumed to be accounted for by false-positives. In the $15ms$ frame-time tolerance experiment, late collisions exceed $20\%$ once $16ms$ latency is exceeded as predicted by the aura size and increase to over $75\%$ at $30ms$ latency.
 In the final frame-time tolerance experiment using $32ms$ frame-time tolerance, late collisions only occur for frame-times of $64ms$. The aura calculation predicts that late collisions should begin to occur as soon as $32ms$ frame-time is exceeded, however, due to the low sample size, as a result of the high occurrences of thrashing, the plot does not accurately represent any relationship between frame-time and proportion of late collisions.
 
 For the first two frame-time experiments ($8.33ms$ and $15ms$ tolerance values), as frame-time increases, the mean penetration time increases and standard deviation also increases, shown in Figs. \ref{fig_CollisionsPenVsFrameTimeLow} and \ref{fig_CollisionsPenVsFrameTimeMid}. Standard deviation increases as the delay between frame-time update and physics update can always vary between 0 and the frame-time, meaning even in high frame-time situations, the delay between frame-time update and physics update can be 0. Exceeding the frame-time tolerance very quickly leads to high max error. This is due to the delay in messages being exchanged being created by the long frame-times on both servers (this is reflected in the aura calculation by the frame-time tolerance being multiplied by 2). However, as the target frame-time increases over the tolerance, variation in error increases and maximum errors become less likely. For the final frame-time experiment, ($33.33ms$ tolerance value), thrashing occurs the majority of the time (as demonstrated in \ref{tab_BelowTolerance} and \ref{tab_AboveTolerance}), both above and below the tolerance, due to this the results shown in \ref{fig_CollisionsPenVsFrameTimeHigh} have a very small sample size and thus will not accurately represent the relationship between frame-time and penetration.
 
-\subsubsection{Varying Factors - Summary}
-The varying factors experiments demonstrate that the aura calculation is conclusively correct for speed and frame-time aura tolerance factors and at minimum approximate for latency. For each varied factor, for all three tolerance values chosen, below the tolerance value, the mean + two standard deviations lies under the maximum penetration time expected on a centralised simulation, with only a small number of exceptions discussed above. These experiments also demonstrate the relationship between increasing the tolerance values and amount of thrashing expected to occur. There are no missed collisions, with the exception of the speed experiments and these have significantly fewer than $1\%$ misses below the tolerance and $1.12\%$ misses above the tolerance. Once factors increase above their respective tolerance values, late collisions begin to occur and the more the factors are exceeded, the number and magnitude of errors increase. This demonstrates the correctness of the aura calculation in AP.
+In summary, the varying factors experiments demonstrate that the aura calculation is conclusively correct for speed and frame-time aura tolerance factors and at minimum approximate for latency. For each varied factor, for all three tolerance values chosen, below the tolerance value, the mean + two standard deviations lies under the maximum penetration time expected on a centralised simulation, with only a small number of exceptions discussed above. These experiments also demonstrate the relationship between increasing the tolerance values and amount of thrashing expected to occur. There are no missed collisions, with the exception of the speed experiments and these have significantly fewer than $1\%$ misses below the tolerance and $1.12\%$ misses above the tolerance. Once factors increase above their respective tolerance values, late collisions begin to occur and the more the factors are exceeded, the number and magnitude of errors increase. This demonstrates the correctness of the aura calculation in AP.
 %Therefore, we have shown that if the aura calculation factors remain within their respective tolerances, erroneous collisions will be small in magnitude and rare in number. %TODO: Summary Table: Row for each factor: Number of collisions below tolerance, Percentage of errors below tolerance, Mean error below tolerance
 
 %TODO: The following needs to be formalised.
@@ -986,7 +976,7 @@ In addition to varying each aura tolerance factor, an experiment was undertaken 
 
 RakNet, the library used for network communication in this project, includes a reliability layer, which uses best effort. This means if packets are lost and an acknowledgement message is not received, sending will be re-attempted, but message delivery cannot be guaranteed. However, this takes time and therefore causes a delay in messages being received. Delays in messages will lead to erroneous collisions, therefore as packet-loss increases, erroneous collisions should increase in number and magnitude. If messages are delayed enough, the collision will be missed as the two objects pass each other on different servers without ever interacting with each other. 
 
-\subsubsection{Experiment parameters and output}
+For the varying packet-loss experiments, the following parameters were used and output given.
 The two servers use the following tolerances: a maximum speed tolerance of $32m\mathord{\cdot}s^{-1}$; maximum latency tolerance of $2ms$; and a maximum frame-time tolerance of $15ms$. Each server has a random delay before starting between $0$ and the target frame-time in order to prevent the two servers always having synchronous update cycles. Each experiment is repeated $50$ times. The mean and $+/-2$ standard deviations of penetration time were plotted against each tolerance factor for each of the three tolerance values chosen. In addition, the ratio of errors to correct collisions and misses to total collisions were plotted against packet-loss.
 
 \begin{figure}
@@ -1031,5 +1021,4 @@ The two servers use the following tolerances: a maximum speed tolerance of $32m\
 %\label{fig_RatiosVsLoss}
 %\end{figure}
 
-\subsubsection{Evaluation}
 As packet-loss increases, late and erroneous collisions increase and late collisions increase in magnitude. This is due to messages being delayed as packets are lost and need to be re-sent by RakNet's reliability layer. Missed collisions begin to occur as soon as packet-loss exceeds $1\%$, but increase at a lower rate relative to late collisions. (Note, late collisions begin to occur from $0\%$, this is expected as all factors are set to be equal to their tolerances). These results demonstrate that AP is able to prevent $50\%$ of late collisions even in cases of packet-loss as high as (15\%) and prevent all missed collisions with up to $1\%$ packet-loss, which is much greater packet-loss than would be expected in practice (0.01\%) \cite{ThousandEyesCloudPerf2018}.

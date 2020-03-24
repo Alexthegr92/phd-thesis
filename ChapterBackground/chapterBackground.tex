@@ -245,7 +245,6 @@ Scalability in online games is typically measured in terms of players that can b
 Online game architectures fall into the following main categories: client-server; peer-to-peer; hybrid peer-to-peer; and distributed server (also referred to as multiserver). Each type has advantages and disadvantages and suitability depends on a number of factors, including number of players and whether or not the game is short-session-based or persistent.
 %We discuss the wider topic of online gaming (client-hosted, P2P, server), challenges of latency, security/cheating and computational limits. Also some details of online gaming servers are discussed, specifically, typical server frame-times and network tick updates.
 
-\subsubsection{Client-Server}
 Client-Server architecture is a type of architecture in which the game is executed and game state is managed entirely by the server. Clients connect to the server and receive the necessary information about the game world. All messages and interactions are sent through the game server and the server is responsible for disseminating messages to the appropriate clients. The main challenge with this approach is scalability, as a single server can only support a limited number of players \cite{Ferretti2018}. This is normally solved with the addition of more servers, i.e. switching to a distributed server architecture. As all communication goes through the server, clients do not directly communicate with each other, meaning latency can be increased for interactions with other players.
 As there is only one central version of the game state, consistency resolution is simplified to solving inconsistencies between server and client and the server treated as the correct master copy. In addition, fault-tolerance is simplified to keeping a single backup of the sate of the central server, although this adds more complexity and cost, and can reduce scalability. Client-Server architectures are less prone to cheating than peer-to-peer based architectures, as the game provider has complete control over the game state \cite{P2PForMMOs}.
 
@@ -263,7 +262,6 @@ As there is only one central version of the game state, consistency resolution i
 %	\caption{Client hosted networked game.}
 %\end{figure}
 
-\subsubsection{Peer-to-Peer}
 Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the game is executed and game state is managed entirely by the peers, although peers are often only responsible for a subset of the game state, such as the entities they are currently interacting with. A peer-to-peer architecture is shown in Fig. \ref{fig_P2P}. Peers are all responsible for message forwarding to each other. In other words, peers act as both server and client. Peer-to-Peer reduces the cost for the game provider of maintaining expensive servers and can reduce latency between players, as communication is performed directly between peers, rather than communicating through a server. In addition, it provides scalability in terms of compute power, as the more peers that join, the more resources available to the system. However, as more peers join, the greater the communication overhead is between peers. In addition, peer-to-peer is prone to the problems of fault-tolerance, data consistency and cheating by players. A peer is more likely to fail or experience unscheduled disconnection than a dedicated server. As each peer is responsible for the game state, it is possible for communication errors to occur, resulting in two peers with different game states or a peer maliciously altering the game state or the messages being sent to other peers in order to cheat. The fault-tolerance requirements of short-session-based games are lower than persistent games, making peer-to-peer architectures better suited to short-session-based games \cite{P2PForMMOs}. Peer-to-Peer architectures have received much research attention in previous years, with many solutions that attempt to address the problems above, through the use of techniques discussed in \cite{P2PForMMOs}.
 
 %VoroGame, work is distributed amongst clients.
@@ -276,11 +274,9 @@ Peer-to-Peer, often referred to as`P2P', is a type of architecture in which the 
 	\label{fig_P2P}
 \end{figure}
 
-\subsubsection{Hybrid Peer-to-Peer}
 Hybrid Peer-to-Peer architectures are a combination of client-server and peer-to-peer architectures. The peer-to-peer part of the system can be responsible for different aspects of the system, including Cooperative Message Dissemination, State Distribution, Basic Server Control and distributing software updates. \cite{P2PForMMOs}. Hybrid Peer-to-Peer enables trade-offs between consistency control and scalability, determined by how the system is divided between server and peer-to-peer. The more responsibility peers have, the greater the scalability but at a loss of consistency control.
 %These can be broadly classified into two types: Homogeneous, in which all nodes have similar responsibilities and Heterogeneous, in which some peers be
 
-\subsubsection{Distributed server}
 % TODO: More references for this
 Distributed server or Multi-Server architectures use multiple servers and the computational workload is divided between the servers. This can be achieved in one of two ways, either through `shards' or through division of the game world. 
 
@@ -390,9 +386,9 @@ Despite DVE being a popular area of research, the literature is restricted to mo
 The technique presented in this paper, Aura Projection, makes use of the aura concept from Interest Management. Interest Management is a term used to describe any method of restricting message dissemination between objects within a virtual space, with the aim of reducing the network overhead when large numbers of participants or players are connected to a virtual world \cite{Morgan2005}.
 
 Interest Management can be broadly classified into two categories: Regions and Auras \cite{Morgan2005, storey2004determining}.
-\subsubsection{Regions}
-``In the region based approach the virtual world is commonly, but not always, divided into well defined uniform sized regions that are static in nature (i.e. their boundaries are defined at virtual world creation time)."\cite{storey2004determining}
-\subsubsection{Auras}
+
+``In the region based approach the virtual world is commonly, but not always, divided into well defined uniform sized regions that are static in nature (i.e. their boundaries are defined at virtual world creation time)."\cite{storey2004determining}\\
+
 ``In the aura based approach each object is associated to an aura that defines an area of the virtual world over which an object may exert influence. Ideally, an object may potentially communicate their actions to only objects that fall within their influence."\cite{storey2004determining}\\
 
 Interest management is a well researched topic and enhancements to it exist, such as \cite{Bezerra2008} which proposes the A3 algorithm. A3 uses a combination of a circular area of interest and field of view combined with a relevance gradient. \cite{LoadBalancingforMMOs} proposes a Behavioural Interest Management Technique that allocates resources based on player interactions. Auras (an area of interest/influence) are used to determine player message exchanges, reducing message passing while promoting player number scalability.
