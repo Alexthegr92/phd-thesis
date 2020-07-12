@@ -6,6 +6,8 @@ This study aims to measure and demonstrate scalability of AP. When more servers 
 
 Experiments were performed on two layouts of servers: column layout and corner layout. The column layout experiment was performed using an increasing number of servers from 1 to 10. The regions were laid out in a column configuration as shown in Fig. \ref{ColumnLayout}. Objects are injected at a constant rate, both near and far from boundaries. Injected objects are randomly selected from the following types: sphere (radius: $0.3m$), cuboid ($0.3m\mathord{\times}0.3m\mathord{\times}1.0m$) and capsule (radius: $0.3m$, height: $2m$) and start with a random velocity from the uniform distribution of: $(-10\mathord{<}x\mathord{<}10,-10\mathord{<}y\mathord{<}0,-10\mathord{<}z\mathord{<}10)m\mathord{\cdot}s^{-1}$. $50\%$ of objects are injected in a volume of $20m\mathord{\times}20m\mathord{\times}150m$ centred $12m$ away from a boundary and $15m$ above the ground plane. $50\%$ of objects are injected in the centre of a server's region in a volume of $20m\mathord{\times}20m\mathord{\times}20m$, $15m$ above the ground plane.
 
+The experiment is designed to test the performance of the system with a reasonably even distribution of objects between servers with a ratio of 1:1 between objects close to and far from server boundaries.
+
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \definecolor{sim}{rgb}{0,0.2,0.5}
 \begin{figure}[!t]	\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=1.5]
@@ -101,9 +103,15 @@ Fig. \ref{fig_PerCol} shows the performance of our system with rising server num
 
 From these observations it can be concluded that this system is scalable in column configuration as the addition of servers results in increased performance.
 
-Experiments were also carried out using servers in a corner layout. The layouts of 3 and 4 servers are shown in Fig. \ref{ServerCorner}, in which the 4 server case is a 2x2 grid with a single corner intersection in the centre. The 9 server case is a 3x3 grid with 4 corner intersections. Injection rates and volume dimensions remain the same as in the column based experiments. Fig. \ref{fig_PerCor} shows the graph illustrating performance. The graph demonstrates that increasing the number of servers lowers the frame time. The additional processing overhead of exchanging more messages with more neighbouring servers in the 9 server experiment is outweighed by the performance gains of additional servers.
+Experiments were also carried out using servers in a corner layout. The layouts of 3 and 4 servers are shown in Fig. \ref{ServerCorner}, in which the 4 server case is a 2x2 grid with a single corner intersection in the centre. The 9 server case is a 3x3 grid with 4 corner intersections. Injection rates and volume dimensions remain the same as in the column based experiments. Fig. \ref{fig_PerCor} shows the graph illustrating performance. 
 
-From these observations it may be declared that this system is scalable in corner configuration as the addition of servers results in increased performance.
+As discussed in \ref{Topology}, topologies with corner boundaries between server regions have higher communication requirements, this is because servers must communicate with all neighbouring servers. The highest number of expected neighbours for a given server in a grid layout is 8 servers, this applies to the server in the centre of the grid illustrated in Fig. \ref{BrickLayout} and any server not on the edge of the grid. The graph in Fig. \ref{fig_PerCor} demonstrates that increasing the number of servers lowers the frame-time. This remains true even in the presence of corner boundaries and with the maximum number of expected neighbours, 8, in a grid layout (meaning maximum communication requirement). The additional processing overhead of the higher communication requirements (as messages must be exchanged with all neighbouring servers) on the server with 8 neighbours is outweighed by the performance gains of partitioning the simulation using additional servers. In other words, 9 servers in grid layout outperform (have a lower frame-time than) a single server, despite the server in the centre of the grid needing to communicate with the maximum number of neighbouring servers for a grid layout. 
+
+The performance cost of the higher communication requirements for corner layouts is reflected in the performance graphs as the respective number of servers in column layout outperform those in corner layout. i.e. 3 servers in column layout have a lower frame-time than 3 servers in corner layout.
+
+As 8 neighbours is the maximum number of neighbours a server can have in a grid layout (and therefore has the most processing overhead), it can be concluded that any number of servers in a grid layout will outperform a single server (assuming reasonably even distribution of objects between servers and reasonable ratio of objects near and far from server boundaries).
+
+From these observations it may be declared that this system is scalable in corner and grid layout configurations as the addition of servers results in increased performance.
 
 \begin{figure}[!t]
 	\begin{subfigure}{.5\textwidth}
