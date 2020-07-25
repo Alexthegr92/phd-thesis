@@ -191,7 +191,7 @@ Fig. \ref{ExpensivePhysics} shows a time sequence diagram of a scenario in which
 \section{Scalable Non-Real Time Physics}
 Scalable non-real time physics simulations include fluid simulations, meteorological simulations and accurate physical simulations e.g. robotics, wheeled and tracked vehicle dynamics and mechatronics. An example of a scalable non-real time physic is Project Chrono \cite{Chrono}. Non-real time physics simulations work very differently from real-time, accuracy is highly favoured as opposed to the fast, plausible simulations in real-time physics. In addition high latency (10s of ms) is a small issue relative to large time-steps used in such simulations.
 
-\section{Online Gaming}
+\section{Online Gaming}\label{OnlineGaming}
 %TODO: Change to include related work will be discussed
 In this section an overview of online gaming challenges and architectures will be discussed. 
 The main challenges facing online gaming are consistency, latency, fault-tolerance, fairness, cheating, and scalability. 
@@ -296,7 +296,7 @@ In many cases it is not possible for a server to communicate the entire game sta
 
 The rates chosen for network tick rates depend on a variety of factors, including the required level of accuracy and bandwidth restrictions. Higher tick rates enable higher accuracy, but at the cost of more bandwidth being required. Different genres of games have different accuracy demands. For example, in first-person-shooters (FPS), higher tick rates result in a higher mean shooting accuracy for players \cite{lee2015evaluation}. Whereas, genres like real-time-strategy (RTS) games have more relaxed accuracy requirements. In the RTS Age of Empires, latency only becomes noticeable if it exceeds $500ms$, meaning network tick rates can be very low without being noticeable to the player \cite{pisan2004challenges}. Tick rates of popular network games range from 128Hz for CS:GO to 20Hz for Minecraft \cite{metzger2016comprehensive}.
 
-\subsection{Delta-Encoding}
+\subsection{Delta-Encoding}\label{Delta-Encoding}
 %TODO: Mention Delta-Encoding is used between servers for auras in implementation
 A common optimisation used by networked games is delta-encoding. Typically in games entities and their state change little from one update to the next, i.e. it is expected that only a small number of entities change between updates. Delta-encoding reduces network traffic by the server only encoding the difference (delta) between updates, reducing the size of messages that need to be sent \cite{bharambe2006colyseus}. Additionally, if an object's state has not changed, no message is required to be sent, dramatically reducing network overhead in cases of a large number of objects which are not changing. The main drawback of this technique is a missed update message sent to a client would lead to a different entity state from that point for that client and can lead to missing entities or entities that have been deleted on the server, remaining on the client. As result of this, delta-encoding either requires reliable message transmission between server and client or a periodically transmitted full "key" frame, containing the state of all entities \cite{bharambe2004supporting}.
 
@@ -364,6 +364,49 @@ This study aims to address the problems of consistency in distributing real-time
 
 Although there has been research utilising multiple servers to distribute the task of solving physics based problems (e.g., \cite{mashayekhi2018automatically}), there is no known literature describing real-time interactive physics exploiting the addition of servers to gain scalability. The closest work to this challenge is that carried out to seek scalability in terms of player numbers in online gaming in the field of Distributed Virtual Environments (DVEs). 
 
+Online gaming is a subset of DVEs and so many principles that apply to DVEs also apply to online gaming. Some key aspects to consider are the Goals and requirements of real-time DVEs are different from other distributed simulations. DVEs only need be "sufficiently realistic", which differs depending on context. This is known as selective fidelity, where different levels of realism are applied selectively to different aspects of the simulation, depending upon how much the aspect affects the outcome of the simulation. For example, in a ship simulator, realistic looking clouds will not contribute to simulator's effectiveness as a training device. DVEs must execute in real-time, unlike non-real-time simulations. Repeatability and synchronisation requirements are often relaxed as they may not contribute to the overall goal of the DVE, whereas they are essential for non-real-time simulations that require a high degree of accuracy. As a result of these different goals and requirements, many of the algorithms and techniques used in non-real-time simulations are not suitable for use in real-time DVEs \cite{fujimoto2000parallel}.
+
+DVEs also share the same architecture categories as online gaming \cite{fujimoto2000parallel} i.e. centralized server (referred to as Client-Server in \ref{OnlineGaming}), Distributed server and distributed, serverless (referred to as peer-to-peer in \ref{OnlineGaming}). Online gaming also includes the hybrid peer-to-peer architecture.
+
+A brief overview of some approaches to implementing systems for DVE will now be given.
+
+\subsection{Distributed Interactive Simulation}
+One example of an implementation of a DVE is Distributed Interactive Simulation (DIS), developed in the early '90s  \cite{fujimoto2000parallel}.
+DIS followed the following design principles:
+\begin{itemize}
+	\item Autonomous simulation nodes.
+	Each node is responsible for simulating one or more entities and generates messages, referred to as protocol data units (PDUs), to notify other nodes of updates to states of entities.
+	\item Transmission of "ground truth" information. 
+	Each node sends absolute truth concerning the state of the entities it represents.
+	\item Transmission of state change information only. To economize on communications, simulation nodes only transmit changes in behaviour. (Referred to as delta-encoding and discussed in \ref{Delta-Encoding}).
+	\item The use of "dead-reckoning", as discussed in \ref{ConsistencyRealTimePhysics}.
+\end{itemize}
+
+The principle of autonomous simulation nodes has some significant benefits, particularly in the case of heterogeneous simulations (distributed simulations using more than one type of simulation). It simplifies the development of simulators (simulation instances) as each simulator is not concerned with the details of the other simulators and allows for easy integration of legacy simulators. It also allows for simple joining or leaving of the distributed simulation by simulators. Autonomous simulation nodes advance the simulation time independently of each other, meaning there is no need for clock synchronisation between nodes. Additionally, autonomous nodes are not responsible for determining recipients of messages, which is instead performed by the underlying infrastructure \cite{fujimoto2000parallel}.
+
+\subsection{High Level Architecture}
+HLA is a successor to DIS and was originally developed in the mid-'90s for military simulations. In HLA a distributed simulation comprises of individual simulators called federates and combined are referred to as a federation. The main goal behind HLA is to support interoperability and reuse of simulations (i.e. for use with heterogeneous simulations) \cite{fujimoto2000parallel}.
+
+All entities in the simulation are represented in the HLA and each entity instance contains:
+\begin{enumerate}
+	\item A unique identifier
+	\item Attributes that indicate those state variables and parameters of an object that are accessible to other objects
+	\item Associations between objects.
+\end{enumerate}
+HLAs include a non-runtime and runtime component. The non-runtime component is responsible for specifying the definitions of the object types to be used by the federation. The runtime component is responsible for providing the federates with a means to interact with one another, known as the Run-time Infrastructure (RTI). Each federate is responsible for a set of entities and the state variables for entities are stored within the federates and not the runtime. Each federate is responsible for informing the RTI of any changes to state. Federates register interest with the RTI to receive updates for entities of which they are concerned \cite{fujimoto2000parallel}.
+
+It should be noted that different attributes for a single entity can be owned by different federates and the RTI has no knowledge of the semantics of the information that it's transmitting. As a result of this lack of semantic knowledge, no optimisations (e.g. dead-reckoning) can be performed by the RTI and any techniques must be implemented only on the federates \cite{fujimoto2000parallel}.
+
+HLA is very similar to the model used by SpatialOS \cite{SpatialOS}, which also uses a runtime, however, the implementation details of SpatialOS's runtime are not public knowledge.
+
+HLA is ideal for heterogeneous distributed simulations and for re-use with different types of simulations. However, there are some disadvantges to this architecture:
+\begin{enumerate}
+	\item It increases latency between simulations as communication must go through the run time \item It does not allow for any optimisations to be performed in the run time as the run time is not aware of the semantics of the simulations.
+\end{enumerate}
+
+In the case of real-time physics, we can assume the use of either homogeneous simulations or at least simulations that will be simulating physics with a large degree of shared semantics between simulations (as all simulations are dealing with physical simulation). As a result of this, there is little to no advantage gained in using the HLA architecture and direct communication between servers has the benefit of lower latency between servers.
+
+\subsection{Migratory vs Non-Migratory}
 There are primarily two ways in which server-side resources can provide scalability in online gaming (e.g., DVEs): (1) Migratory; (2) Non-migratory. In migratory approaches, a server will assume responsibility for handling in-simulation objects within a region. When objects traverse region boundaries into a region that is the responsibility of another server, they will be handed over to the other server. In a non-migratory approach, in-simulation objects are allocated to the responsibility of a particular server at instantiation time and stay with that server until they are deleted.
 
 The benefit of a migratory approach is that tightly coupled objects (interacting frequently) can be co-located on the same server, reducing interaction latencies. However, the act of moving such objects may be costly in terms of time required to resolve the hosting requirements of an object. The benefit of a non-migratory approach is that servers are rarely exhausted but network traffic will result in higher latencies that will inhibit the fidelity of interaction between objects.
