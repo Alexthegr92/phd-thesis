@@ -397,14 +397,16 @@ HLAs include a non-runtime and runtime component. The non-runtime component is r
 
 It should be noted that different attributes for a single entity can be owned by different federates and the RTI has no knowledge of the semantics of the information that it's transmitting. As a result of this lack of semantic knowledge, no optimisations (e.g. dead-reckoning) can be performed by the RTI and any techniques must be implemented only on the federates \cite{fujimoto2000parallel}.
 
-HLA is very similar to the model used by SpatialOS \cite{SpatialOS}, which also uses a runtime, however, the implementation details of SpatialOS's runtime are not public knowledge.
-
-HLA is ideal for heterogeneous distributed simulations and for re-use with different types of simulations. However, there are some disadvantges to this architecture:
+HLA is ideal for heterogeneous distributed simulations and for re-use with different types of simulations. However, there are some disadvantages to this architecture:
 \begin{enumerate}
 	\item It increases latency between simulations as communication must go through the run time \item It does not allow for any optimisations to be performed in the run time as the run time is not aware of the semantics of the simulations.
 \end{enumerate}
 
-In the case of real-time physics, we can assume the use of either homogeneous simulations or at least simulations that will be simulating physics with a large degree of shared semantics between simulations (as all simulations are dealing with physical simulation). As a result of this, there is little to no advantage gained in using the HLA architecture and direct communication between servers has the benefit of lower latency between servers.
+\subsection{SpatialOS}
+SpatialOS uses a very similar architecture to HLA which also uses a runtime and 'workers' which are equivalent to federates \cite{SpatialOS}. A key difference between HLA and SpatialOS is that in SpatialOS the full entity data of all entities is stored within the run-time (as opposed to just attribute metadata and associations in HLA) and each worker stores a copy of a subset of the entities, which it is responsible for \cite{Introduc36:online}. Each worker communicates updates for the entities it is responsible for, which then get disseminated by the runtime to other workers with registered interest in those entities.
+
+\subsection{Distributed Virtual Environments - Summary}
+In the case of real-time physics, we can assume the use of either homogeneous simulations or at least simulations that will be simulating physics with a large degree of shared semantics between simulations (as all simulations are dealing with physical simulation). As a result of this, there is little to no advantage gained in using the HLA architecture or similar and direct communication between servers has the benefit of lower latency between servers.
 
 \subsection{Migratory vs Non-Migratory}
 There are primarily two ways in which server-side resources can provide scalability in online gaming (e.g., DVEs): (1) Migratory; (2) Non-migratory. In migratory approaches, a server will assume responsibility for handling in-simulation objects within a region. When objects traverse region boundaries into a region that is the responsibility of another server, they will be handed over to the other server. In a non-migratory approach, in-simulation objects are allocated to the responsibility of a particular server at instantiation time and stay with that server until they are deleted.
