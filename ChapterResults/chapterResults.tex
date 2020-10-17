@@ -626,6 +626,45 @@ The cost of non-boundary objects can then be subtracted from the performance cos
 \end{figure}
 \clearpage
 
+\subsection{Optimal Scale}
+The relationship between cost per object and increasing objects is shown in Fig. \ref{fig_CostPerObjPerNodeColumn}. The cost per object steeply decreases until the lowest cost per object occurs at approximately 4000 objects. Above 4000 objects, the cost per object begins to increase again.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{CostPerObjPerNodeColumn}
+	\caption{Cost per Object per Node (in column layout)}
+	\label{fig_CostPerObjPerNodeColumn}
+\end{figure}
+
+This means, for example, if 1000 objects took 6ms to perform a single physics time-step, 500 objects would take more than half of 6ms. This has important consequences when distributing the workload as it means splitting objects between two servers may not double the performance even without accounting for overhead. Likewise, splitting the objects between two servers could also potentially lead to more than double the performance. For example, if 8000 objects exist on one server and takes 80ms to perform a physics time-step. If the objects are then split across two servers, resulting in 4000 objects on each, it would take approximately 12ms to perform a physics time-step, a 6.67 factor increase in performance (not accounting for overhead).
+
+The relationship between number of objects and frame-time is approximately exponential (shown in Fig. \ref{fig_PerfColumn}). In order to determine the optimal scale for this experiment, we can calculate the coefficients for approximate exponential functions for the performance of each number of servers. Ideally, a double in the number of servers, should lead to a double in performance and therefore double the exponential coefficient. First, approximate functions were fitted for each node using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_FittedCostColumns}). This gives a coefficient for each node. This coefficient can then be used to work out relative performance. 2 servers led to a increase in performance by a factor of 1.74, 4 servers a factor of 3.40 and 8 servers a factor of 4.22. It should be noted that the accuracy of the coefficients for higher numbers of servers (i,e, 8, \& 10) will be low as the relationship appears linear when there are low numbers of objects per server. As a result of this, it is not possible to accurately predict the performance of the system for more than 8 servers with more than 10,000 objects (the total used in this experiment).
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{PerfColumn}
+	\caption{Cost of Increasing Objects (in column layout)}
+	\label{fig_PerfColumn}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\textwidth]{FittedCostColumns}
+\caption{Fitted Cost of Increasing Objects (in column layout). The shapes indicate the results from the experiment, the lines indicate the fitted functions}
+\label{fig_FittedCostColumns}
+\end{figure} 
+
+The coefficients used in the approximate functions can then be plotted and compared to the ideal line, show in Fig. \ref{fig_FittedCoeff}. A line was then fitted using a self-starting asymptotic regression model to the curve of coefficients, to approximate the point at which the performance factor increases converge. The result of which is 4.26.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{FittedCoeff}
+	\caption{Fitted Cost of Increasing Objects (in column layout). Coefficients used in Fig. \ref{fig_PerfColumn} are in red, the ideal line of Y=X (i.e. doubling servers, doubles performance) is in green and a line fitted on the values of the coefficients is in blue.}
+	\label{fig_FittedCoeff}
+\end{figure}
+\clearpage
+
+
 \section{Collision Correctness Experiments}
 In the following section the correctness of collisions between objects is explored, i.e. do objects have the same collision behaviour in a AP as they do in a centralised system.
 
