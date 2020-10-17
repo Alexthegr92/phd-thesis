@@ -548,6 +548,26 @@ From these observations it may be declared that this system is scalable in corne
 \end{figure}
 \clearpage
 
+\subsection{Object Migrations}
+In this sub-section we show the number of migrations of objects between servers. This is done using the average cumulative migrations between servers over time for the different numbers of servers. For each iteration of the experiment, the maximum number of cumulative migrations across all nodes for each time interval is taken, the mean of this value for each time interval is then taken across the 50 repetitions. This was done for both the column (see Fig. \ref{fig_MigrationsColumn}) and corner experiments (see Fig. \ref{fig_MigrationsCorner}).
+
+In the experiments objects are injected at a fixed rate across all servers into random locations within regions near and far from the boundary. As the number of servers increase, the number of objects injected per server decreases. As a result of this, experiments involving more servers will have a lower number and density of objects leading to fewer object migrations.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{MigrationsColumn}
+	\caption{Object Migrations over time (in column layout)}
+	\label{fig_MigrationsColumn}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\textwidth]{MigrationsCorner}
+\caption{Object Migrations over time (in corner layout)}
+\label{fig_MigrationsCorner}
+\end{figure}
+\clearpage
+
 \subsection{Performance Overhead}
 In this sub-section we address the performance overhead of Aura Projection. This overhead is calculated by first measuring the performance cost (frame-time) in terms of objects per server (the number of objects is known as the injection rate of objects is known). This is shown in Fig. \ref{fig_PerfPerNodeRaw} and a line can then be fitted to the performance cost of the single server (centralised experiment) experiment with increasing numbers of objects. This provides a baseline cost for non-boundary objects.
 
