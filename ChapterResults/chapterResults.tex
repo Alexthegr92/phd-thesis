@@ -547,6 +547,43 @@ From these observations it may be declared that this system is scalable in corne
 	\label{fig_PerCor}
 \end{figure}
 \clearpage
+
+\subsection{Performance Overhead}
+In this sub-section we address the performance overhead of Aura Projection. This overhead is calculated by first measuring the performance cost (frame-time) in terms of objects per server (the number of objects is known as the injection rate of objects is known). This is shown in Fig. \ref{fig_PerfPerNodeRaw} and a line can then be fitted to the performance cost of the single server (centralised experiment) experiment with increasing numbers of objects. This provides a baseline cost for non-boundary objects.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{CostOfIncreasingObjectsPerNodeInColumnLayout}
+	\caption{Performance Cost of Increasing Objects per servers (in Column Layout)}
+	\label{fig_PerfPerNodeRaw}
+\end{figure}
+
+The relationship between objects per node and frame-time is approximately exponential and can be seen more clearly when plotting the measurements of frame-time on a $log_{10}$ scale (shown in Fig. \ref{fig_PerfPerNodeRawLog}). The line is fitted using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_PerfFitted}).
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{CostOfIncreasingObjectsPerNodeInColumnLayoutLog}
+	\caption{Performance Cost ($log_{10}$) of Increasing Objects per servers (in Column Layout)}
+	\label{fig_PerfPerNodeRawLog}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{PerfFitted}
+	\caption{Fitted Cost of Increasing Objects on a Single Server}
+	\label{fig_PerfFitted}
+\end{figure}
+
+The cost of non-boundary objects can then be subtracted from the performance cost of each number of servers using the baseline from the fitted line for the centralised experiment (the ratio of boundary to non-boundary objects is 1:1, so the number of boundary and non-boundary objects is known) leaving just the cost of boundary objects. To calculate the overhead of boundary objects, the cost of the same number of non-boundary objects is subtracted, leaving just the overhead of boundary objects relative to the cost of non-boundary objects (shown in Fig. \ref{fig_PerfOverheadColumn}).
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{PerfOverheadColumn}
+	\caption{Overhead Cost of Increasing Objects per Node in Column Layout}
+	\label{fig_PerfOverheadColumn}
+\end{figure}
+\clearpage
+
 \section{Collision Correctness Experiments}
 In the following section the correctness of collisions between objects is explored, i.e. do objects have the same collision behaviour in a AP as they do in a centralised system.
 
