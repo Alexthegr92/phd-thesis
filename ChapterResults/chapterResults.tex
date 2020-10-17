@@ -568,6 +568,28 @@ In the experiments objects are injected at a fixed rate across all servers into 
 \end{figure}
 \clearpage
 
+\subsection{Object Updates}
+In the sub-section we show the number of object updates sent between servers. An update is sent from the host server to any neighbours with interest in that object (i.e. when an object is within the aura distance of a boundary), whenever the object's position changes. In order to show the number of updates, for each time interval of 5 seconds, the maximum number of updates is taken across all servers for each iteration of the experiment. The mean of these maximums is then taken for each number of servers and plotted over elapsed time of the experiment. This was done for both the column (see Fig. \ref{fig_UpdatesColumn}) and corner experiments (see Fig. \ref{fig_UpdatesCorner}).
+
+The graphs demonstrate that as elapsed time increases, so does the number of object updates being sent in both the column and corner experiments. However, the relationship is not a linear one. The density of objects around the boundary will affect the number of updates being sent in two ways: (1) Updates are not sent for objects at rest; a higher density of objects means a newly injected object is more likely to collide with an object at rest, resulting in updates needing to be sent for both updates (2) A higher density of objects means a newly injected object is more likely to collide with another object and come to rest sooner than if no object were there.
+
+Comparing the column and corner experiments, the corner experiments have a lower object density in the boundary region as objects are spawned in multiple boundary regions on all servers. As a result of this, the corner experiments result in fewer object updates for all nodes (3, 4 \& 9) compared to the same number of nodes in column layout.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{UpdatesColumn}
+	\caption{Object Updates Over Time (in column layout)}
+	\label{fig_UpdatesColumn}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\textwidth]{UpdatesCorner}
+	\caption{Object Updates Over Time (in corner layout)}
+	\label{fig_UpdatesCorner}
+\end{figure}
+\clearpage
+
 \subsection{Performance Overhead}
 In this sub-section we address the performance overhead of Aura Projection. This overhead is calculated by first measuring the performance cost (frame-time) in terms of objects per server (the number of objects is known as the injection rate of objects is known). This is shown in Fig. \ref{fig_PerfPerNodeRaw} and a line can then be fitted to the performance cost of the single server (centralised experiment) experiment with increasing numbers of objects. This provides a baseline cost for non-boundary objects.
 
