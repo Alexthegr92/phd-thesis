@@ -199,7 +199,24 @@ These will all be briefly explained, although they are not all the main focus of
 %Existing work into scalability in online gaming will discussed leading into discussion of online gaming architectures. Finally, important aspects of online gaming that are relevant to this study are discussed.
 
 \subsection{Consistency}
-As online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order or messages lost entirely, inconsistent states can arise.  Different aspects of game state require different levels consistency and games often employ consistency resolution instead of inconsistency prevention \cite{P2PForMMOs}.
+As online games are distributed (either between clients and a server, peers or multiple servers), inconsistent states can occur. Multiple peer/servers execute updates in parallel, however if these are executed out of order, such as due to messages being received out of order or messages lost entirely, inconsistent states can arise.  Different aspects of game state require different levels consistency, e.g. player life-death decisions requires a high degree of consistency, whereas movements of other players has little effect on game play (in games like World of Warcraft) and so only require a low degree of consistency \cite{Savery2014Consistency}. In addition, games often employ consistency resolution instead of inconsistency prevention/consistency maintenance \cite{P2PForMMOs}.
+
+Four categories of algorithms for consistency maintenance techniques for networked games are identified in \cite{Savery2014Consistency}. The categories are as follows:
+\begin{itemize}
+	\item Delay the processing of local events. Examples include Bucket Synchronisation \cite{BucketSynchronisation1998} and Local Lag \cite{LocalLag2004}, in which, local actions are grouped into buckets of time or delayed to allow for simultaneous execution on all clients.
+	\item Alter the time frame for remote entities e.g. Remote Lag \cite{Bernier2003LatencyCM}, in which, local actions are applied immediately, but remote actions are delayed allowing for interpolation (instead of relying on prediction) and Local Perception Filters  \cite{PerceptionFilter}, a refinement on Remote Lag, in which, instead of applying a fixed delay to remotely controlled entities (as in Remote-Lag), a variable delay is applied determined by the position of the remote entity relative to the player.
+	\item Absolute consistency e.g. Locking and Serialisation \cite{coulouris2005distributed}, similar to techniques used in transactional databased, and TimeWarp \cite{LocalLag2004}, in which each client keeps a list of commands and states ordered by time, when a command arrives late or out of order, the command is inserted into the list and the command are then applied in order, starting from the state immediately preceding the new command, until the state reaches the current time.
+	\item Predictive algorithms, such as dead-reckoning (discussed further in section \ref{ConsistencyRealTimePhysics}), in which, future positions of remote entities are predicted based on prior data, such as position and velocity.
+\end{itemize}
+
+Consistency resolution can divided into the following two categories:
+\begin{itemize}
+\item Decision-making. Determining the outcome of decisions in the presence of inconsistency. The decisions can be be determined by choosing a perspective, i.e. the server, in which the server maintains the whole state necessary to determine the decision; source client, the perspective of the client that initiates the action (e.g. shoots an enemy player); and target client, the perspective of the client that the action targets (e.g. target of an enemy player shooting) \cite{Savery2014Consistency}.
+
+\item Error Repair. Repairing inconsistencies as they are discovered. The three basic approaches to error repair are: 
+	Correct Immediately, in which, remote entities are immediately updated to the latest received position; Smoothly Correct, where remote entities position are interpolated over time to the latest position; and Tolerate, where if the inconsistency has no effect on gameplay, the inconsistency is not corrected \cite{Savery2014Consistency}.
+\end{itemize}
+
 
 %Strong Consistency
 %Weak Consistency
