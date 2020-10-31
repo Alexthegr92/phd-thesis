@@ -103,11 +103,11 @@ Fig. \ref{fig_PerCol} shows the performance of our system with rising server num
 
 From these observations it can be concluded that this system is scalable in column configuration as the addition of servers results in increased performance.
 
-Experiments were also carried out using servers in a corner layout. The layouts of 3 and 4 servers are shown in Fig. \ref{ServerCorner}, in which the 4 server case is a 2x2 grid with a single corner intersection in the centre. The 9 server case is a 3x3 grid with 4 corner intersections. Injection rates and volume dimensions remain the same as in the column based experiments. Fig. \ref{fig_PerCor} shows the graph illustrating performance. 
+Experiments were also carried out using servers in a corner layout. The layouts of 3 and 4 servers are shown in Fig. \ref{ServerCorner}, in which the 4 server case is a 2x2 grid with a single corner intersection in the centre. The 9 server case is a 3x3 grid with 4 corner intersections. Injection rates and volume dimensions remain the same as in the column-based experiments. Fig. \ref{fig_PerCor} shows the graph illustrating performance. 
 
-As discussed in \ref{Topology}, topologies with corner boundaries between server regions have higher communication requirements, this is because servers must communicate with all neighbouring servers. The highest number of expected neighbours for a given server in a grid layout is 8 servers, this applies to the server in the centre of the grid illustrated in Fig. \ref{BrickLayout} and any server not on the edge of the grid. The graph in Fig. \ref{fig_PerCor} demonstrates that increasing the number of servers lowers the frame-time. This remains true even in the presence of corner boundaries and with the maximum number of expected neighbours, 8, in a grid layout (meaning maximum communication requirement). The additional processing overhead of the higher communication requirements (as messages must be exchanged with all neighbouring servers) on the server with 8 neighbours is outweighed by the performance gains of partitioning the simulation using additional servers. In other words, 9 servers in grid layout outperform (have a lower frame-time than) a single server, despite the server in the centre of the grid needing to communicate with the maximum number of neighbouring servers for a grid layout. 
+As discussed in \ref{Topology}, topologies with corner boundaries between server regions have higher communication requirements. This is because servers must communicate with all neighbouring servers. The highest number of expected neighbours for a given server in a grid layout is 8 servers, which applies to the server in the centre of the grid illustrated in Fig. \ref{BrickLayout} and any server not on the edge of the grid. The graph in Fig. \ref{fig_PerCor} demonstrates that increasing the number of servers lowers the frame-time. This remains true even in the presence of corner boundaries and with the maximum number of expected neighbours, 8, in a grid layout (meaning maximum communication requirement). The additional processing overhead of the higher communication requirements (as messages must be exchanged with all neighbouring servers) on the server with 8 neighbours is outweighed by the performance gains of partitioning the simulation using additional servers. In other words, 9 servers in grid layout outperform (have a lower frame-time than) a single server, despite the server in the centre of the grid needing to communicate with the maximum number of neighbouring servers for a grid layout. 
 
-The performance cost of the higher communication requirements for corner layouts is reflected in the performance graphs as the respective number of servers in column layout outperform those in corner layout. i.e. 3 servers in column layout have a lower frame-time than 3 servers in corner layout.
+The performance cost of the higher communication requirements for corner layouts is reflected in the performance graphs as the respective number of servers in column layout outperform those in corner layout, i.e. 3 servers in column layout have a lower frame-time than 3 servers in corner layout.
 
 As 8 neighbours is the maximum number of neighbours a server can have in a grid layout (and therefore has the most processing overhead), it can be concluded that any number of servers in a grid layout will outperform a single server (assuming reasonably even distribution of objects between servers and reasonable ratio of objects near and far from server boundaries).
 
@@ -549,9 +549,9 @@ From these observations it may be declared that this system is scalable in corne
 \clearpage
 
 \subsection{Object Migrations}
-In this sub-section we show the number of migrations of objects between servers. This is done using the average cumulative migrations between servers over time for the different numbers of servers. For each iteration of the experiment, the maximum number of cumulative migrations across all nodes for each time interval is taken, the mean of this value for each time interval is then taken across the 50 repetitions. This was done for both the column (see Fig. \ref{fig_MigrationsColumn}) and corner experiments (see Fig. \ref{fig_MigrationsCorner}).
+In this sub-section we show the number of migrations of objects between servers. This is done using the average cumulative migrations between servers over time for the different numbers of servers. For each iteration of the experiment, the maximum number of cumulative migrations across all nodes for each time interval is taken and the mean of this value for each time interval is then taken across the 50 repetitions. This was done for both the column (see Fig. \ref{fig_MigrationsColumn}) and corner experiments (see Fig. \ref{fig_MigrationsCorner}).
 
-In the experiments objects are injected at a fixed rate across all servers into random locations within regions near and far from the boundary. As the number of servers increase, the number of objects injected per server decreases. As a result of this, experiments involving more servers will have a lower number and density of objects leading to fewer object migrations.
+In the experiments, objects are injected at a fixed rate across all servers into random locations within regions near and far from the boundary. As the number of servers increases, the number of objects injected per server decreases. As a result of this, experiments involving more servers will have a lower number and density of objects leading to fewer object migrations.
 
 \begin{figure}[!t]
 	\centering
@@ -569,11 +569,11 @@ In the experiments objects are injected at a fixed rate across all servers into 
 \clearpage
 
 \subsection{Object Updates}
-In the sub-section we show the number of object updates sent between servers. An update is sent from the host server to any neighbours with interest in that object (i.e. when an object is within the aura distance of a boundary), whenever the object's position changes. In order to show the number of updates, for each time interval of 5 seconds, the maximum number of updates is taken across all servers for each iteration of the experiment. The mean of these maximums is then taken for each number of servers and plotted over elapsed time of the experiment. This was done for both the column (see Fig. \ref{fig_UpdatesColumn}) and corner experiments (see Fig. \ref{fig_UpdatesCorner}).
+In this sub-section we show the number of object updates sent between servers. An update is sent from the host server to any neighbours with interest in that object (i.e. when an object is within the aura distance of a boundary), whenever the object's position changes. The number of updates shared between servers will be shown in graphs produced using the following process: for each time interval of 5 seconds, the maximum number of updates is taken across all servers for each iteration of the experiment. The mean of these maximums is then taken for each number of servers and plotted over elapsed time of the experiment. This was done for both the column (see Fig. \ref{fig_UpdatesColumn}) and corner experiments (see Fig. \ref{fig_UpdatesCorner}).
 
-The graphs demonstrate that as elapsed time increases, so does the number of object updates being sent in both the column and corner experiments. However, the relationship is not a linear one. The density of objects around the boundary will affect the number of updates being sent in two ways: (1) Updates are not sent for objects at rest; a higher density of objects means a newly injected object is more likely to collide with an object at rest, resulting in updates needing to be sent for both updates (2) A higher density of objects means a newly injected object is more likely to collide with another object and come to rest sooner than if no object were there.
+The graphs demonstrate that as elapsed time increases, so does the number of object updates being sent in both the column and corner experiments. However, the relationship is not a linear one. The density of objects around the boundary will affect the number of updates being sent in two ways: (1) Updates are not sent for objects at rest; a higher density of objects means a newly injected object is more likely to collide with an object at rest, resulting in updates needing to be sent for both objects (2) A higher density of objects means a newly injected object is more likely to collide with another object and come to rest sooner than if no object were there.
 
-Comparing the column and corner experiments, the corner experiments have a lower object density in the boundary region as objects are spawned in multiple boundary regions on all servers. As a result of this, the corner experiments result in fewer object updates for all nodes (3, 4 \& 9) compared to the same number of nodes in column layout.
+Comparing the column and corner experiments, the corner experiments have a lower object density in the boundary region as objects are spawned in multiple boundary regions on all servers. As a result of this, the corner experiments result in fewer object updates for all numbers of servers (3, 4 and 9) compared to the same number of nodes in column layout.
 
 \begin{figure}[!t]
 	\centering
@@ -591,7 +591,7 @@ Comparing the column and corner experiments, the corner experiments have a lower
 \clearpage
 
 \subsection{Performance Overhead}
-In this sub-section we address the performance overhead of Aura Projection. This overhead is calculated by first measuring the performance cost (frame-time) in terms of objects per server (the number of objects is known as the injection rate of objects is known). This is shown in Fig. \ref{fig_PerfPerNodeRaw} and a line can then be fitted to the performance cost of the single server (centralised experiment) experiment with increasing numbers of objects. This provides a baseline cost for non-boundary objects.
+In this sub-section we address the performance overhead of Aura Projection. This overhead is calculated by first measuring the performance cost (frame-time) in terms of objects per server (the number of objects is known because the injection rate of objects is known). This is shown in Fig. \ref{fig_PerfPerNodeRaw}. A curve can then be fitted to the performance cost of the single server (centralised) experiment with increasing numbers of objects. This provides a baseline cost for non-boundary objects.
 
 \begin{figure}[!t]
 	\centering
@@ -600,7 +600,7 @@ In this sub-section we address the performance overhead of Aura Projection. This
 	\label{fig_PerfPerNodeRaw}
 \end{figure}
 
-The relationship between objects per node and frame-time is approximately exponential and can be seen more clearly when plotting the measurements of frame-time on a $log_{10}$ scale (shown in Fig. \ref{fig_PerfPerNodeRawLog}). The line is fitted using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_PerfFitted}).
+The relationship between objects per node and frame-time is approximately exponential and can be seen more clearly when plotting the measurements of frame-time on a $log_{10}$ scale (shown in Fig. \ref{fig_PerfPerNodeRawLog}). The curve is fitted using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_PerfFitted}).
 
 \begin{figure}[!t]
 	\centering
@@ -616,7 +616,7 @@ The relationship between objects per node and frame-time is approximately expone
 	\label{fig_PerfFitted}
 \end{figure}
 
-The cost of non-boundary objects can then be subtracted from the performance cost of each number of servers using the baseline from the fitted line for the centralised experiment (the ratio of boundary to non-boundary objects is 1:1, so the number of boundary and non-boundary objects is known) leaving just the cost of boundary objects. To calculate the overhead of boundary objects, the cost of the same number of non-boundary objects is subtracted, leaving just the overhead of boundary objects relative to the cost of non-boundary objects (shown in Fig. \ref{fig_PerfOverheadColumn}).
+The cost of non-boundary objects can then be subtracted from the performance cost of each number of servers using the baseline from the fitted curve for the centralised experiment (the ratio of boundary to non-boundary objects is 1:1, so the number of boundary and non-boundary objects is known) leaving just the cost of boundary objects. To calculate the overhead of boundary objects, the cost of the same number of non-boundary objects is subtracted, leaving just the overhead of boundary objects relative to the cost of non-boundary objects (shown in Fig. \ref{fig_PerfOverheadColumn}).
 
 \begin{figure}[!t]
 	\centering
@@ -636,9 +636,9 @@ The relationship between cost per object and increasing objects is shown in Fig.
 	\label{fig_CostPerObjPerNodeColumn}
 \end{figure}
 
-This means, for example, if 1000 objects took 6ms to perform a single physics time-step, 500 objects would take more than half of 6ms. This has important consequences when distributing the workload as it means splitting objects between two servers may not double the performance even without accounting for overhead. Likewise, splitting the objects between two servers could also potentially lead to more than double the performance. For example, if 8000 objects exist on one server and takes 80ms to perform a physics time-step. If the objects are then split across two servers, resulting in 4000 objects on each, it would take approximately 12ms to perform a physics time-step, a 6.67 factor increase in performance (not accounting for overhead).
+This means, for example, if 1000 objects took 6ms to perform a single physics time-step, 500 objects would take more than half of 6ms. This has important consequences when distributing the workload as it means splitting objects between two servers may not double the performance even without accounting for overhead. Likewise, splitting the objects between two servers could also potentially lead to more than double the performance. For example, if 8000 objects exist on one server and the simulation takes 80ms to perform a physics time-step, then if the objects are split across two servers, resulting in 4000 objects on each, it would take approximately 12ms to perform a physics time-step. This would be a 6.67 factor increase in performance (not accounting for overhead).
 
-The relationship between number of objects and frame-time is approximately exponential (shown in Fig. \ref{fig_PerfColumn}). In order to determine the optimal scale for this experiment, we can calculate the coefficients for approximate exponential functions for the performance of each number of servers. Ideally, a double in the number of servers, should lead to a double in performance and therefore double the exponential coefficient. First, approximate functions were fitted for each node using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_FittedCostColumns}). This gives a coefficient for each node. This coefficient can then be used to work out relative performance. 2 servers led to a increase in performance by a factor of 1.74, 4 servers a factor of 3.40 and 8 servers a factor of 4.22. It should be noted that the accuracy of the coefficients for higher numbers of servers (i,e, 8, \& 10) will be low as the relationship appears linear when there are low numbers of objects per server. As a result of this, it is not possible to accurately predict the performance of the system for more than 8 servers with more than 10,000 objects (the total used in this experiment).
+The relationship between number of objects and frame-time is approximately exponential (shown in Fig. \ref{fig_PerfColumn}). In order to determine the optimal scale for this experiment, we can calculate the coefficients for approximate exponential functions for the performance of each number of servers. Ideally, a double in the number of servers should lead to a double in performance and therefore double the exponential coefficient. First, approximate functions were fitted for each node using linear regression on the $log_{10}$ of the frame-time (shown in Fig. \ref{fig_FittedCostColumns}). This gives a coefficient for each node. This coefficient can then be used to work out relative performance. 2 servers led to an increase in performance by a factor of 1.74, 4 servers a factor of 3.40 and 8 servers a factor of 4.22. It should be noted that the accuracy of the coefficients for higher numbers of servers (i.e. 8, \& 10) will be low as the relationship appears linear when there are low numbers of objects per server. As a result of this, it is not possible to accurately predict the performance of the system for more than 8 servers with more than 10,000 objects (the total used in this experiment).
 
 \begin{figure}[!t]
 	\centering
@@ -650,16 +650,16 @@ The relationship between number of objects and frame-time is approximately expon
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\textwidth]{FittedCostColumns}
-\caption{Fitted Cost of Increasing Objects (in column layout). The shapes indicate the results from the experiment, the lines indicate the fitted functions}
+\caption{Fitted Cost of Increasing Objects (in column layout). The shapes indicate the results from the experiment, the curves indicate the fitted functions}
 \label{fig_FittedCostColumns}
 \end{figure} 
 
-The coefficients used in the approximate functions can then be plotted and compared to the ideal line, show in Fig. \ref{fig_FittedCoeff}. A line was then fitted using a self-starting asymptotic regression model to the curve of coefficients, to approximate the point at which the performance factor increases converge. The result of which is 4.26.
+The coefficients used in the approximate functions can then be plotted and compared to the ideal line, show in Fig. \ref{fig_FittedCoeff}. A curve was then fitted using a self-starting asymptotic regression model to the curve of coefficients, to approximate the point at which the performance factor increases converge. The result of this is 4.26.
 
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\textwidth]{FittedCoeff}
-	\caption{Fitted Cost of Increasing Objects (in column layout). Coefficients used in Fig. \ref{fig_PerfColumn} are in red, the ideal line of Y=X (i.e. doubling servers, doubles performance) is in green and a line fitted on the values of the coefficients is in blue.}
+	\caption{Fitted Cost of Increasing Objects (in column layout). Coefficients used in Fig. \ref{fig_PerfColumn} are in red, the ideal line of Y=X (i.e. doubling servers doubles performance) is in green and a curve fitted on the values of the coefficients is in blue.}
 	\label{fig_FittedCoeff}
 \end{figure}
 \clearpage
@@ -787,7 +787,7 @@ The two servers use the following tolerances unless otherwise stated: a maximum 
 
 %TODO: Also mention very small tolerance for detecting errors, so collisions very close to the line aren't counted as errors. Have to account for floating-point errors throughout the results process.
 
-The first experiment conducted was the varying speed experiment. In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times. In these experiments it is assumed 1 unit is 1 metre. The speed tolerances chosen represent categories of typical fast moving objects in games. The categories selected were: slow-moving vehicles ($16m\mathord{\cdot}s^{-1}$); fast-moving/motorway-speed vehicles ($32m\mathord{\cdot}s^{-1}$); and racing vehicles ($48m\mathord{\cdot}s^{-1}$).
+The first experiment conducted was the varying speed experiment. In this experiment the speed of each of the two objects was varied from $1m\mathord{\cdot}s^{-1}$ to double the the following tolerances: $16m\mathord{\cdot}s^{-1}$; $32m\mathord{\cdot}s^{-1}$ and $48m\mathord{\cdot}s^{-1}$. Increments of $1m\mathord{\cdot}s^{-1}$ were used and the whole experiment repeated $50$ times. In these experiments, it is assumed 1 unit is 1 metre. The speed tolerances chosen represent categories of typical fast-moving objects in games. The categories selected were: slow-moving vehicles ($16m\mathord{\cdot}s^{-1}$); fast-moving/motorway-speed vehicles ($32m\mathord{\cdot}s^{-1}$); and racing vehicles ($48m\mathord{\cdot}s^{-1}$).
 
 \begin{figure}
 	\centering

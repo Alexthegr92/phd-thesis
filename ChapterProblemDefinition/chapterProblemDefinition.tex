@@ -52,7 +52,7 @@ In cases of higher latency, or small or fast moving objects, collisions may be m
 \subsection{Diverging results}\label{divergingResults}
 PhysX is non-deterministic, as a result of this, repeating the same scenario with the exact same starting parameters does not necessarily lead to the exact same end state. The order in which collisions are resolved are randomised to achieve greater stability of the simulation. When there is a queued execution of collision calculations in the collision response phase, the objects considered in the latter stages of the phase are prone to cumulative errors from the previous calculations within the same phase. By randomising the order of the collision calculations each time step, the cumulative error is not propagated into the same objects over multiple time steps.
 
-Due to this non-determinism, if the collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results. The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat, level plane, the cubes land is such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing, in a second iteration, the stack of cubes may collapse.
+Due to this non-determinism, if the collision response is performed on different servers with the same group of objects, they will not lead to the same results. PhysX has an option for increased determinism, but as servers will have different states, as they will be hosting objects that the other server is not, this will not guarantee the exact same results. The results of a single differing collision response can create a significantly different state of objects, for example if a stack of cubes is dropped onto a flat, level plane, the cubes land in such a way where the stack is on the verge of collapsing. In one iteration, the stack of cubes may remain standing; in a second iteration, the stack of cubes may collapse.
 
 As a consequence of non-determinism and diverging results, it is not possible to simply simulate the same objects on two different servers without some means of the two servers reaching consensus on the object state. In addition, it is not possible to measure correctness of a distributed simulation by comparing it with a single centralised simulation, i.e. run both solutions with the exact same starting parameters and compare the final state of the distributed simulation to the centralised simulation. A distributed solution can produce a significantly different final state compared to a centralised solution, despite handling all collisions correctly.
 
@@ -444,10 +444,10 @@ An example of the corner case is illustrated in Fig. \ref{AuraProj}. Object N, h
 A server has to receive the auras of all objects from neighbouring boundaries, as objects being simulated by a server can exist anywhere in a neighbouring server's region. Our assumption is that a region a server simulates is sufficiently large enough to prevent the aura overlap of objects from non-neighbouring servers.
 
 \section{Benefits of Proposed Solution}
-Aura Projection has the following benefits over other considered solutions. AP guarantees strong consistency of collisions, meaning diverging results on different servers are prevented. Objects are only simulated once on a one server, instead of being simulated on multiple servers, requiring more computation time per object. No synchronisation is required between servers, as each server is running an entirely autonomous simulation, there is no need for any synchronisation to take place between servers.
+Aura Projection has the following benefits over other considered solutions. AP guarantees strong consistency of collisions, meaning diverging results on different servers are prevented. Objects are only simulated once on one server, instead of being simulated on multiple servers, requiring more computation time per object. No synchronisation is required between servers; as each server is running an entirely autonomous simulation, there is no need for any synchronisation to take place between servers.
 
 \section{Limits of Proposed Solution}
-Performance of the system will be measured using the highest cost across all servers, this will be referred to as $costmax$. If the addition of one or more servers (and/or re-partitioning of servers) cannot be done without causing a higher $costmax$, the system cannot be scaled up further.
+Performance of the system will be measured using the highest cost across all servers, which will be referred to as $costmax$. If the addition of one or more servers (and/or re-partitioning of servers) cannot be done without causing a higher $costmax$, the system cannot be scaled up further.
 
 It is possible to predict whether or not a new configuration has a higher or lower $costmax$ using the following process. Let B:N be the performance cost ratio of boundary to non-boundary objects (this cost ratio will differ for different simulations and may either be a constant ratio or a function, but we will assume it is a constant for this estimate). Due to boundary objects having additional processing and networking overhead, we can assume the B:N ratio will always be greater than 1. The performance cost can then be estimated for each server in the new configuration by summing the boundary and non-boundary objects and using the B:N cost estimate. If this results in a lower $costmax$ the performance of the system will be increased.
 
@@ -463,7 +463,7 @@ Let N be the number of servers. The $cost_max$ of a server can be calculated usi
 	costmax = max(cost(1),...,cost(N))
 \end{equation}
 
-Let $costmax_n$ be the current $costmax$ of system and $costmax_{n+1}$ be the $costmax$ of a potential new configuration.
+Let $costmax_n$ be the current $costmax$ of the system and $costmax_{n+1}$ be the $costmax$ of a potential new configuration.
 
 \begin{equation}
 	costmax_{n+1} < costmax_n
@@ -473,10 +473,10 @@ The $costmax_{n+1}$ must be less than $costmax_n$ in order for a performance gai
 
 Example 1:
 Let 1 non-boundary object have the cost value of 1 and suppose the B:N ratio is a constant 2:1.
-1 server with 1000 non-boundary objects. The $costmax_n$ is 1000. 1 server is added, the simulation is partitioned so that 500 non-boundary objects exist on each. The $costmax_{n+1}$ is 500. 500<1000, so new configuration results in better performance.
+The example begins with 1 server with 1000 non-boundary objects and the $costmax_n$ is 1000. 1 server is added, and the simulation is partitioned so that 500 non-boundary objects exist on each. The $costmax_{n+1}$ is 500. 500<1000, so the new configuration results in better overall performance of the system.
 
 Example 2:
-2 servers with 1000 non-boundary objects each. The $costmax_n$ is 1000. 1 server is added, the simulation, the best partitioning that can be achieved results in 1 server having 250 non-boundary and 400 boundary objects. The $costmax_{n+1}$ is (400*B:N)+250 = 1050. 1050>1000, so the new configuration results in worse performance. As this is the best partitioning that could be achieved the system cannot be scaled up further.
+The example begins with 2 servers with 1000 non-boundary objects each and the $costmax_n$ is 1000. 1 server is added, and the simulation is partitioned. The best partitioning that can be achieved results in 1 server having 250 non-boundary and 400 boundary objects. The $costmax_{n+1}$ is (400*B:N)+250 = 1050. 1050>1000, so the new configuration results in worse performance. As this is the best partitioning that could be achieved the system cannot be scaled up further.
 
 Using the logic above and the assumptions made, it can be deduced that the main limiting factor of Aura Projection is the number of unavoidable boundary objects present on a single server in the simulation.
 
